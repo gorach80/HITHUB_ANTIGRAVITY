@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma Interactiva: Simulación 3D y Pizarra Matemática</title>
+    <title>Plataforma Interactiva: Simulación 3D, Pizarra y GeoGebra</title>
     
     <!-- 1. Font Awesome Local (Iconos) -->
     <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
@@ -21,10 +21,13 @@
     <!-- 5. lil-gui Local (Panel de Control 3D) -->
     <script src="node_modules/lil-gui/dist/lil-gui.umd.js"></script>
     
-    <!-- 6. MathLive Local (Teclado y Editor de Ecuaciones Matemáticas) -->
+    <!-- 6. MathLive Local (Teclado y Editor de Ecuaciones) -->
     <link rel="stylesheet" href="node_modules/mathlive/mathlive-fonts.css">
     <link rel="stylesheet" href="node_modules/mathlive/mathlive-static.css">
     <script src="node_modules/mathlive/mathlive.min.js"></script>
+    
+    <!-- 7. GeoGebra Applet Deployer Local -->
+    <script src="geogebra-deploy.js"></script>
     
     <!-- Estilos del Proyecto -->
     <link rel="stylesheet" href="style.css">
@@ -41,6 +44,9 @@
             </button>
             <button class="tab-btn" id="btn-tab-pizarra">
                 <i class="fas fa-chalkboard-teacher"></i> Pizarra y Editor MathLive
+            </button>
+            <button class="tab-btn" id="btn-tab-geogebra">
+                <i class="fas fa-calculator"></i> GeoGebra Integrado
             </button>
         </nav>
         <div class="status-badge">
@@ -152,8 +158,65 @@
         </section>
     </main>
 
+    <!-- PÁGINA 3: GEOGEBRA INTEGRADO -->
+    <main class="main-container tab-content" id="tab-geogebra-content" style="grid-template-columns: 1fr;">
+        <section class="card scene-card" style="width: 100%;">
+            <h2>
+                <i class="fas fa-shapes"></i>
+                Calculadora GeoGebra Integrada
+            </h2>
+            <p style="margin-bottom: 25px;">Interactúa con el entorno algebraico y de dibujo clásico de GeoGebra. Haz clic en copiar en los comandos de ejemplo para probarlos en la Entrada:</p>
+            
+            <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 320px; background: rgba(15, 23, 42, 0.6); padding: 25px; border-radius: 16px; border: 1px solid var(--card-border); max-height: 550px; overflow-y: auto;">
+                    <h3 style="color: var(--accent-color); font-size: 1.1rem; margin-bottom: 12px;"><i class="fas fa-terminal"></i> Comandos Rápidos (Rotor Reuleaux):</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">Copia y pega estas líneas una a una en la entrada (+) a la derecha y presiona Enter:</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">w = 0.50</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">A = (0, 0)</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">B = (w, 0)</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">C = (w / 2, w * sqrt(3) / 2)</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">O = (A + B + C) / 3</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">arco1 = CircularArc[A, B, C]</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">arco2 = CircularArc[B, C, A]</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="cmd-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,0.4); padding: 10px 15px; border-radius: 8px; font-family: monospace; font-size: 0.95rem;">
+                            <code class="ggb-cmd">arco3 = CircularArc[C, A, B]</code>
+                            <button class="btn-copy-cmd" style="background: transparent; border: none; color: var(--secondary-color); cursor: pointer; font-size: 1.1rem;" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="flex: 2; min-width: 500px;">
+                    <div id="ggb-element" style="border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4); background: #ffffff;"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
     <footer class="app-footer">
-        <p>&copy; 2026 - Plataforma Científica Local · Desarrollado con Three.js, MathLive y Canvas2D</p>
+        <p>&copy; 2026 - Plataforma Científica Local · Desarrollado con Three.js, MathLive y GeoGebra</p>
     </footer>
 
     <!-- Lógica del Proyecto -->

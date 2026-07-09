@@ -4,28 +4,43 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     const btnTab3d = document.getElementById('btn-tab-3d');
     const btnTabPizarra = document.getElementById('btn-tab-pizarra');
+    const btnTabGeogebra = document.getElementById('btn-tab-geogebra');
     const tab3dContent = document.getElementById('tab-3d-content');
     const tabPizarraContent = document.getElementById('tab-pizarra-content');
+    const tabGeogebraContent = document.getElementById('tab-geogebra-content');
 
-    if (btnTab3d && btnTabPizarra && tab3dContent && tabPizarraContent) {
+    if (btnTab3d && btnTabPizarra && btnTabGeogebra && tab3dContent && tabPizarraContent && tabGeogebraContent) {
         btnTab3d.addEventListener('click', () => {
             btnTab3d.classList.add('active');
             btnTabPizarra.classList.remove('active');
+            btnTabGeogebra.classList.remove('active');
             tab3dContent.classList.add('active');
             tabPizarraContent.classList.remove('active');
+            tabGeogebraContent.classList.remove('active');
             
-            // Forzar redimensión de Three.js al volver a la pestaña 3D
+            // Forzar redimensión de Three.js
             window.dispatchEvent(new Event('resize'));
         });
 
         btnTabPizarra.addEventListener('click', () => {
             btnTabPizarra.classList.add('active');
             btnTab3d.classList.remove('active');
+            btnTabGeogebra.classList.remove('active');
             tabPizarraContent.classList.add('active');
             tab3dContent.classList.remove('active');
+            tabGeogebraContent.classList.remove('active');
             
-            // Forzar redimensión de la pizarra al mostrarla
+            // Forzar redimensión de la pizarra
             window.dispatchEvent(new Event('resize-canvas'));
+        });
+
+        btnTabGeogebra.addEventListener('click', () => {
+            btnTabGeogebra.classList.add('active');
+            btnTab3d.classList.remove('active');
+            btnTabPizarra.classList.remove('active');
+            tabGeogebraContent.classList.add('active');
+            tab3dContent.classList.remove('active');
+            tabPizarraContent.classList.remove('active');
         });
     }
 
@@ -243,35 +258,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Configuración de resolución interna del Canvas
         function resizeChalkboard() {
-            // Guardar contenido existente para no perderlo al redimensionar
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = chalkboard.width;
             tempCanvas.height = chalkboard.height;
             const tempCtx = tempCanvas.getContext('2d');
             tempCtx.drawImage(chalkboard, 0, 0);
 
-            // Ajustar tamaño según el contenedor
             chalkboard.width = chalkboard.parentElement.clientWidth;
-            chalkboard.height = 400; // Altura fija definida en index.html
+            chalkboard.height = 400;
 
-            // Restaurar configuración de tiza
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.strokeStyle = chalkColor;
             ctx.lineWidth = chalkThickness;
 
-            // Volver a dibujar el contenido previo
             ctx.drawImage(tempCanvas, 0, 0);
         }
 
-        // Evento personalizado para redimensionar la pizarra cuando se muestra la pestaña
         window.addEventListener('resize-canvas', resizeChalkboard);
         window.addEventListener('resize', resizeChalkboard);
         
-        // Ejecución inicial
         setTimeout(resizeChalkboard, 100);
 
-        // --- LÓGICA DE DIBUJO ---
         function startDrawing(e) {
             isDrawing = true;
             ctx.beginPath();
@@ -287,7 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.strokeStyle = chalkColor;
             ctx.lineWidth = chalkThickness;
             
-            // Simular trazo de tiza imperfecta (efecto opaco / tiza)
             ctx.stroke();
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
@@ -302,7 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function getPos(e) {
             const rect = chalkboard.getBoundingClientRect();
-            // Soporte para Mouse o Touch
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             return {
@@ -311,13 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        // Eventos de Mouse
         chalkboard.addEventListener('mousedown', startDrawing);
         chalkboard.addEventListener('mousemove', draw);
         chalkboard.addEventListener('mouseup', stopDrawing);
         chalkboard.addEventListener('mouseleave', stopDrawing);
 
-        // Eventos de Pantalla Táctil (Touch)
         chalkboard.addEventListener('touchstart', (e) => {
             startDrawing(e);
             e.preventDefault();
@@ -328,11 +332,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         chalkboard.addEventListener('touchend', stopDrawing);
 
-        // --- CONTROLES DE LA PIZARRA ---
-        // Selector de color de tiza
         const colorBtns = document.querySelectorAll('.color-btn');
         colorBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 colorBtns.forEach(b => {
                     b.style.borderColor = 'transparent';
                     b.classList.remove('active');
@@ -343,7 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Selector de grosor
         const thicknessSlider = document.getElementById('chalk-thickness');
         const thicknessVal = document.getElementById('thickness-val');
         if (thicknessSlider && thicknessVal) {
@@ -353,7 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Botón Borrar Todo
         const btnClear = document.getElementById('btn-clear-board');
         if (btnClear) {
             btnClear.addEventListener('click', () => {
@@ -361,24 +361,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Botón Guardar Pizarra como Imagen
         const btnSave = document.getElementById('btn-save-board');
         if (btnSave) {
             btnSave.addEventListener('click', () => {
-                // Crear un canvas temporal para simular el fondo escolar de madera/verde
                 const exportCanvas = document.createElement('canvas');
                 exportCanvas.width = chalkboard.width;
                 exportCanvas.height = chalkboard.height;
                 const exportCtx = exportCanvas.getContext('2d');
 
-                // Dibujar fondo de pizarra
                 exportCtx.fillStyle = '#13221c';
                 exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-                
-                // Dibujar trazos encima del fondo
                 exportCtx.drawImage(chalkboard, 0, 0);
 
-                // Exportar y descargar
                 const image = exportCanvas.toDataURL("image/png");
                 const link = document.createElement('a');
                 link.download = 'pizarra_matematica.png';
@@ -387,4 +381,48 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // =================================================================
+    // 6. INTEGRACIÓN DE GEOGEBRA SUITE CALCULADORA
+    // =================================================================
+    const ggbElement = document.getElementById('ggb-element');
+    if (ggbElement && typeof GGBApplet !== 'undefined') {
+        const params = {
+            "appName": "suite",
+            "width": 800,
+            "height": 550,
+            "showToolBar": true,
+            "showAlgebraInput": true,
+            "showMenuBar": true,
+            "enableRightClick": true,
+            "enableLabelDrags": false,
+            "enableShiftDragZoom": true,
+            "showResetIcon": true,
+            "useBrowserForJS": true,
+            "language": "es"
+        };
+        const applet = new GGBApplet(params, true);
+        
+        // Inyectar el entorno de GeoGebra
+        applet.inject('ggb-element');
+    }
+
+    // Lógica para botones de copiado de comandos de GeoGebra
+    const copyCmdBtns = document.querySelectorAll('.btn-copy-cmd');
+    copyCmdBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const codeEl = btn.parentElement.querySelector('.ggb-cmd');
+            if (codeEl) {
+                navigator.clipboard.writeText(codeEl.textContent).then(() => {
+                    const icon = btn.querySelector('i');
+                    icon.className = 'fas fa-check';
+                    icon.style.color = 'var(--success-color)';
+                    setTimeout(() => {
+                        icon.className = 'fas fa-copy';
+                        icon.style.color = '';
+                    }, 1500);
+                });
+            }
+        });
+    });
 });
