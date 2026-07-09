@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Interactiva: Simulación 3D y Pizarra Matemática</title>
+    
+    <!-- 1. Font Awesome Local (Iconos) -->
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    
+    <!-- 2. KaTeX Local (Fórmulas Matemáticas) -->
+    <link rel="stylesheet" href="node_modules/katex/dist/katex.min.css">
+    <script defer src="node_modules/katex/dist/katex.min.js"></script>
+    
+    <!-- 3. Three.js Local (Gráficos 3D) -->
+    <script src="node_modules/three/build/three.core.min.js"></script>
+    
+    <!-- 4. Stats.js Local (Monitor de Rendimiento FPS) -->
+    <script src="node_modules/stats.js/build/stats.min.js"></script>
+    
+    <!-- 5. lil-gui Local (Panel de Control 3D) -->
+    <script src="node_modules/lil-gui/dist/lil-gui.umd.js"></script>
+    
+    <!-- 6. MathLive Local (Teclado y Editor de Ecuaciones Matemáticas) -->
+    <link rel="stylesheet" href="node_modules/mathlive/mathlive-fonts.css">
+    <link rel="stylesheet" href="node_modules/mathlive/mathlive-static.css">
+    <script src="node_modules/mathlive/mathlive.min.js"></script>
+    
+    <!-- Estilos del Proyecto -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <i class="fas fa-brain"></i>
+            <span>Plataforma Científica Interactiva</span>
+        </div>
+        <nav class="navigation-tabs">
+            <button class="tab-btn active" id="btn-tab-3d">
+                <i class="fas fa-cube"></i> Simulador 3D y Video
+            </button>
+            <button class="tab-btn" id="btn-tab-pizarra">
+                <i class="fas fa-chalkboard-teacher"></i> Pizarra y Editor MathLive
+            </button>
+        </nav>
+        <div class="status-badge">
+            <span class="dot live"></span>
+            Modo Local Activo
+        </div>
+    </header>
+
+    <!-- PÁGINA 1: SIMULADOR 3D -->
+    <main class="main-container tab-content active" id="tab-3d-content">
+        <section class="card formula-card">
+            <h2>
+                <i class="fas fa-sliders-h"></i> 
+                Lógica del Simulador
+            </h2>
+            <p>Este simulador corre 100% de manera local y permite interactuar con la geometría en tiempo real:</p>
+            
+            <div class="control-explanation">
+                <h3>Variables Modificables (Panel Flotante):</h3>
+                <ul class="variables-list">
+                    <li><strong style="color: var(--secondary-color)">Color del Objeto:</strong> Altera el color RGB del material del cubo.</li>
+                    <li><strong style="color: var(--secondary-color)">Escala / Tamaño:</strong> Escala el tamaño del objeto en los ejes X, Y y Z simultáneamente.</li>
+                    <li><strong style="color: var(--secondary-color)">Velocidades de Rotación:</strong> Modifica la rapidez del giro en X e Y de forma independiente.</li>
+                    <li><strong style="color: var(--secondary-color)">Modo Wireframe:</strong> Alterna entre un renderizado sólido y uno de malla de alambre.</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <i class="fas fa-desktop"></i>
+                <span>Usa el panel de la derecha para interactuar con la simulación.</span>
+            </div>
+
+            <div class="action-box" style="margin-top: 20px;">
+                <button class="btn" id="btn-record" style="margin: 0; width: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3); border-radius: 30px; border: none; padding: 14px 30px; font-weight: 600; cursor: pointer; transition: all 0.3s; gap: 10px;">
+                    <i class="fas fa-video" id="record-icon"></i>
+                    <span id="record-text">Grabar Video de Simulación</span>
+                </button>
+            </div>
+            
+            <div class="formula-container" id="math-formula">
+                <!-- Se inyectará por JS (KaTeX) -->
+            </div>
+        </section>
+
+        <section class="card scene-card">
+            <h2>
+                <i class="fas fa-vr-cardboard"></i>
+                Lienzo 3D en Tiempo Real
+            </h2>
+            <p>Monitor de FPS integrado en la esquina superior izquierda del simulador:</p>
+            <div id="canvas-container">
+                <!-- El canvas 3D y el panel de Stats se inyectarán aquí -->
+            </div>
+        </section>
+    </main>
+
+    <!-- PÁGINA 2: PIZARRA Y EDITOR MATHLIVE -->
+    <main class="main-container tab-content" id="tab-pizarra-content">
+        <section class="card formula-card">
+            <h2>
+                <i class="fas fa-keyboard"></i>
+                Editor Mathfield (MathLive)
+            </h2>
+            <p>Escribe fórmulas utilizando el teclado matemático virtual de MathLive. El código LaTeX se extraerá en tiempo real:</p>
+            
+            <!-- Editor MathLive Web Component -->
+            <div class="mathfield-container" style="margin: 20px 0;">
+                <math-field id="math-input" style="width:100%; font-size: 1.3rem; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.4); color: white;">x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}</math-field>
+            </div>
+
+            <div class="latex-output-box" style="background: rgba(15,23,42,0.6); padding: 15px; border-radius: 8px; border: 1px solid var(--card-border); margin-bottom: 25px;">
+                <h4 style="color: var(--secondary-color); font-size: 0.95rem; margin-bottom: 5px;"><i class="fas fa-code"></i> Salida LaTeX en Tiempo Real:</h4>
+                <code id="latex-output" style="font-family: monospace; font-size: 1.05rem; color: var(--accent-color); word-break: break-all;"></code>
+            </div>
+
+            <div class="chalkboard-controls">
+                <h3>Controles de la Pizarra:</h3>
+                
+                <div class="color-palette" style="display: flex; gap: 10px; margin: 15px 0;">
+                    <button class="color-btn active" data-color="#ffffff" style="background: #ffffff; border: 2px solid var(--accent-color); width: 30px; height: 30px; border-radius: 50%; cursor: pointer;" title="Tiza Blanca"></button>
+                    <button class="color-btn" data-color="#ffd700" style="background: #ffd700; border: 2px solid transparent; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;" title="Tiza Amarilla"></button>
+                    <button class="color-btn" data-color="#ef4444" style="background: #ef4444; border: 2px solid transparent; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;" title="Tiza Roja"></button>
+                    <button class="color-btn" data-color="#10b981" style="background: #10b981; border: 2px solid transparent; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;" title="Tiza Verde"></button>
+                </div>
+
+                <div class="thickness-control" style="margin: 20px 0; display: flex; align-items: center; gap: 15px;">
+                    <label style="font-size: 0.9rem; color: var(--text-secondary);">Grosor:</label>
+                    <input type="range" id="chalk-thickness" min="1" max="10" value="3" style="flex: 1; cursor: pointer;">
+                    <span id="thickness-val" style="font-size: 0.9rem; min-width: 20px;">3px</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 25px;">
+                    <button class="btn btn-warning" id="btn-clear-board" style="margin:0; font-size: 0.9rem; padding: 12px;"><i class="fas fa-eraser"></i> Borrar Todo</button>
+                    <button class="btn btn-success" id="btn-save-board" style="margin:0; font-size: 0.9rem; padding: 12px;"><i class="fas fa-save"></i> Guardar Imagen</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card scene-card">
+            <h2>
+                <i class="fas fa-chalkboard"></i>
+                Pizarra Escolar Interactiva
+            </h2>
+            <p>Dibuja diagramas, gráficos o bosquejos matemáticos libremente con tu ratón en este lienzo:</p>
+            
+            <div class="chalkboard-frame" style="border: 12px solid #5c4033; border-radius: 12px; overflow: hidden; background: #13221c; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);">
+                <canvas id="chalkboard-canvas" style="display: block; width: 100%; height: 400px; cursor: crosshair; background: transparent;"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; 2026 - Plataforma Científica Local · Desarrollado con Three.js, MathLive y Canvas2D</p>
+    </footer>
+
+    <!-- Lógica del Proyecto -->
+    <script src="app.js"></script>
+</body>
+</html>
