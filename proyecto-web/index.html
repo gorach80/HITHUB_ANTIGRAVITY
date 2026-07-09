@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma Interactiva: Simulación 3D, Pizarra y GeoGebra</title>
+    <title>Plataforma Interactiva: Simulación 3D, Pizarra, GeoGebra y Python</title>
     
     <!-- 1. Font Awesome Local (Iconos) -->
     <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
@@ -48,6 +48,9 @@
             <button class="tab-btn" id="btn-tab-geogebra">
                 <i class="fas fa-calculator"></i> GeoGebra Integrado
             </button>
+            <button class="tab-btn" id="btn-tab-python">
+                <i class="fab fa-python"></i> Editor Python
+            </button>
         </nav>
         <div class="status-badge">
             <span class="dot live"></span>
@@ -64,6 +67,23 @@
             </h2>
             <p>Este simulador corre 100% de manera local y permite interactuar con la geometría en tiempo real:</p>
             
+            <!-- NARRADOR POR VOZ DIDÁCTICO -->
+            <div class="tts-panel" id="tts-panel-3d">
+                <div class="tts-info">
+                    <div class="tts-icon-box">
+                        <i class="fas fa-volume-up" id="tts-icon"></i>
+                    </div>
+                    <div class="tts-details">
+                        <h4>Explicación Guiada del Simulador</h4>
+                        <p id="tts-status">Listo para reproducir la lección didáctica por voz</p>
+                    </div>
+                </div>
+                <div class="tts-controls-row">
+                    <button class="btn-tts" id="btn-tts-play"><i class="fas fa-play"></i> Escuchar</button>
+                    <button class="btn-tts stop" id="btn-tts-stop"><i class="fas fa-stop"></i> Detener</button>
+                </div>
+            </div>
+
             <div class="control-explanation">
                 <h3>Variables Modificables (Panel Flotante):</h3>
                 <ul class="variables-list">
@@ -153,7 +173,44 @@
             <p>Dibuja diagramas, gráficos o bosquejos matemáticos libremente con tu ratón en este lienzo:</p>
             
             <div class="chalkboard-frame" style="border: 12px solid #5c4033; border-radius: 12px; overflow: hidden; background: #13221c; box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5);">
-                <canvas id="chalkboard-canvas" style="display: block; width: 100%; height: 400px; cursor: crosshair; background: transparent;"></canvas>
+                <canvas id="chalkboard-canvas" style="display: block; width: 100%; height: 320px; cursor: crosshair; background: transparent;"></canvas>
+            </div>
+
+            <!-- ESTRUCTURA DE PASOS MATHGPTPRO -->
+            <div class="math-solver">
+                <div class="math-solver-header">
+                    <div class="math-solver-icon">∑</div>
+                    <div class="math-solver-title">
+                        <h3>Deducción del Rotor de Reuleaux</h3>
+                        <p>Resolución por pasos de las ecuaciones del área y perímetro</p>
+                    </div>
+                </div>
+                <div class="math-steps">
+                    <div class="math-step">
+                        <span class="math-step-number">Paso 01</span>
+                        <div class="math-step-title">Área del Triángulo Equilátero Base</div>
+                        <div class="math-step-content">El área del triángulo equilátero formado por los tres centros es:</div>
+                        <div class="math-formula-block">
+                            <div id="step-formula-1"></div>
+                        </div>
+                    </div>
+                    <div class="math-step">
+                        <span class="math-step-number">Paso 02</span>
+                        <div class="math-step-title">Área del Segmento Circular</div>
+                        <div class="math-step-content">El área de cada uno de los tres segmentos circulares agregados es:</div>
+                        <div class="math-formula-block">
+                            <div id="step-formula-2"></div>
+                        </div>
+                    </div>
+                    <div class="math-step">
+                        <span class="math-step-number">Paso 03</span>
+                        <div class="math-step-title">Fórmula del Área Total del Rotor</div>
+                        <div class="math-step-content">Sumando el triángulo y los tres segmentos, se deduce la fórmula final:</div>
+                        <div class="math-formula-block">
+                            <div id="step-formula-3"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -212,6 +269,65 @@
                     <div id="ggb-element" style="border: 1px solid var(--card-border); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4); background: #ffffff;"></div>
                 </div>
             </div>
+        </section>
+    </main>
+
+    <!-- PÁGINA 4: EDITOR PYTHON INTERACTIVO -->
+    <main class="main-container tab-content" id="tab-python-content">
+        <section class="card formula-card">
+            <h2>
+                <i class="fab fa-python"></i>
+                IDE Python Científico
+            </h2>
+            <p>Escribe y modifica el script en Python. La terminal emulará los resultados del comando <code>print()</code> y el canvas de matplotlib se actualizará dinámicamente:</p>
+            
+            <div class="ide-container">
+                <div class="ide-topbar">
+                    <div class="ide-dots">
+                        <span class="ide-dot red"></span>
+                        <span class="ide-dot yellow"></span>
+                        <span class="ide-dot green"></span>
+                    </div>
+                    <div class="ide-filename">
+                        <i class="fab fa-python"></i> rotor_reuleaux.py — Python 3.11
+                    </div>
+                </div>
+                <div class="ide-editor-area">
+                    <div class="ide-line-numbers">
+                        1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15
+                    </div>
+                    <textarea class="ide-textarea" id="pyCode" spellcheck="false"># Parámetros del Rotor de Reuleaux
+w = 1.80  # Ancho constante (m)
+L = 5.00  # Largo del sólido de revolución (m)
+
+# Fórmulas de Geometría Plana
+area_rotor = ((3.14159 - 1.73205) / 2) * (w ** 2)
+perimetro = 3.14159 * w
+volumen = area_rotor * L
+
+# Imprimir resultados en consola
+print("=== ROTOR DE REULEAUX ===")
+print("Ancho w       :", w, "metros")
+print("Área 2D       :", area_rotor, "m2")
+print("Perímetro P   :", perimetro, "m")
+print("Volumen Sol.  :", volumen, "m3")</textarea>
+                </div>
+                <div class="ide-actions">
+                    <button class="ide-btn run" id="btn-run-python"><i class="fas fa-play"></i> Ejecutar Script</button>
+                    <button class="ide-btn secondary" id="btn-copy-pycode"><i class="fas fa-copy"></i> Copiar Código</button>
+                    <button class="ide-btn secondary" id="btn-reset-python"><i class="fas fa-rotate-left"></i> Restablecer</button>
+                </div>
+                <div class="ide-console" id="pyConsole">▶ Listo. Presiona "Ejecutar Script" para iniciar el análisis...</div>
+            </div>
+        </section>
+
+        <section class="card scene-card">
+            <h2>
+                <i class="fas fa-chart-line"></i>
+                Lienzo Gráfico (Matplotlib)
+            </h2>
+            <p>Gráfico 2D del Rotor de Reuleaux generado en tiempo real según el ancho $w$ definido en el script:</p>
+            <canvas id="matplotCanvas" width="550" height="380"></canvas>
         </section>
     </main>
 

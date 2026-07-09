@@ -10,6 +10,7 @@
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --success-color: #10b981;
+    --danger-color: #ef4444;
 }
 
 /* Reseteo General */
@@ -255,6 +256,340 @@ body {
     position: absolute;
     left: 0;
     top: -2px;
+}
+
+/* =================================================================
+   NUEVOS ESTILOS: NARRADOR POR VOZ
+   ================================================================= */
+.tts-panel {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.tts-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.tts-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+}
+
+.tts-panel.speaking .tts-icon-box {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success-color);
+    animation: voicePulse 1.5s infinite alternate;
+}
+
+@keyframes voicePulse {
+    from { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    to { transform: scale(1.1); box-shadow: 0 0 10px 4px rgba(16, 185, 129, 0.2); }
+}
+
+.tts-details h4 {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.tts-details p {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.tts-controls-row {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-tts {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-tts:hover {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-tts.stop:hover {
+    background: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+/* =================================================================
+   NUEVOS ESTILOS: ESTRUCTURA DE PASOS SOLUCIONADOR (KaTeX)
+   ================================================================= */
+.math-solver {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    overflow: hidden;
+    margin-top: 25px;
+}
+
+.math-solver-header {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.math-solver-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--secondary-color), #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.math-solver-title h3 {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.math-solver-title p {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.math-steps {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.math-step {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--card-border);
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    transition: all 0.3s;
+}
+
+.math-step:hover {
+    border-left-color: var(--accent-color);
+    background: rgba(30, 41, 59, 0.6);
+}
+
+.math-step-number {
+    position: absolute;
+    top: -10px;
+    left: 15px;
+    background: linear-gradient(135deg, var(--secondary-color), var(--success-color));
+    color: #0f172a;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.math-step-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #60a5fa;
+    margin-bottom: 6px;
+    margin-top: 4px;
+}
+
+.math-step-content {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.math-formula-block {
+    background: #090d16;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin: 8px 0;
+    text-align: center;
+    overflow-x: auto;
+}
+
+/* =================================================================
+   NUEVOS ESTILOS: EDITOR DE PYTHON INTERACTIVO (IDE)
+   ================================================================= */
+.ide-container {
+    background: #0b0f17;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.ide-topbar {
+    background: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ide-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.ide-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ide-dot.red { background: #ef4444; }
+.ide-dot.yellow { background: #f59e0b; }
+.ide-dot.green { background: #10b981; }
+
+.ide-filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ide-editor-area {
+    position: relative;
+    background: #090d16;
+    display: flex;
+}
+
+.ide-line-numbers {
+    padding: 15px 10px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: #475569;
+    background: #060910;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    user-select: none;
+    line-height: 1.6;
+}
+
+.ide-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #a7f3d0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    padding: 15px;
+    line-height: 1.6;
+    outline: none;
+    resize: none;
+    height: 280px;
+}
+
+.ide-actions {
+    background: #0f172a;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 16px;
+    display: flex;
+    gap: 10px;
+}
+
+.ide-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.ide-btn.run {
+    background: linear-gradient(135deg, var(--success-color), #047857);
+    color: white;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.ide-btn.run:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.5);
+}
+
+.ide-btn.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+}
+
+.ide-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ide-console {
+    background: #05070c;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #34d399;
+    min-height: 100px;
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+#matplotCanvas {
+    background: #080c14;
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    width: 100%;
+    height: 380px;
+    display: block;
 }
 
 /* Responsivo */

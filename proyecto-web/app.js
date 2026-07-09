@@ -5,47 +5,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTab3d = document.getElementById('btn-tab-3d');
     const btnTabPizarra = document.getElementById('btn-tab-pizarra');
     const btnTabGeogebra = document.getElementById('btn-tab-geogebra');
+    const btnTabPython = document.getElementById('btn-tab-python');
+    
     const tab3dContent = document.getElementById('tab-3d-content');
     const tabPizarraContent = document.getElementById('tab-pizarra-content');
     const tabGeogebraContent = document.getElementById('tab-geogebra-content');
+    const tabPythonContent = document.getElementById('tab-python-content');
 
-    if (btnTab3d && btnTabPizarra && btnTabGeogebra && tab3dContent && tabPizarraContent && tabGeogebraContent) {
+    if (btnTab3d && btnTabPizarra && btnTabGeogebra && btnTabPython &&
+        tab3dContent && tabPizarraContent && tabGeogebraContent && tabPythonContent) {
+        
         btnTab3d.addEventListener('click', () => {
-            btnTab3d.classList.add('active');
-            btnTabPizarra.classList.remove('active');
-            btnTabGeogebra.classList.remove('active');
-            tab3dContent.classList.add('active');
-            tabPizarraContent.classList.remove('active');
-            tabGeogebraContent.classList.remove('active');
-            
+            setActiveTab(btnTab3d, tab3dContent);
             // Forzar redimensión de Three.js
             window.dispatchEvent(new Event('resize'));
         });
 
         btnTabPizarra.addEventListener('click', () => {
-            btnTabPizarra.classList.add('active');
-            btnTab3d.classList.remove('active');
-            btnTabGeogebra.classList.remove('active');
-            tabPizarraContent.classList.add('active');
-            tab3dContent.classList.remove('active');
-            tabGeogebraContent.classList.remove('active');
-            
+            setActiveTab(btnTabPizarra, tabPizarraContent);
             // Forzar redimensión de la pizarra
             window.dispatchEvent(new Event('resize-canvas'));
         });
 
         btnTabGeogebra.addEventListener('click', () => {
-            btnTabGeogebra.classList.add('active');
-            btnTab3d.classList.remove('active');
-            btnTabPizarra.classList.remove('active');
-            tabGeogebraContent.classList.add('active');
-            tab3dContent.classList.remove('active');
-            tabPizarraContent.classList.remove('active');
+            setActiveTab(btnTabGeogebra, tabGeogebraContent);
+        });
+
+        btnTabPython.addEventListener('click', () => {
+            setActiveTab(btnTabPython, tabPythonContent);
+            // Renderizar el gráfico de python inicial si no se ha hecho
+            runPythonCode();
         });
     }
 
+    function setActiveTab(activeBtn, activeContent) {
+        [btnTab3d, btnTabPizarra, btnTabGeogebra, btnTabPython].forEach(btn => btn.classList.remove('active'));
+        [tab3dContent, tabPizarraContent, tabGeogebraContent, tabPythonContent].forEach(tab => tab.classList.remove('active'));
+        
+        activeBtn.classList.add('active');
+        activeContent.classList.add('active');
+    }
+
     // =================================================================
-    // 2. RENDERIZADO DE KATEX LOCAL (FÓRMULA 3D)
+    // 2. RENDERIZADO DE KATEX LOCAL (FÓRMULAS & SOLUCIONADOR)
     // =================================================================
     const formulaContainer = document.getElementById('math-formula');
     if (formulaContainer && typeof katex !== 'undefined') {
@@ -53,19 +55,84 @@ document.addEventListener('DOMContentLoaded', () => {
             katex.render(
                 "V_{rev} = \\Delta A \\cdot L = \\frac{(3\\sqrt{3} - \\pi) \\cdot w^2 \\cdot L}{6}",
                 formulaContainer,
-                {
-                    throwOnError: false,
-                    displayMode: true
-                }
+                { throwOnError: false, displayMode: true }
             );
         } catch (error) {
             console.error("Error al renderizar KaTeX:", error);
-            formulaContainer.textContent = "Error al cargar la fórmula.";
         }
     }
 
+    // Renderizar fórmulas paso a paso en la pizarra
+    const step1El = document.getElementById('step-formula-1');
+    const step2El = document.getElementById('step-formula-2');
+    const step3El = document.getElementById('step-formula-3');
+
+    if (typeof katex !== 'undefined') {
+        if (step1El) katex.render("A_{triangulo} = \\frac{\\sqrt{3}}{4} w^2", step1El, { displayMode: true });
+        if (step2El) katex.render("A_{segmento} = \\frac{\\pi}{6} w^2 - \\frac{\\sqrt{3}}{4} w^2", step2El, { displayMode: true });
+        if (step3El) katex.render("A_{total} = A_{triangulo} + 3 A_{segmento} = \\frac{\\pi - \\sqrt{3}}{2} w^2 \\approx 0.70477 w^2", step3El, { displayMode: true });
+    }
+
     // =================================================================
-    // 3. SIMULADOR THREE.JS + STATS.JS + LIL-GUI
+    // 3. SÍNTESIS DE VOZ DIDÁCTICA (Web Speech API)
+    // =================================================================
+    const btnTtsPlay = document.getElementById('btn-tts-play');
+    const btnTtsStop = document.getElementById('btn-tts-stop');
+    const ttsPanel = document.getElementById('tts-panel-3d');
+    const ttsStatus = document.getElementById('tts-status');
+    const ttsIcon = document.getElementById('tts-icon');
+    
+    let synth = window.speechSynthesis;
+    let utterance = null;
+
+    if (btnTtsPlay && btnTtsStop) {
+        btnTtsPlay.addEventListener('click', () => {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+
+            const lessonText = "Hola. Bienvenido a la Plataforma Científica. En el simulador 3D puedes alterar las variables geométricas de un sólido de revolución en tiempo real. Por ejemplo, la fórmula que ves en pantalla representa el volumen del sólido de revolución de un Rotor de Reuleaux, cuya área base es aproximadamente cero coma setenta por el ancho constante al cuadrado. Modificando el ancho o la longitud, el volumen cambia proporcionalmente. Puedes usar la Pizarra o GeoGebra para profundizar en el diseño.";
+
+            utterance = new SpeechSynthesisUtterance(lessonText);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+
+            utterance.onstart = () => {
+                ttsPanel.classList.add('speaking');
+                ttsStatus.textContent = "Reproduciendo lección de geometría en audio...";
+                ttsIcon.className = "fas fa-volume-mute";
+                btnTtsPlay.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+            };
+
+            utterance.onend = () => {
+                resetTtsUI();
+            };
+
+            utterance.onerror = () => {
+                resetTtsUI();
+            };
+
+            synth.speak(utterance);
+        });
+
+        btnTtsStop.addEventListener('click', () => {
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            resetTtsUI();
+        });
+    }
+
+    function resetTtsUI() {
+        if (ttsPanel) ttsPanel.classList.remove('speaking');
+        if (ttsStatus) ttsStatus.textContent = "Listo para reproducir la lección didáctica por voz";
+        if (ttsIcon) ttsIcon.className = "fas fa-volume-up";
+        if (btnTtsPlay) btnTtsPlay.innerHTML = '<i class="fas fa-play"></i> Escuchar';
+    }
+
+    // =================================================================
+    // 4. SIMULADOR THREE.JS + STATS.JS + LIL-GUI
     // =================================================================
     const canvasContainer = document.getElementById('canvas-container');
     if (canvasContainer && typeof THREE !== 'undefined') {
@@ -231,23 +298,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =================================================================
-    // 4. EDITOR MATHLIVE (MATHFIELD)
+    // 5. EDITOR MATHLIVE (MATHFIELD)
     // =================================================================
     const mathInput = document.getElementById('math-input');
     const latexOutput = document.getElementById('latex-output');
 
     if (mathInput && latexOutput) {
-        // Inicializar texto
         latexOutput.textContent = mathInput.value;
-
-        // Escuchar cambios de fórmula matemática en tiempo real
         mathInput.addEventListener('input', () => {
             latexOutput.textContent = mathInput.value;
         });
     }
 
     // =================================================================
-    // 5. PIZARRA DIGITAL INTERACTIVA (HTML5 CANVAS)
+    // 6. PIZARRA DIGITAL INTERACTIVA (HTML5 CANVAS)
     // =================================================================
     const chalkboard = document.getElementById('chalkboard-canvas');
     if (chalkboard) {
@@ -256,7 +320,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let chalkColor = '#ffffff';
         let chalkThickness = 3;
 
-        // Configuración de resolución interna del Canvas
         function resizeChalkboard() {
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = chalkboard.width;
@@ -265,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tempCtx.drawImage(chalkboard, 0, 0);
 
             chalkboard.width = chalkboard.parentElement.clientWidth;
-            chalkboard.height = 400;
+            chalkboard.height = 320;
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -291,10 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
         function draw(e) {
             if (!isDrawing) return;
             const pos = getPos(e);
-            
             ctx.strokeStyle = chalkColor;
             ctx.lineWidth = chalkThickness;
-            
             ctx.stroke();
             ctx.lineTo(pos.x, pos.y);
             ctx.stroke();
@@ -383,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =================================================================
-    // 6. INTEGRACIÓN DE GEOGEBRA SUITE CALCULADORA
+    // 7. INTEGRACIÓN DE GEOGEBRA SUITE CALCULADORA
     // =================================================================
     const ggbElement = document.getElementById('ggb-element');
     if (ggbElement && typeof GGBApplet !== 'undefined') {
@@ -402,12 +463,9 @@ document.addEventListener('DOMContentLoaded', () => {
             "language": "es"
         };
         const applet = new GGBApplet(params, true);
-        
-        // Inyectar el entorno de GeoGebra
         applet.inject('ggb-element');
     }
 
-    // Lógica para botones de copiado de comandos de GeoGebra
     const copyCmdBtns = document.querySelectorAll('.btn-copy-cmd');
     copyCmdBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -425,4 +483,202 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // =================================================================
+    // 8. IDE PYTHON CIENTÍFICO INTERACTIVO (SIMULADO)
+    // =================================================================
+    const btnRunPython = document.getElementById('btn-run-python');
+    const btnCopyPycode = document.getElementById('btn-copy-pycode');
+    const btnResetPython = document.getElementById('btn-reset-python');
+    const pyCodeArea = document.getElementById('pyCode');
+    const pyConsole = document.getElementById('pyConsole');
+    const matplotCanvas = document.getElementById('matplotCanvas');
+
+    const defaultPythonCode = `# Parámetros del Rotor de Reuleaux
+w = 1.80  # Ancho constante (m)
+L = 5.00  # Largo del sólido de revolución (m)
+
+# Fórmulas de Geometría Plana
+area_rotor = ((3.14159 - 1.73205) / 2) * (w ** 2)
+perimetro = 3.14159 * w
+volumen = area_rotor * L
+
+# Imprimir resultados en consola
+print("=== ROTOR DE REULEAUX ===")
+print("Ancho w       :", w, "metros")
+print("Área 2D       :", area_rotor, "m2")
+print("Perímetro P   :", perimetro, "m")
+print("Volumen Sol.  :", volumen, "m3")`;
+
+    if (btnRunPython && pyCodeArea && pyConsole && matplotCanvas) {
+        btnRunPython.addEventListener('click', runPythonCode);
+        
+        btnResetPython.addEventListener('click', () => {
+            pyCodeArea.value = defaultPythonCode;
+            pyConsole.textContent = "▶ Listo. Presiona \"Ejecutar Script\" para iniciar el análisis...";
+            runPythonCode();
+        });
+
+        btnCopyPycode.addEventListener('click', () => {
+            navigator.clipboard.writeText(pyCodeArea.value).then(() => {
+                btnCopyPycode.innerHTML = '<i class="fas fa-check"></i> ¡Copiado!';
+                setTimeout(() => {
+                    btnCopyPycode.innerHTML = '<i class="fas fa-copy"></i> Copiar Código';
+                }, 2000);
+            });
+        });
+    }
+
+    function runPythonCode() {
+        if (!pyCodeArea || !pyConsole || !matplotCanvas) return;
+        
+        const code = pyCodeArea.value;
+        pyConsole.textContent = "▶ Ejecutando rotor_reuleaux.py...\n";
+
+        setTimeout(() => {
+            // Parser básico para buscar variables w y L
+            let wVal = 1.80;
+            let LVal = 5.00;
+
+            const wMatch = code.match(/w\s*=\s*([0-9.]+)/);
+            const LMatch = code.match(/L\s*=\s*([0-9.]+)/);
+
+            if (wMatch) wVal = parseFloat(wMatch[1]);
+            if (LMatch) LVal = parseFloat(LMatch[1]);
+
+            // Realizar los cálculos en JS
+            const pi = Math.PI;
+            const sqrt3 = Math.sqrt(3);
+            const area_rotor = ((pi - sqrt3) / 2) * (wVal ** 2);
+            const perimetro = pi * wVal;
+            const volumen = area_rotor * LVal;
+
+            // Formatear consola
+            let output = "▶ Ejecutando rotor_reuleaux.py...\n";
+            output += "---------------------------------------------\n";
+            output += "  === ROTOR DE REULEAUX (Simulado) ===\n";
+            output += "---------------------------------------------\n";
+            output += `  Ancho w       : ${wVal.toFixed(2)} metros\n`;
+            output += `  Largo L       : ${LVal.toFixed(2)} metros\n`;
+            output += `  Área 2D       : ${area_rotor.toFixed(5)} m²\n`;
+            output += `  Perímetro P   : ${perimetro.toFixed(5)} m\n`;
+            output += `  Volumen Sol.  : ${volumen.toFixed(5)} m³\n`;
+            output += "---------------------------------------------\n";
+            output += "✓ Gráfico generado exitosamente en Canvas.\n";
+            output += `✓ Script finalizado — ${new Date().toLocaleTimeString()}`;
+
+            pyConsole.textContent = output;
+
+            // Dibujar la simulación gráfica de matplotlib
+            drawMatplotlibSimulation(wVal);
+        }, 300);
+    }
+
+    function drawMatplotlibSimulation(w) {
+        const ctx = matplotCanvas.getContext('2d');
+        const W = matplotCanvas.width;
+        const H = matplotCanvas.height;
+
+        // Limpiar
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#080c14';
+        ctx.fillRect(0, 0, W, H);
+
+        // Dibujar Cuadrícula de Fondo (estilo matplotlib)
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        for (let x = 50; x < W; x += 50) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+        }
+        for (let y = 50; y < H; y += 50) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+        }
+
+        // Parámetros de escala
+        const cx = W / 2;
+        const cy = H / 2;
+        const scale = 110; // escala visual de píxeles por metro
+
+        // Puntos del triángulo equilátero
+        // El rotor tiene un ancho w. El triángulo equilátero de centros tiene lados de longitud w.
+        const r = w * scale; // Radio visual
+        const side = r;
+        const hTri = (Math.sqrt(3) / 2) * side;
+
+        // Centrar el triángulo en cy
+        const yA = cy + hTri / 3;
+        const yB = cy + hTri / 3;
+        const yC = cy - (2 * hTri) / 3;
+
+        const xA = cx - side / 2;
+        const xB = cx + side / 2;
+        const xC = cx;
+
+        // Dibujar triángulo base (línea punteada)
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(xA, yA);
+        ctx.lineTo(xB, yB);
+        ctx.lineTo(xC, yC);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Rellenar y dibujar el Rotor de Reuleaux (3 arcos de radio w)
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+        ctx.strokeStyle = '#34d399';
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        // Arco 1: Centrado en A, desde B hasta C (ángulo de B es 0 respecto a A, C es -60)
+        // Usamos atan2 para calcular ángulos exactos
+        const angleA_B = Math.atan2(yB - yA, xB - xA);
+        const angleA_C = Math.atan2(yC - yA, xC - xA);
+        ctx.arc(xA, yA, side, angleA_B, angleA_C, true);
+
+        // Arco 2: Centrado en C, desde A hasta B
+        const angleC_A = Math.atan2(yA - yC, xA - xC);
+        const angleC_B = Math.atan2(yB - yC, xB - xC);
+        ctx.arc(xC, yC, side, angleC_A, angleC_B, false);
+
+        // Arco 3: Centrado en B, desde C hasta A
+        const angleB_C = Math.atan2(yC - yB, xC - xB);
+        const angleB_A = Math.atan2(yA - yB, xA - xB);
+        ctx.arc(xB, yB, side, angleB_C, angleB_A, false);
+
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Dibujar centros de arcos (puntos A, B, C)
+        ctx.fillStyle = '#f59e0b';
+        [ {x:xA, y:yA, l:'A'}, {x:xB, y:yB, l:'B'}, {x:xC, y:yC, l:'C'} ].forEach(p => {
+            ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#f8fafc';
+            ctx.font = '10px monospace';
+            ctx.fillText(p.l, p.x + 8, p.y + 4);
+            ctx.fillStyle = '#f59e0b';
+        });
+
+        // Centroide (G)
+        ctx.fillStyle = '#a855f7';
+        ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText('G', cx - 12, cy - 8);
+
+        // Ejes de coordenadas simulados
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(20, cy); ctx.lineTo(W - 20, cy); ctx.stroke(); // Eje X
+        ctx.beginPath(); ctx.moveTo(cx, 20); ctx.lineTo(cx, H - 20); ctx.stroke(); // Eje Y
+
+        // Etiquetas
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px sans-serif';
+        ctx.fillText(`Rotor de Reuleaux (Ancho constante w = ${w.toFixed(2)}m)`, 20, 30);
+        ctx.fillText('Eje Y (m)', cx - 55, 30);
+        ctx.fillText('Eje X (m)', W - 75, cy + 18);
+    }
 });
