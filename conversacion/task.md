@@ -1,9 +1,8 @@
-# Tareas de Instalación: LaTeX y KaTeX
+# Tareas de Implementación: Editor de Python e Interactividad Avanzada
 
-- [x] Instalar librerías de Python (`pylatex` y `markdown-katex`)
-- [x] Instalar MiKTeX (LaTeX) a través de winget
-- [x] Instalar Node.js a través de winget
-- [x] Instalar VS Code a través de winget
-- [x] Instalar KaTeX CLI a través de npm (requiere Node.js)
-- [x] Instalar extensiones de VS Code (`latex-workshop` y `mdmath`)
-- [x] Verificar la correcta instalación de todas las herramientas
+- [/] Implementar Editor Python e Interactividad
+    - [x] Modificar `style.css` con los estilos de la terminal, editor de Python, tarjetas solucionadoras de KaTeX y narrador de voz
+    - [x] Modificar `index.html` agregando la cuarta pestaña (Editor Python), la sección de pasos KaTeX en la pizarra y los botones de voz didáctica
+    - [x] Modificar `app.js` con el motor de simulación de Python, el canvas matplotlib, la síntesis de voz y el tab switcher actualizado
+    - [ ] Verificar el funcionamiento del IDE Python, los botones de copiado y el narrador de voz
+    - [ ] Realizar el respaldo y sincronización automática en el repositorio de GitHub
