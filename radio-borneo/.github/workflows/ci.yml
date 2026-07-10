@@ -1,0 +1,83 @@
+name: 🧪 CI - Test & Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Lint JavaScript
+        run: |
+          # Verificación de sintaxis con Node
+          node --check app.js || echo "⚠ app.js no es módulo CommonJS (esperado, es ES module)"
+          # Verificar como ES module
+          cp app.js /tmp/test-check.mjs
+          node --check /tmp/test-check.mjs
+          echo "✅ Sintaxis JavaScript OK"
+
+      - name: 🔍 Lint HTML
+        run: |
+          # Verificar que index.html existe y tiene estructura básica
+          if [ ! -f index.html ]; then
+            echo "❌ index.html no encontrado"
+            exit 1
+          fi
+          # Verificar DOCTYPE
+          if ! head -1 index.html | grep -q "DOCTYPE"; then
+            echo "❌ Falta DOCTYPE en index.html"
+            exit 1
+          fi
+          echo "✅ HTML válido"
+
+      - name: 🔍 Verificar recursos críticos
+        run: |
+          for f in index.html style.css app.js geogebra-deploy.js; do
+            if [ ! -f "$f" ]; then
+              echo "❌ Falta: $f"
+              exit 1
+            fi
+            echo "✓ $f presente"
+          done
+
+      - name: 🔍 Verificar imports en app.js
+        run: |
+          if ! grep -q "import \* as THREE" app.js; then
+            echo "❌ Falta import de Three.js"
+            exit 1
+          fi
+          if ! grep -q "import { GUI }" app.js; then
+            echo "❌ Falta import de lil-gui"
+            exit 1
+          fi
+          echo "✅ Imports correctos"
+
+      - name: 🌐 Servidor local smoke test
+        run: |
+          node start-server.js &
+          SERVER_PID=$!
+          sleep 3
+          # Verificar que responde
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/ || echo "000")
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Servidor respondió $STATUS"
+            kill $SERVER_PID
+            exit 1
+          fi
+          echo "✅ Servidor responde 200"
+          kill $SERVER_PID

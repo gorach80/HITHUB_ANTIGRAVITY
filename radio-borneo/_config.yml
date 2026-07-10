@@ -1,0 +1,33 @@
+# Configuración de GitHub Pages para el proyecto Radio de Borneo
+# Como usamos .nojekyll, este config es opcional pero útil para metadata.
+
+title: "Radio de Borneo y Área de Seguridad"
+description: "Laboratorio científico interactivo para anclajes de boyas marítimas offshore en el Puerto de La Libertad"
+theme: null  # Usamos nuestro propio CSS
+markdown: GFM
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+
+# Metadatos del sitio
+author: "Proyecto Educativo Geometría Plana"
+lang: es
+dir: ltr
+
+# Excluir archivos del build
+exclude:
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - start-server.js
+  - CONTRIBUTING.md
+  - CHANGELOG.md
+  - .github/
+  - .gitignore
+
+# Headers de seguridad
+webrick:
+  headers:
+    Content-Security-Policy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.geogebra.org https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:;"
