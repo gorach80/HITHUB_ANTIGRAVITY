@@ -216,6 +216,7 @@ def update_category():
         for msg in data.get("messages", []):
             if msg["data_id"] == data_id:
                 msg["category"] = new_category
+                msg["classified"] = True   # marcado como clasificado manualmente
                 found = True
                 break
                 
@@ -526,6 +527,8 @@ def delete_bulk():
 
         if category == 'all':
             messages = []
+        elif category == '__unclassified__':
+            messages = [m for m in messages if m.get('classified', False)]
         else:
             messages = [m for m in messages if m.get("category") != category]
 

@@ -128,7 +128,7 @@
     <script>
         let messagesData = [];
         let globalCategories = [];
-        let activeCategory = 'all';
+        let activeCategory = 'recientes';
         let categoryChart = null;
 
         // Initialize Page
@@ -165,7 +165,12 @@
         // Render Filter Buttons dynamically
         function renderFilterButtons() {
             const container = document.getElementById('filter-buttons-container');
-            container.innerHTML = `<button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-category="all" onclick="selectFilter('all', this)">Todos</button>`;
+            // Pestaña Recientes (sin clasificar manualmente)
+            const recentCount = messagesData.filter(m => !m.classified).length;
+            container.innerHTML = `<button class="filter-btn filter-btn-recent ${activeCategory === 'recientes' ? 'active' : ''}" data-category="recientes" onclick="selectFilter('recientes', this)">
+                <i class="fa-solid fa-clock-rotate-left"></i> Recientes
+                ${recentCount > 0 ? `<span class="recent-badge">${recentCount}</span>` : ''}
+            </button>`;
             
             globalCategories.forEach(cat => {
                 const btn = document.createElement('button');
@@ -191,18 +196,29 @@
         function updateBulkBar() {
             const bar = document.getElementById('bulk-action-bar');
             const countEl = document.getElementById('bulk-count');
-            const filtered = activeCategory === 'all'
-                ? messagesData
-                : messagesData.filter(m => m.category === activeCategory);
+            let filtered;
+            if (activeCategory === 'recientes') {
+                filtered = messagesData.filter(m => !m.classified);
+            } else {
+                filtered = messagesData.filter(m => m.category === activeCategory);
+            }
             countEl.textContent = filtered.length;
             bar.style.display = filtered.length > 0 ? 'flex' : 'none';
         }
 
         // Bulk delete all visible messages in current filter
         function deleteBulk() {
-            const label = activeCategory === 'all' ? 'TODOS los mensajes' : `todos los mensajes de "${activeCategory}"`;
+            let label, apiCategory;
+            if (activeCategory === 'recientes') {
+                const cnt = messagesData.filter(m => !m.classified).length;
+                label = `los ${cnt} mensajes sin clasificar (Recientes)`;
+                apiCategory = '__unclassified__';
+            } else {
+                label = `todos los mensajes de "${activeCategory}"`;
+                apiCategory = activeCategory;
+            }
             const count = document.getElementById('bulk-count').textContent;
-            if (!confirm(`¿Estás segura de que deseas eliminar ${count} mensajes (${label})? Esta acción no se puede deshacer.`)) return;
+            if (!confirm(`¿Estás segura de que deseas eliminar ${label}? Esta acción no se puede deshacer.`)) return;
 
             const btn = document.getElementById('btn-delete-bulk');
             btn.disabled = true;
@@ -211,15 +227,15 @@
             fetch('/api/messages/delete-bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ category: activeCategory })
+                body: JSON.stringify({ category: apiCategory })
             })
             .then(r => r.json())
             .then(data => {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Borrar todos estos mensajes';
                 if (data.success) {
-                    if (activeCategory === 'all') {
-                        messagesData = [];
+                    if (activeCategory === 'recientes') {
+                        messagesData = messagesData.filter(m => m.classified);
                     } else {
                         messagesData = messagesData.filter(m => m.category !== activeCategory);
                     }
@@ -370,7 +386,7 @@
 
                     // Render chart and feed
                     updateChart(messagesData);
-                    filterMessages('all');
+                    filterMessages('recientes');
                     updateBulkBar();
                 })
                 .catch(err => {
@@ -384,15 +400,20 @@
             const container = document.getElementById('messages-container');
             container.innerHTML = '';
 
-            const filtered = category === 'all' 
-                ? messagesData 
-                : messagesData.filter(m => m.category === category);
+            let filtered;
+            if (category === 'recientes') {
+                // Mostrar mensajes sin clasificar manualmente, del más reciente al más antiguo
+                filtered = messagesData.filter(m => !m.classified);
+            } else {
+                filtered = messagesData.filter(m => m.category === category);
+            }
 
             if (filtered.length === 0) {
+                const isEmpty = category === 'recientes';
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="fa-regular fa-folder-open"></i>
-                        <p>No hay mensajes en esta categoría.</p>
+                        <i class="fa-solid ${isEmpty ? 'fa-check-circle' : 'fa-folder-open'}" style="${isEmpty ? 'color:#10b981' : ''}"></i>
+                        <p>${isEmpty ? '\u00a1Todo clasificado! No hay mensajes pendientes.' : 'No hay mensajes en esta categoría.'}</p>
                     </div>
                 `;
                 return;
@@ -424,7 +445,7 @@
                     <div class="message-actions">
                         <div class="category-selector">
                             <label><i class="fa-solid fa-tag"></i> Categoría:</label>
-                            <select onchange="updateMessageCategory('${msg.data_id}', this.value)">
+                            <select onchange="updateMessageCategory('${msg.data_id}', this.value, this)">
                                 ${optionsHtml}
                             </select>
                         </div>
@@ -552,7 +573,7 @@
         }
 
         // Update Category on Backend
-        function updateMessageCategory(dataId, newCategory) {
+        function updateMessageCategory(dataId, newCategory, cardElement) {
             fetch('/api/messages/update_category', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -561,13 +582,42 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    showToast('Categoría actualizada con éxito', 'success');
-                    // Update local data and chart
+                    // Actualizar datos locales
                     const msg = messagesData.find(m => m.data_id === dataId);
-                    if (msg) msg.category = newCategory;
+                    if (msg) {
+                        msg.category = newCategory;
+                        msg.classified = true;
+                    }
                     updateChart(messagesData);
-                    
-                    // Update GitHub Status card
+                    renderFilterButtons(); // Actualizar badge de Recientes
+
+                    // Si estamos en Recientes, animar y retirar la card
+                    if (activeCategory === 'recientes') {
+                        showToast(`✅ Clasificado como "${newCategory}"`, 'success');
+                        const card = cardElement ? cardElement.closest('.message-card') : null;
+                        if (card) {
+                            card.style.transition = 'opacity 0.4s, transform 0.4s, max-height 0.5s';
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateX(30px)';
+                            setTimeout(() => {
+                                card.remove();
+                                updateBulkBar();
+                                // Si ya no quedan recientes, mostrar estado vacío
+                                const remaining = messagesData.filter(m => !m.classified).length;
+                                if (remaining === 0) {
+                                    document.getElementById('messages-container').innerHTML = `
+                                        <div class="empty-state">
+                                            <i class="fa-solid fa-check-circle" style="color:#10b981"></i>
+                                            <p>¡Todo clasificado! No hay mensajes pendientes.</p>
+                                        </div>`;
+                                }
+                            }, 420);
+                        }
+                    } else {
+                        showToast('Categoría actualizada con éxito', 'success');
+                    }
+
+                    // Actualizar GitHub Status card
                     const gitStatus = document.getElementById('stat-git-status');
                     gitStatus.textContent = data.git_backup;
                     gitStatus.className = data.git_backup === 'Completado' ? 'status-green' : 'status-red';
