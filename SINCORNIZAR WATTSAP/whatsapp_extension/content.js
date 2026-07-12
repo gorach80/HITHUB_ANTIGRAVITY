@@ -255,6 +255,8 @@ function showCategoriesPopup(textToClassify, rect, bubbleElement) {
 
     // Cargar categorías dinámicas vía Service Worker de la extensión
     chrome.runtime.sendMessage({ action: "fetchCategories" }, (response) => {
+        if (!popupMenu) return; // Evitar carrera asíncrona si el menú se cerró
+        
         if (response && response.success) {
             response.categories.forEach(cat => {
                 const opt = document.createElement('div');
