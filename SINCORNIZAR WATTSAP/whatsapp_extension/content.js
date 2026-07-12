@@ -1,18 +1,19 @@
 let floatBtn = null;
 let popupMenu = null;
 
+console.log("WhatsApp Classifier Extension loaded successfully!");
+
 // Inicializar observador para inyectar botones en las burbujas de chat
 initBubbleObserver();
 
 // Escuchar evento mouseup para detectar selección de texto (Método alternativo)
 document.addEventListener('mouseup', handleTextSelection);
 
-// Función para inicializar MutationObserver y buscar burbujas de mensajes constantemente
 function initBubbleObserver() {
     // Buscar e inyectar en burbujas ya presentes
     injectClassifyButtons();
 
-    // Crear el observador para inyectar en mensajes nuevos conforme se hace scroll
+    // Crear el observador para inyectar en mensajes nuevos conforme se hace scroll o llegan mensajes
     const observer = new MutationObserver((mutations) => {
         let shouldInject = false;
         for (const mutation of mutations) {
@@ -29,29 +30,21 @@ function initBubbleObserver() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
-// Inyectar el botón de etiqueta en cada burbuja de chat
+// Inyectar el botón de etiqueta en cada burbuja de chat usando el selector data-id (100% robusto)
 function injectClassifyButtons() {
-    // Buscar burbujas de mensaje (in/out) o celdas de fila de mensajes en WhatsApp Web
-    const bubbles = document.querySelectorAll('div.message-in, div.message-out, div[role="row"]');
+    // WhatsApp Web asigna un atributo data-id único a cada burbuja de mensaje
+    const bubbles = document.querySelectorAll('div[data-id]');
     
     bubbles.forEach(bubble => {
-        // En WhatsApp Web, a veces role="row" contiene la burbuja real adentro.
-        // Buscamos la burbuja real interna si es role="row"
-        let targetBubble = bubble;
-        if (bubble.getAttribute('role') === 'row') {
-            const innerBubble = bubble.querySelector('.message-in, .message-out');
-            if (innerBubble) {
-                targetBubble = innerBubble;
-            } else {
-                return; // Si no hay burbuja interna en este row, ignorar
-            }
-        }
+        const dataId = bubble.getAttribute('data-id');
+        // Validar que sea una burbuja de mensaje estándar (suele empezar con true_ o false_)
+        if (!dataId || (!dataId.startsWith('true_') && !dataId.startsWith('false_'))) return;
 
         // Asegurarse de no inyectar dos veces
-        if (targetBubble.querySelector('.wa-bubble-classify-btn')) return;
+        if (bubble.querySelector('.wa-bubble-classify-btn')) return;
 
         // Asegurar que la burbuja tenga posición relativa para alinear nuestro botón
-        targetBubble.style.position = 'relative';
+        bubble.style.position = 'relative';
 
         const btn = document.createElement('button');
         btn.className = 'wa-bubble-classify-btn';
@@ -63,7 +56,7 @@ function injectClassifyButtons() {
             e.preventDefault();
             
             const rect = btn.getBoundingClientRect();
-            const messageText = extractTextFromBubble(targetBubble);
+            const messageText = extractTextFromBubble(bubble);
             
             if (!messageText) {
                 console.warn('No se pudo extraer texto de esta burbuja.');
@@ -71,10 +64,10 @@ function injectClassifyButtons() {
             }
 
             // Mostrar el selector de categorías debajo del botón
-            showCategoriesPopup(messageText, rect, targetBubble);
+            showCategoriesPopup(messageText, rect, bubble);
         });
 
-        targetBubble.appendChild(btn);
+        bubble.appendChild(btn);
     });
 }
 
@@ -85,11 +78,10 @@ function extractTextFromBubble(bubble) {
     // 1. Intentar con selectable-text (el texto oficial en WhatsApp)
     const selectable = bubble.querySelector('.selectable-text');
     if (selectable) {
-        // WhatsApp a veces guarda el texto limpio en span.selectable-text
         text = selectable.innerText || selectable.textContent;
     }
     
-    // 2. Si no, buscar div.copyable-text
+    // 2. Si no, buscar div.copyable-text o cualquier contenedor de texto
     if (!text) {
         const copyable = bubble.querySelector('.copyable-text');
         if (copyable) {
@@ -106,13 +98,12 @@ function extractTextFromBubble(bubble) {
     text = text.trim();
     
     // Quitar la hora y estado que WhatsApp añade al final del texto visible de la burbuja
-    // Ejemplo: "Hola cómo estás 11:04 a.m. ✓✓" -> "Hola cómo estás"
     text = text.replace(/\d{1,2}:\d{2}\s*(?:a\.\sm\.|p\.\sm\.|AM|PM)?\s*✓*$/i, '').trim();
 
     return text;
 }
 
-// Escuchar evento mouseup para detectar selección de texto (Fallback en caso de que hover falle)
+// Escuchar evento mouseup para detectar selección de texto (Método alternativo)
 function handleTextSelection(e) {
     setTimeout(() => {
         const selection = window.getSelection();
@@ -147,7 +138,7 @@ function handleTextSelection(e) {
                 // Encontrar burbuja padre para contextualizar
                 let parentBubble = range.startContainer.parentElement;
                 while (parentBubble && parentBubble !== document.body) {
-                    if (parentBubble.classList.contains('message-in') || parentBubble.classList.contains('message-out')) {
+                    if (parentBubble.hasAttribute('data-id')) {
                         break;
                     }
                     parentBubble = parentBubble.parentElement;
@@ -170,6 +161,7 @@ function removeFloatBtn() {
     }
 }
 
+// Remover popup de categorías
 function removePopup() {
     if (popupMenu) {
         popupMenu.remove();
@@ -206,11 +198,10 @@ function showCategoriesPopup(textToClassify, rect, bubbleElement) {
     title.textContent = 'Clasificar mensaje';
     popupMenu.appendChild(title);
 
-    // Cargar categorías dinámicas de Flask
-    fetch('http://localhost:5000/api/categories')
-        .then(res => res.json())
-        .then(categories => {
-            categories.forEach(cat => {
+    // Cargar categorías dinámicas vía Service Worker de la extensión (Evita CORS/CSP de WhatsApp)
+    chrome.runtime.sendMessage({ action: "fetchCategories" }, (response) => {
+        if (response && response.success) {
+            response.categories.forEach(cat => {
                 const opt = document.createElement('div');
                 opt.className = 'wa-classifier-option';
                 opt.textContent = cat;
@@ -220,21 +211,21 @@ function showCategoriesPopup(textToClassify, rect, bubbleElement) {
                 });
                 popupMenu.appendChild(opt);
             });
-        })
-        .catch(err => {
-            console.error('Error al cargar categorías en la extensión:', err);
+        } else {
+            console.error('Error loading categories:', response ? response.error : 'No response');
             const errDiv = document.createElement('div');
             errDiv.style.color = '#ef4444';
             errDiv.style.padding = '8px';
             errDiv.style.fontSize = '12px';
-            errDiv.textContent = 'Servidor Flask apagado o inaccesible (http://localhost:5000).';
+            errDiv.textContent = 'Servidor Flask desconectado. Inicia app.py.';
             popupMenu.appendChild(errDiv);
-        });
+        }
+    });
 
     document.body.appendChild(popupMenu);
 }
 
-// Enviar la clasificación al servidor Flask local
+// Enviar la clasificación al servidor Flask local vía Service Worker de la extensión
 function classifyMessage(text, bubbleElement, category) {
     removePopup();
 
@@ -256,9 +247,9 @@ function classifyMessage(text, bubbleElement, category) {
                     }
                 }
             } else {
-                // Verificar si es un mensaje recibido (in) o enviado (out) para definir remitente
+                // Si la burbuja tiene la clase message-in, es un mensaje recibido
                 if (bubbleElement.classList.contains('message-in')) {
-                    sender = 'RM'; // Remitente por defecto
+                    sender = 'RM';
                 }
             }
         } catch (err) {
@@ -266,33 +257,27 @@ function classifyMessage(text, bubbleElement, category) {
         }
     }
 
-    // Enviar POST a la API
-    fetch('http://localhost:5000/api/messages/add_external', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+    // Enviar datos al Service Worker para su publicación
+    chrome.runtime.sendMessage({
+        action: "classifyMessage",
+        data: {
             text: text,
             sender: sender,
             category: category,
             timestamp: timestamp
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
+        }
+    }, (response) => {
+        if (response && response.success && response.data.success) {
             // Mostrar retroalimentación visual exitosa directamente en el botón de la burbuja
             if (bubbleElement) {
                 showSuccessIndicatorInBubble(bubbleElement);
             } else {
-                alert(`¡Clasificado con éxito en "${category}"!`);
+                alert(`¡Clasificado en "${category}" con éxito!`);
             }
         } else {
-            alert('Error al clasificar: ' + data.error);
+            const errMsg = response ? response.error || (response.data && response.data.error) : 'Error de conexión';
+            alert('Error al clasificar: ' + errMsg);
         }
-    })
-    .catch(err => {
-        console.error('Error de red al clasificar en la extensión:', err);
-        alert('Error: No se pudo conectar con el servidor local en http://localhost:5000. Asegúrate de que el servidor Flask esté corriendo.');
     });
 }
 
