@@ -1,44 +1,159 @@
 let floatBtn = null;
 let popupMenu = null;
 
-// Escuchar evento mouseup para detectar selección de texto
+// Inicializar observador para inyectar botones en las burbujas de chat
+initBubbleObserver();
+
+// Escuchar evento mouseup para detectar selección de texto (Método alternativo)
 document.addEventListener('mouseup', handleTextSelection);
 
+// Función para inicializar MutationObserver y buscar burbujas de mensajes constantemente
+function initBubbleObserver() {
+    // Buscar e inyectar en burbujas ya presentes
+    injectClassifyButtons();
+
+    // Crear el observador para inyectar en mensajes nuevos conforme se hace scroll
+    const observer = new MutationObserver((mutations) => {
+        let shouldInject = false;
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length > 0) {
+                shouldInject = true;
+                break;
+            }
+        }
+        if (shouldInject) {
+            injectClassifyButtons();
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+}
+
+// Inyectar el botón de etiqueta en cada burbuja de chat
+function injectClassifyButtons() {
+    // Buscar burbujas de mensaje (in/out) o celdas de fila de mensajes en WhatsApp Web
+    const bubbles = document.querySelectorAll('div.message-in, div.message-out, div[role="row"]');
+    
+    bubbles.forEach(bubble => {
+        // En WhatsApp Web, a veces role="row" contiene la burbuja real adentro.
+        // Buscamos la burbuja real interna si es role="row"
+        let targetBubble = bubble;
+        if (bubble.getAttribute('role') === 'row') {
+            const innerBubble = bubble.querySelector('.message-in, .message-out');
+            if (innerBubble) {
+                targetBubble = innerBubble;
+            } else {
+                return; // Si no hay burbuja interna en este row, ignorar
+            }
+        }
+
+        // Asegurarse de no inyectar dos veces
+        if (targetBubble.querySelector('.wa-bubble-classify-btn')) return;
+
+        // Asegurar que la burbuja tenga posición relativa para alinear nuestro botón
+        targetBubble.style.position = 'relative';
+
+        const btn = document.createElement('button');
+        btn.className = 'wa-bubble-classify-btn';
+        btn.innerHTML = '🏷️';
+        btn.title = 'Clasificar este mensaje';
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const rect = btn.getBoundingClientRect();
+            const messageText = extractTextFromBubble(targetBubble);
+            
+            if (!messageText) {
+                console.warn('No se pudo extraer texto de esta burbuja.');
+                return;
+            }
+
+            // Mostrar el selector de categorías debajo del botón
+            showCategoriesPopup(messageText, rect, targetBubble);
+        });
+
+        targetBubble.appendChild(btn);
+    });
+}
+
+// Extraer el texto de la burbuja (removiendo elementos HTML y hora final de WhatsApp)
+function extractTextFromBubble(bubble) {
+    let text = "";
+    
+    // 1. Intentar con selectable-text (el texto oficial en WhatsApp)
+    const selectable = bubble.querySelector('.selectable-text');
+    if (selectable) {
+        // WhatsApp a veces guarda el texto limpio en span.selectable-text
+        text = selectable.innerText || selectable.textContent;
+    }
+    
+    // 2. Si no, buscar div.copyable-text
+    if (!text) {
+        const copyable = bubble.querySelector('.copyable-text');
+        if (copyable) {
+            text = copyable.innerText || copyable.textContent;
+        }
+    }
+
+    // 3. Fallback: extraer el texto crudo del contenedor y remover la hora/check de lectura
+    if (!text) {
+        text = bubble.innerText || bubble.textContent;
+    }
+
+    // Limpieza final
+    text = text.trim();
+    
+    // Quitar la hora y estado que WhatsApp añade al final del texto visible de la burbuja
+    // Ejemplo: "Hola cómo estás 11:04 a.m. ✓✓" -> "Hola cómo estás"
+    text = text.replace(/\d{1,2}:\d{2}\s*(?:a\.\sm\.|p\.\sm\.|AM|PM)?\s*✓*$/i, '').trim();
+
+    return text;
+}
+
+// Escuchar evento mouseup para detectar selección de texto (Fallback en caso de que hover falle)
 function handleTextSelection(e) {
-    // Pequeño retardo para dar tiempo a que se dibuje la selección
     setTimeout(() => {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
 
-        // Eliminar botones y popups previos si existen
+        // Limpiar widgets activos
         removeFloatBtn();
-        removePopup();
-
-        if (selectedText.length === 0) return;
-
-        // Evitar activar el botón si el clic fue dentro de la misma interfaz flotante
+        
+        // No borrar el popup si el usuario hace clic dentro de él
         if (e.target.closest('.wa-classifier-btn') || e.target.closest('.wa-classifier-popup')) {
             return;
         }
+        removePopup();
+
+        if (selectedText.length === 0) return;
 
         try {
             const range = selection.getRangeAt(0);
             const rect = range.getBoundingClientRect();
 
-            // Crear el botón flotante
             floatBtn = document.createElement('button');
             floatBtn.className = 'wa-classifier-btn';
             floatBtn.innerHTML = '🏷️';
             
-            // Posicionar el botón flotante justo encima de la selección
             floatBtn.style.top = `${window.scrollY + rect.top - 42}px`;
             floatBtn.style.left = `${window.scrollX + rect.left + (rect.width / 2) - 18}px`;
 
-            // Escuchar clic en el botón
             floatBtn.addEventListener('click', (btnEvent) => {
                 btnEvent.stopPropagation();
                 btnEvent.preventDefault();
-                showCategoriesPopup(selectedText, range, rect);
+                
+                // Encontrar burbuja padre para contextualizar
+                let parentBubble = range.startContainer.parentElement;
+                while (parentBubble && parentBubble !== document.body) {
+                    if (parentBubble.classList.contains('message-in') || parentBubble.classList.contains('message-out')) {
+                        break;
+                    }
+                    parentBubble = parentBubble.parentElement;
+                }
+                
+                showCategoriesPopup(selectedText, rect, parentBubble);
             });
 
             document.body.appendChild(floatBtn);
@@ -48,7 +163,6 @@ function handleTextSelection(e) {
     }, 50);
 }
 
-// Remover botón flotante
 function removeFloatBtn() {
     if (floatBtn) {
         floatBtn.remove();
@@ -56,7 +170,6 @@ function removeFloatBtn() {
     }
 }
 
-// Remover popup de categorías
 function removePopup() {
     if (popupMenu) {
         popupMenu.remove();
@@ -64,9 +177,9 @@ function removePopup() {
     }
 }
 
-// Escuchar clics en el documento para limpiar la interfaz flotante si el usuario hace clic fuera
+// Limpiar menús si el usuario hace clic fuera de la extensión
 document.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.wa-classifier-btn') || e.target.closest('.wa-classifier-popup')) {
+    if (e.target.closest('.wa-classifier-btn') || e.target.closest('.wa-classifier-popup') || e.target.closest('.wa-bubble-classify-btn')) {
         return;
     }
     removeFloatBtn();
@@ -74,21 +187,26 @@ document.addEventListener('mousedown', (e) => {
 });
 
 // Mostrar el popup con el listado de categorías cargadas del servidor
-function showCategoriesPopup(textToClassify, range, rect) {
-    removeFloatBtn(); // Ocultar el botón para mostrar el popup
+function showCategoriesPopup(textToClassify, rect, bubbleElement) {
+    removeFloatBtn();
     removePopup();
 
     popupMenu = document.createElement('div');
     popupMenu.className = 'wa-classifier-popup';
-    popupMenu.style.top = `${window.scrollY + rect.top - 120}px`; // Un poco más arriba
+    popupMenu.style.top = `${window.scrollY + rect.top - 120}px`;
     popupMenu.style.left = `${window.scrollX + rect.left + (rect.width / 2) - 100}px`;
+
+    // Evitar que el popup se dibuje fuera de la pantalla (limite superior)
+    if (parseFloat(popupMenu.style.top) < 10) {
+        popupMenu.style.top = `${window.scrollY + rect.bottom + 10}px`;
+    }
 
     const title = document.createElement('div');
     title.className = 'wa-classifier-title';
     title.textContent = 'Clasificar mensaje';
     popupMenu.appendChild(title);
 
-    // Cargar categorías dinámicas del servidor Flask local
+    // Cargar categorías dinámicas de Flask
     fetch('http://localhost:5000/api/categories')
         .then(res => res.json())
         .then(categories => {
@@ -98,7 +216,7 @@ function showCategoriesPopup(textToClassify, range, rect) {
                 opt.textContent = cat;
                 opt.addEventListener('click', (optEvent) => {
                     optEvent.stopPropagation();
-                    classifyMessage(textToClassify, range, cat);
+                    classifyMessage(textToClassify, bubbleElement, cat);
                 });
                 popupMenu.appendChild(opt);
             });
@@ -109,7 +227,7 @@ function showCategoriesPopup(textToClassify, range, rect) {
             errDiv.style.color = '#ef4444';
             errDiv.style.padding = '8px';
             errDiv.style.fontSize = '12px';
-            errDiv.textContent = 'Servidor Flask desconectado.';
+            errDiv.textContent = 'Servidor Flask apagado o inaccesible (http://localhost:5000).';
             popupMenu.appendChild(errDiv);
         });
 
@@ -117,35 +235,35 @@ function showCategoriesPopup(textToClassify, range, rect) {
 }
 
 // Enviar la clasificación al servidor Flask local
-function classifyMessage(text, range, category) {
+function classifyMessage(text, bubbleElement, category) {
     removePopup();
 
-    // Intentar encontrar el remitente y la marca de tiempo de forma dinámica en WhatsApp Web
     let sender = 'Yo (Tú)';
     let timestamp = '';
 
-    try {
-        let parent = range.startContainer.parentElement;
-        while (parent && parent !== document.body) {
-            if (parent.hasAttribute('data-id') || parent.classList.contains('message-in') || parent.classList.contains('message-out')) {
-                const copyable = parent.querySelector('div.copyable-text');
-                if (copyable) {
-                    const preText = copyable.getAttribute('data-pre-plain-text');
-                    if (preText) {
-                        const clean = preText.replace(/^\[|\]\s*$/g, '');
-                        const parts = clean.split('] ');
-                        if (parts.length >= 2) {
-                            timestamp = parts[0];
-                            sender = parts[1].replace(':', '').trim();
-                        }
+    // Extraer metadata si tenemos la burbuja asociada
+    if (bubbleElement) {
+        try {
+            const copyable = bubbleElement.querySelector('div.copyable-text');
+            if (copyable) {
+                const preText = copyable.getAttribute('data-pre-plain-text');
+                if (preText) {
+                    const clean = preText.replace(/^\[|\]\s*$/g, '');
+                    const parts = clean.split('] ');
+                    if (parts.length >= 2) {
+                        timestamp = parts[0];
+                        sender = parts[1].replace(':', '').trim();
                     }
                 }
-                break;
+            } else {
+                // Verificar si es un mensaje recibido (in) o enviado (out) para definir remitente
+                if (bubbleElement.classList.contains('message-in')) {
+                    sender = 'RM'; // Remitente por defecto
+                }
             }
-            parent = parent.parentElement;
+        } catch (err) {
+            console.warn('Error al extraer metadata de la burbuja:', err);
         }
-    } catch (err) {
-        console.warn('No se pudo extraer metadata del mensaje en la extensión:', err);
     }
 
     // Enviar POST a la API
@@ -162,46 +280,37 @@ function classifyMessage(text, range, category) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            // Mostrar retroalimentación visual exitosa
-            showSuccessIndicator(range);
+            // Mostrar retroalimentación visual exitosa directamente en el botón de la burbuja
+            if (bubbleElement) {
+                showSuccessIndicatorInBubble(bubbleElement);
+            } else {
+                alert(`¡Clasificado con éxito en "${category}"!`);
+            }
         } else {
             alert('Error al clasificar: ' + data.error);
         }
     })
     .catch(err => {
         console.error('Error de red al clasificar en la extensión:', err);
-        alert('Error: No se pudo conectar con la aplicación local en http://localhost:5000. Asegúrate de que el servidor Flask esté corriendo.');
+        alert('Error: No se pudo conectar con el servidor local en http://localhost:5000. Asegúrate de que el servidor Flask esté corriendo.');
     });
 }
 
-// Dibujar un pequeño check verde temporal sobre el texto clasificado con éxito
-function showSuccessIndicator(range) {
-    try {
-        const rect = range.getBoundingClientRect();
-        const check = document.createElement('div');
-        check.style.position = 'absolute';
-        check.style.zIndex = '100002';
-        check.style.top = `${window.scrollY + rect.top - 20}px`;
-        check.style.left = `${window.scrollX + rect.left + (rect.width / 2) - 12}px`;
-        check.style.background = '#10b981';
-        check.style.color = 'white';
-        check.style.borderRadius = '50%';
-        check.style.width = '24px';
-        check.style.height = '24px';
-        check.style.display = 'flex';
-        check.style.justifyContent = 'center';
-        check.style.alignItems = 'center';
-        check.style.fontSize = '12px';
-        check.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.4)';
-        check.innerHTML = '✓';
-        
-        document.body.appendChild(check);
-        setTimeout(() => {
-            check.style.transition = 'opacity 0.3s';
-            check.style.opacity = '0';
-            setTimeout(() => check.remove(), 300);
-        }, 1500);
-    } catch (err) {
-        console.error('Error al mostrar indicador de éxito:', err);
-    }
+// Dibujar un check verde temporal sobre el botón de la burbuja clasificada
+function showSuccessIndicatorInBubble(bubbleElement) {
+    const btn = bubbleElement.querySelector('.wa-bubble-classify-btn');
+    if (!btn) return;
+
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '✓';
+    btn.style.background = '#10b981';
+    btn.style.borderColor = '#10b981';
+    btn.style.opacity = '1';
+
+    setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.opacity = '';
+    }, 2000);
 }
