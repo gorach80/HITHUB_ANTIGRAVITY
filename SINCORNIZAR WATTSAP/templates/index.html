@@ -102,6 +102,14 @@
                     <!-- Las categorías se cargarán aquí dinámicamente -->
                 </div>
 
+                <!-- Bulk delete bar -->
+                <div class="bulk-action-bar" id="bulk-action-bar" style="display:none;">
+                    <span id="bulk-count-label"><i class="fa-solid fa-circle-exclamation"></i> <span id="bulk-count">0</span> mensajes visibles</span>
+                    <button class="btn-delete-bulk" id="btn-delete-bulk" onclick="deleteBulk()">
+                        <i class="fa-solid fa-trash-can"></i> Borrar todos estos mensajes
+                    </button>
+                </div>
+
                 <!-- Messages Feed -->
                 <div class="messages-feed" id="messages-container">
                     <!-- Loading state -->
@@ -176,6 +184,64 @@
             buttons.forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
             filterMessages(category);
+            updateBulkBar();
+        }
+
+        // Show/hide bulk delete bar with message count
+        function updateBulkBar() {
+            const bar = document.getElementById('bulk-action-bar');
+            const countEl = document.getElementById('bulk-count');
+            const filtered = activeCategory === 'all'
+                ? messagesData
+                : messagesData.filter(m => m.category === activeCategory);
+            countEl.textContent = filtered.length;
+            bar.style.display = filtered.length > 0 ? 'flex' : 'none';
+        }
+
+        // Bulk delete all visible messages in current filter
+        function deleteBulk() {
+            const label = activeCategory === 'all' ? 'TODOS los mensajes' : `todos los mensajes de "${activeCategory}"`;
+            const count = document.getElementById('bulk-count').textContent;
+            if (!confirm(`¿Estás segura de que deseas eliminar ${count} mensajes (${label})? Esta acción no se puede deshacer.`)) return;
+
+            const btn = document.getElementById('btn-delete-bulk');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Eliminando...';
+
+            fetch('/api/messages/delete-bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ category: activeCategory })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Borrar todos estos mensajes';
+                if (data.success) {
+                    if (activeCategory === 'all') {
+                        messagesData = [];
+                    } else {
+                        messagesData = messagesData.filter(m => m.category !== activeCategory);
+                    }
+                    filterMessages(activeCategory);
+                    updateChart(messagesData);
+                    document.getElementById('stat-total').textContent = messagesData.length;
+
+                    const gitStatus = document.getElementById('stat-git-status');
+                    gitStatus.textContent = data.git_backup;
+                    gitStatus.className = data.git_backup === 'Completado' ? 'status-green' : 'status-red';
+
+                    document.getElementById('bulk-action-bar').style.display = 'none';
+                    showToast(`Se eliminaron ${data.deleted} mensajes correctamente`, 'success');
+                } else {
+                    showToast('Error al eliminar: ' + data.error, 'error');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Borrar todos estos mensajes';
+                showToast('Error de red al eliminar', 'error');
+            });
         }
 
         // Create Custom Category
@@ -305,6 +371,7 @@
                     // Render chart and feed
                     updateChart(messagesData);
                     filterMessages('all');
+                    updateBulkBar();
                 })
                 .catch(err => {
                     console.error('Error fetching data:', err);

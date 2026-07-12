@@ -511,6 +511,41 @@ def delete_message():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/messages/delete-bulk', methods=['POST'])
+def delete_bulk():
+    """Elimina todos los mensajes de una categoría o todos si category='all'."""
+    try:
+        req = request.get_json()
+        category = req.get('category', '').strip()
+        if not category:
+            return jsonify({"success": False, "error": "Categoría requerida"}), 400
+
+        data = load_messages_data()
+        messages = data.get("messages", [])
+        original_count = len(messages)
+
+        if category == 'all':
+            messages = []
+        else:
+            messages = [m for m in messages if m.get("category") != category]
+
+        deleted = original_count - len(messages)
+        data["messages"] = messages
+        data["last_update"] = datetime.datetime.now().strftime("%d/%m/%Y, %I:%M %p")
+
+        with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+        git_status = run_git_backup()
+        return jsonify({
+            "success": True,
+            "deleted": deleted,
+            "remaining": len(messages),
+            "git_backup": git_status
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == '__main__':
     # Iniciar el hilo del planificador automático
     scheduler_thread = threading.Thread(target=scheduler_worker, daemon=True)
