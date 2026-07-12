@@ -13,7 +13,7 @@ function initBubbleObserver() {
     // Buscar e inyectar en burbujas ya presentes
     injectClassifyButtons();
 
-    // Crear el observador para inyectar en mensajes nuevos conforme se hace scroll o llegan mensajes
+    // Crear el observador para inyectar en mensajes nuevos conforme se hace scroll
     const observer = new MutationObserver((mutations) => {
         let shouldInject = false;
         for (const mutation of mutations) {
@@ -30,18 +30,48 @@ function initBubbleObserver() {
     observer.observe(document.body, { childList: true, subtree: true });
 }
 
-// Inyectar el botón de etiqueta en cada burbuja de chat usando el selector data-id (100% robusto)
+// Buscar burbujas usando múltiples selectores de respaldo para compatibilidad absoluta
+function findMessageBubbles() {
+    let elements = [];
+    
+    // 1. Buscar por atributo data-id (que contiene el ID del mensaje en WhatsApp Web)
+    const elementsWithId = document.querySelectorAll('div[data-id]');
+    elementsWithId.forEach(el => {
+        const dataId = el.getAttribute('data-id');
+        // Validar que sea un ID de mensaje estándar (suele tener guiones, arrobas o guiones bajos)
+        if (dataId && (dataId.includes('_') || dataId.includes('@'))) {
+            elements.push(el);
+        }
+    });
+
+    // 2. Si no encuentra ninguno, buscar por las clases clásicas
+    if (elements.length === 0) {
+        const classic = document.querySelectorAll('.message-in, .message-out');
+        classic.forEach(el => elements.push(el));
+    }
+
+    // 3. Fallback final: buscar cualquier div con clase que contenga la palabra "message"
+    if (elements.length === 0) {
+        const wildcard = document.querySelectorAll('div[class*="message-"]');
+        wildcard.forEach(el => elements.push(el));
+    }
+
+    return elements;
+}
+
+// Inyectar el botón de etiqueta en cada burbuja de chat
 function injectClassifyButtons() {
-    // WhatsApp Web asigna un atributo data-id único a cada burbuja de mensaje
-    const bubbles = document.querySelectorAll('div[data-id]');
+    const bubbles = findMessageBubbles();
     
     bubbles.forEach(bubble => {
-        const dataId = bubble.getAttribute('data-id');
-        // Validar que sea una burbuja de mensaje estándar (suele empezar con true_ o false_)
-        if (!dataId || (!dataId.startsWith('true_') && !dataId.startsWith('false_'))) return;
-
         // Asegurarse de no inyectar dos veces
         if (bubble.querySelector('.wa-bubble-classify-btn')) return;
+
+        // Validar que sea una burbuja con contenido real (texto/imagen/etc.)
+        if (!bubble.innerText || bubble.innerText.trim().length === 0) return;
+
+        // Evitar inyectar en paneles grandes del chat
+        if (bubble.offsetWidth > 600 || bubble.offsetHeight > 400) return;
 
         // Asegurar que la burbuja tenga posición relativa para alinear nuestro botón
         bubble.style.position = 'relative';
@@ -50,6 +80,22 @@ function injectClassifyButtons() {
         btn.className = 'wa-bubble-classify-btn';
         btn.innerHTML = '🏷️';
         btn.title = 'Clasificar este mensaje';
+
+        // Estilos explícitos en línea para asegurar máxima prioridad sobre el CSS de WhatsApp
+        btn.style.position = 'absolute';
+        btn.style.top = '6px';
+        btn.style.right = '32px';
+        btn.style.zIndex = '9999';
+        btn.style.opacity = '0'; // Oculto por defecto
+        btn.style.transition = 'opacity 0.2s, background-0.2s, transform 0.2s';
+
+        // Agregar listeners en JS para mostrar/ocultar el botón (Independiente de las clases CSS)
+        bubble.addEventListener('mouseenter', () => {
+            btn.style.opacity = '1';
+        });
+        bubble.addEventListener('mouseleave', () => {
+            btn.style.opacity = '0';
+        });
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -63,7 +109,6 @@ function injectClassifyButtons() {
                 return;
             }
 
-            // Mostrar el selector de categorías debajo del botón
             showCategoriesPopup(messageText, rect, bubble);
         });
 
@@ -71,17 +116,15 @@ function injectClassifyButtons() {
     });
 }
 
-// Extraer el texto de la burbuja (removiendo elementos HTML y hora final de WhatsApp)
+// Extraer el texto de la burbuja
 function extractTextFromBubble(bubble) {
     let text = "";
     
-    // 1. Intentar con selectable-text (el texto oficial en WhatsApp)
     const selectable = bubble.querySelector('.selectable-text');
     if (selectable) {
         text = selectable.innerText || selectable.textContent;
     }
     
-    // 2. Si no, buscar div.copyable-text o cualquier contenedor de texto
     if (!text) {
         const copyable = bubble.querySelector('.copyable-text');
         if (copyable) {
@@ -89,15 +132,12 @@ function extractTextFromBubble(bubble) {
         }
     }
 
-    // 3. Fallback: extraer el texto crudo del contenedor y remover la hora/check de lectura
     if (!text) {
         text = bubble.innerText || bubble.textContent;
     }
 
-    // Limpieza final
     text = text.trim();
-    
-    // Quitar la hora y estado que WhatsApp añade al final del texto visible de la burbuja
+    // Quitar la hora y estado que WhatsApp añade al final
     text = text.replace(/\d{1,2}:\d{2}\s*(?:a\.\sm\.|p\.\sm\.|AM|PM)?\s*✓*$/i, '').trim();
 
     return text;
@@ -109,10 +149,8 @@ function handleTextSelection(e) {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
 
-        // Limpiar widgets activos
         removeFloatBtn();
         
-        // No borrar el popup si el usuario hace clic dentro de él
         if (e.target.closest('.wa-classifier-btn') || e.target.closest('.wa-classifier-popup')) {
             return;
         }
@@ -135,7 +173,6 @@ function handleTextSelection(e) {
                 btnEvent.stopPropagation();
                 btnEvent.preventDefault();
                 
-                // Encontrar burbuja padre para contextualizar
                 let parentBubble = range.startContainer.parentElement;
                 while (parentBubble && parentBubble !== document.body) {
                     if (parentBubble.hasAttribute('data-id')) {
@@ -161,7 +198,6 @@ function removeFloatBtn() {
     }
 }
 
-// Remover popup de categorías
 function removePopup() {
     if (popupMenu) {
         popupMenu.remove();
@@ -169,7 +205,6 @@ function removePopup() {
     }
 }
 
-// Limpiar menús si el usuario hace clic fuera de la extensión
 document.addEventListener('mousedown', (e) => {
     if (e.target.closest('.wa-classifier-btn') || e.target.closest('.wa-classifier-popup') || e.target.closest('.wa-bubble-classify-btn')) {
         return;
@@ -188,7 +223,6 @@ function showCategoriesPopup(textToClassify, rect, bubbleElement) {
     popupMenu.style.top = `${window.scrollY + rect.top - 120}px`;
     popupMenu.style.left = `${window.scrollX + rect.left + (rect.width / 2) - 100}px`;
 
-    // Evitar que el popup se dibuje fuera de la pantalla (limite superior)
     if (parseFloat(popupMenu.style.top) < 10) {
         popupMenu.style.top = `${window.scrollY + rect.bottom + 10}px`;
     }
@@ -198,7 +232,7 @@ function showCategoriesPopup(textToClassify, rect, bubbleElement) {
     title.textContent = 'Clasificar mensaje';
     popupMenu.appendChild(title);
 
-    // Cargar categorías dinámicas vía Service Worker de la extensión (Evita CORS/CSP de WhatsApp)
+    // Cargar categorías dinámicas vía Service Worker de la extensión
     chrome.runtime.sendMessage({ action: "fetchCategories" }, (response) => {
         if (response && response.success) {
             response.categories.forEach(cat => {
@@ -232,7 +266,6 @@ function classifyMessage(text, bubbleElement, category) {
     let sender = 'Yo (Tú)';
     let timestamp = '';
 
-    // Extraer metadata si tenemos la burbuja asociada
     if (bubbleElement) {
         try {
             const copyable = bubbleElement.querySelector('div.copyable-text');
@@ -247,7 +280,6 @@ function classifyMessage(text, bubbleElement, category) {
                     }
                 }
             } else {
-                // Si la burbuja tiene la clase message-in, es un mensaje recibido
                 if (bubbleElement.classList.contains('message-in')) {
                     sender = 'RM';
                 }
@@ -257,7 +289,6 @@ function classifyMessage(text, bubbleElement, category) {
         }
     }
 
-    // Enviar datos al Service Worker para su publicación
     chrome.runtime.sendMessage({
         action: "classifyMessage",
         data: {
@@ -268,7 +299,6 @@ function classifyMessage(text, bubbleElement, category) {
         }
     }, (response) => {
         if (response && response.success && response.data.success) {
-            // Mostrar retroalimentación visual exitosa directamente en el botón de la burbuja
             if (bubbleElement) {
                 showSuccessIndicatorInBubble(bubbleElement);
             } else {
@@ -281,7 +311,6 @@ function classifyMessage(text, bubbleElement, category) {
     });
 }
 
-// Dibujar un check verde temporal sobre el botón de la burbuja clasificada
 function showSuccessIndicatorInBubble(bubbleElement) {
     const btn = bubbleElement.querySelector('.wa-bubble-classify-btn');
     if (!btn) return;
