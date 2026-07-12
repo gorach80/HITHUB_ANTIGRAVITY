@@ -248,12 +248,7 @@
                     filterMessages(activeCategory);
                     updateChart(messagesData);
                     document.getElementById('stat-total').textContent = messagesData.length;
-
-                    const gitStatus = document.getElementById('stat-git-status');
-                    gitStatus.textContent = data.git_backup;
-                    gitStatus.className = data.git_backup === 'Completado' ? 'status-green' : 'status-red';
-
-                    document.getElementById('bulk-action-bar').style.display = 'none';
+                    renderFilterButtons(); // Actualiza conteo en pestaña
                     showToast(`Se eliminaron ${data.deleted} mensajes correctamente`, 'success');
                 } else {
                     showToast('Error al eliminar: ' + data.error, 'error');
@@ -263,6 +258,57 @@
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Borrar todos estos mensajes';
                 showToast('Error de red al eliminar', 'error');
+            });
+        }
+
+        // Delete single message
+        function deleteIndividualMessage(data_id, cardElement) {
+            if (!confirm('¿Estás segura de que deseas borrar este mensaje?')) return;
+            
+            // Animación de salida (desvanece y colapsa)
+            cardElement.style.transition = 'all 0.4s ease';
+            cardElement.style.opacity = '0';
+            cardElement.style.transform = 'scale(0.9)';
+            
+            fetch('/api/messages/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data_id: data_id })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    messagesData = messagesData.filter(m => m.data_id !== data_id);
+                    updateChart(messagesData);
+                    document.getElementById('stat-total').textContent = messagesData.length;
+                    renderFilterButtons(); // Update badges
+                    updateBulkBar();       // Update bulk count
+                    
+                    setTimeout(() => {
+                        cardElement.style.height = '0px';
+                        cardElement.style.padding = '0px';
+                        cardElement.style.margin = '0px';
+                        setTimeout(() => cardElement.remove(), 300);
+                        
+                        // Show empty state if needed
+                        const container = document.getElementById('messages-container');
+                        if (container.querySelectorAll('.message-card').length === 0 || 
+                            (container.querySelectorAll('.message-card').length === 1 && container.contains(cardElement))) {
+                            filterMessages(activeCategory); 
+                        }
+                    }, 400);
+                    
+                    showToast('Mensaje eliminado', 'success');
+                } else {
+                    cardElement.style.opacity = '1';
+                    cardElement.style.transform = 'scale(1)';
+                    showToast('Error al eliminar: ' + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                cardElement.style.opacity = '1';
+                cardElement.style.transform = 'scale(1)';
+                showToast('Error de conexión', 'error');
             });
         }
 
@@ -443,8 +489,13 @@
 
                 card.innerHTML = `
                     <div class="message-meta">
-                        <span class="sender"><i class="fa-solid fa-user"></i> ${msg.sender}</span>
-                        <span class="time"><i class="fa-solid fa-clock"></i> ${msg.timestamp || 'Sin fecha'}</span>
+                        <div>
+                            <span class="sender"><i class="fa-solid fa-user"></i> ${msg.sender}</span>
+                            <span class="time"><i class="fa-solid fa-clock"></i> ${msg.timestamp || 'Sin fecha'}</span>
+                        </div>
+                        <button class="btn-delete-msg" onclick="deleteIndividualMessage('${msg.data_id}', this.closest('.message-card'))" title="Borrar mensaje">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
                     <div class="message-body">${formattedText}</div>
                     ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}

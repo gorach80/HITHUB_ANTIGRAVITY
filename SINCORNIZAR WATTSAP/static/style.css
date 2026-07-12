@@ -862,3 +862,24 @@ body {
     0%, 100% { transform: scale(1); opacity: 1; }
     50%       { transform: scale(1.12); opacity: 0.85; }
 }
+
+/* ── Botón Borrar Mensaje Individual ─────────── */
+.btn-delete-msg {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete-msg:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
