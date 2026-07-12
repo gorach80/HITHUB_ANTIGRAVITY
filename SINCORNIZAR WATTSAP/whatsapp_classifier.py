@@ -176,10 +176,11 @@ def run_whatsapp_update(headless=True):
             except Exception:
                 page.mouse.click(600, 400)
                 
-            print("Cargando historial completo de mensajes hacia arriba...")
+            print("Cargando historial de mensajes hacia arriba...")
             last_height = 0
             no_change_count = 0
-            for scroll_step in range(120):
+            # Reducido a un máximo de 15 pasos de scroll para evitar demoras innecesarias (historial antiguo ya está en messages.json)
+            for scroll_step in range(15):
                 # Desplazar al tope superior
                 page.evaluate('''() => {
                     const pane = document.querySelector('div[data-testid="conversation-panel-wrapper"]');
@@ -218,74 +219,97 @@ def run_whatsapp_update(headless=True):
                 
                 if current_height == last_height:
                     no_change_count += 1
-                    if no_change_count >= 5:
-                        print("Se alcanzó el inicio del historial de mensajes.")
+                    if no_change_count >= 4:
+                        print("Se alcanzó el inicio del historial de mensajes visible.")
                         break
                 else:
                     no_change_count = 0
                     last_height = current_height
                     
-            time.sleep(2)
+            time.sleep(1.5)
             
-            # Extraer mensajes
-            message_elements = page.locator('div[data-id]')
-            count = message_elements.count()
+            # Extraer mensajes de forma instantánea usando Javascript en el contexto de la página
+            print("Extrayendo mensajes de la conversación...")
+            extracted = page.evaluate('''() => {
+                const messages = [];
+                const msgElements = document.querySelectorAll('div[data-id]');
+                msgElements.forEach(msgElem => {
+                    const dataId = msgElem.getAttribute('data-id');
+                    if (!dataId || (dataId.startsWith('album-') && msgElem.innerText.trim() === "")) {
+                        return;
+                    }
+                    
+                    // Extraer texto
+                    let text = "";
+                    const selectable = msgElem.querySelector('span.selectable-text');
+                    if (selectable) {
+                        text = selectable.innerText;
+                    }
+                    
+                    // Extraer metadata
+                    let timestamp = "";
+                    let sender = "";
+                    const copyable = msgElem.querySelector('div.copyable-text');
+                    if (copyable) {
+                        const preText = copyable.getAttribute('data-pre-plain-text');
+                        if (preText) {
+                            try {
+                                const clean = preText.replace(/^\[|\]\s*$/g, '');
+                                const parts = clean.split('] ');
+                                if (parts.length >= 2) {
+                                    timestamp = parts[0];
+                                    sender = parts[1].replace(':', '').trim();
+                                } else {
+                                    const firstRBracket = clean.indexOf(']');
+                                    if (firstRBracket !== -1) {
+                                        timestamp = clean.substring(0, firstRBracket);
+                                        sender = clean.substring(firstRBracket + 1).replace(':', '').trim();
+                                    } else {
+                                        timestamp = clean;
+                                    }
+                                }
+                            } catch (e) {
+                                timestamp = preText;
+                            }
+                        }
+                    }
+                    
+                    if (!text) {
+                        const rawText = msgElem.innerText || "";
+                        const lines = rawText.split('\\n').map(l => l.trim()).filter(Boolean);
+                        if (lines.length > 0) {
+                            if (lines.length > 1 && lines[lines.length - 1].includes(':') && lines[lines.length - 1].length <= 8) {
+                                text = lines.slice(0, -1).join('\\n');
+                            } else {
+                                text = lines.join('\\n');
+                            }
+                        }
+                    }
+                    
+                    if (!text || text.trim() === "") {
+                        if (msgElem.querySelector('img')) {
+                            text = "[Imagen o Sticker]";
+                        } else if (msgElem.querySelector('audio') || msgElem.querySelector('[data-testid="audio-play"]')) {
+                            text = "[Mensaje de Voz o Audio]";
+                        } else {
+                            text = "[Mensaje no de texto o Multimedia]";
+                        }
+                    }
+                    
+                    messages.push({
+                        data_id: dataId,
+                        sender: sender || "Yo (Tú)",
+                        timestamp: timestamp,
+                        text: text.trim()
+                    });
+                });
+                return messages;
+            }''')
             
-            for i in range(count):
-                try:
-                    msg_elem = message_elements.nth(i)
-                    data_id = msg_elem.get_attribute('data-id')
-                    
-                    if not data_id or data_id.startswith('album-') and msg_elem.inner_text().strip() == "":
-                        continue
-                    
-                    # Extraer texto de span.selectable-text
-                    selectable = msg_elem.locator('span.selectable-text').first
-                    text = ""
-                    if selectable.is_visible(timeout=200):
-                        text = selectable.inner_text()
-                    
-                    # Extraer metadata de div.copyable-text
-                    copyable = msg_elem.locator('div.copyable-text').first
-                    timestamp = ""
-                    sender = ""
-                    
-                    if copyable.is_visible(timeout=200):
-                        pre_text = copyable.get_attribute('data-pre-plain-text')
-                        if pre_text:
-                            try:
-                                parts = pre_text.strip('[]').split('] ')
-                                timestamp = parts[0]
-                                sender = parts[1].replace(':', '').strip()
-                            except Exception:
-                                timestamp = pre_text
-                                
-                    if not text:
-                        raw_text = msg_elem.inner_text()
-                        lines = [l.strip() for l in raw_text.split('\n') if l.strip()]
-                        if lines:
-                            if len(lines) > 1 and (':' in lines[-1] and len(lines[-1]) <= 8):
-                                text = "\n".join(lines[:-1])
-                            else:
-                                text = "\n".join(lines)
-                                
-                    if not text or text.strip() == "":
-                        if msg_elem.locator('img').count() > 0:
-                            text = "[Imagen o Sticker]"
-                        elif msg_elem.locator('audio').count() > 0 or msg_elem.locator('[data-testid="audio-play"]').count() > 0:
-                            text = "[Mensaje de Voz o Audio]"
-                        else:
-                            text = "[Mensaje no de texto o Multimedia]"
-                    
-                    if not any(m['data_id'] == data_id for m in extracted_messages):
-                        extracted_messages.append({
-                            "data_id": data_id,
-                            "sender": sender if sender else "Yo (Tú)",
-                            "timestamp": timestamp,
-                            "text": text.strip()
-                        })
-                except Exception:
-                    pass
+            # Filtrar duplicados locales antes de retornar
+            for m in extracted:
+                if not any(x['data_id'] == m['data_id'] for x in extracted_messages):
+                    extracted_messages.append(m)
                     
             context.close()
             print(f"Extracción completada. {len(extracted_messages)} mensajes obtenidos.")
