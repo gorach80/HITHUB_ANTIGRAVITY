@@ -417,12 +417,23 @@ body {
     gap: 5px;
 }
 
+.message-content-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .message-body {
     font-size: 0.95rem;
     line-height: 1.5;
     color: var(--text-primary);
     word-break: break-word;
+    flex: 1;
 }
+
 
 /* Chat/TikTok Link Styling */
 .chat-link {
@@ -602,6 +613,15 @@ body {
         gap: 5px;
     }
 
+    .message-content-wrapper {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .og-preview-container {
+        width: 100%;
+    }
+
     .filter-bar {
         overflow-x: auto;
         white-space: nowrap;
@@ -699,9 +719,12 @@ body {
 
 /* ── Open Graph Link Preview ────────────────── */
 .og-preview-container {
-    margin: 10px 0 4px 0;
+    margin: 0;
     border-radius: 12px;
     overflow: hidden;
+    width: 260px;
+    max-width: 100%;
+    flex-shrink: 0;
 }
 
 .og-loading {

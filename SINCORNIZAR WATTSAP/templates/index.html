@@ -497,8 +497,10 @@
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
-                    <div class="message-body">${formattedText}</div>
-                    ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
+                    <div class="message-content-wrapper">
+                        <div class="message-body">${formattedText}</div>
+                        ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
+                    </div>
                     <div class="message-actions">
                         <div class="category-selector">
                             <label><i class="fa-solid fa-tag"></i> Categoría:</label>
