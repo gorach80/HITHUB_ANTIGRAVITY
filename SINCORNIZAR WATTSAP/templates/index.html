@@ -172,7 +172,13 @@
                 ${recentCount > 0 ? `<span class="recent-badge">${recentCount}</span>` : ''}
             </button>`;
             
-            globalCategories.forEach(cat => {
+            // Ordenar alfabéticamente, Otros siempre al final
+            const sorted = [
+                ...globalCategories.filter(c => c !== 'Otros').sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' })),
+                ...globalCategories.filter(c => c === 'Otros')
+            ];
+
+            sorted.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.className = `filter-btn ${activeCategory === cat ? 'active' : ''}`;
                 btn.setAttribute('data-category', cat);

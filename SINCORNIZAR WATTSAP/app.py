@@ -385,10 +385,11 @@ def add_category():
         if name in categories:
             return jsonify({"success": False, "error": "La categoría ya existe"}), 400
             
-        # Añadir antes de 'Otros' si existe
+        # Ordenar alfabéticamente, Otros siempre al final
         if "Otros" in categories:
             categories.remove("Otros")
         categories.append(name)
+        categories = sorted([c for c in categories if c != "Otros"], key=lambda x: x.lower())
         categories.append("Otros")
         
         with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
