@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Tech Classifier & Backup</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="glass-container">
+        <!-- Sidebar / Header -->
+        <header class="dashboard-header">
+            <div class="brand">
+                <i class="fa-brands fa-whatsapp icon-logo"></i>
+                <div class="brand-text">
+                    <h1>WhatsApp Classifier</h1>
+                    <span>Sincronizado con GitHub</span>
+                </div>
+            </div>
+            
+            <div class="ip-info" id="ip-info-box">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <div>
+                    <small>Acceso Móvil:</small>
+                    <strong id="ip-address">Cargando...</strong>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="stat-total">0</h3>
+                    <p>Mensajes Totales</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="stat-last-update">--:--</h3>
+                    <p>Última Actualización</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <i class="fa-brands fa-github"></i>
+                </div>
+                <div class="stat-details">
+                    <h3 id="stat-git-status">Sin Verificar</h3>
+                    <p>Respaldo en GitHub</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-main">
+            <!-- Visualizations Panel -->
+            <section class="chart-section card">
+                <h2><i class="fa-solid fa-chart-pie"></i> Distribución de Categorías</h2>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Interactive Messages Panel -->
+            <section class="messages-section card">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-list-check"></i> Mensajes Clasificados</h2>
+                    <div class="header-actions">
+                        <button id="btn-import" class="btn-secondary">
+                            <i class="fa-solid fa-file-import"></i> Importar Historial (.txt)
+                        </button>
+                        <input type="file" id="file-import" accept=".txt" style="display: none;">
+                        <button id="btn-update" class="btn-primary">
+                            <i class="fa-solid fa-arrows-rotate"></i> Actualizar Ahora
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-category="all">Todos</button>
+                    <button class="filter-btn" data-category="Música">Música</button>
+                    <button class="filter-btn" data-category="Álgebra">Álgebra</button>
+                    <button class="filter-btn" data-category="Trigonometría">Trigonometría</button>
+                    <button class="filter-btn" data-category="Inteligencia Artificial">Inteligencia Artificial</button>
+                    <button class="filter-btn" data-category="Electrónica">Electrónica</button>
+                    <button class="filter-btn" data-category="Gestión de Proyectos">Gestión de Proyectos</button>
+                    <button class="filter-btn" data-category="Física">Física</button>
+                    <button class="filter-btn" data-category="Estadística">Estadística</button>
+                    <button class="filter-btn" data-category="Redacción de Tesis">Redacción de Tesis</button>
+                    <button class="filter-btn" data-category="Programación">Programación</button>
+                    <button class="filter-btn" data-category="Redes Sociales y Videos">Redes Sociales y Videos</button>
+                    <button class="filter-btn" data-category="Mensajes de Voz y Audios">Mensajes de Voz y Audios</button>
+                    <button class="filter-btn" data-category="Imágenes y Stickers">Imágenes y Stickers</button>
+                    <button class="filter-btn" data-category="Otros">Otros</button>
+                </div>
+
+                <!-- Messages Feed -->
+                <div class="messages-feed" id="messages-container">
+                    <!-- Loading state -->
+                    <div class="loading-state">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Cargando mensajes...
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Alert System -->
+    <div id="toast-container"></div>
+
+    <!-- Script Logic -->
+    <script>
+        let messagesData = [];
+        let categoryChart = null;
+
+        // Initialize Page
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            
+            // Set up update button
+            document.getElementById('btn-update').addEventListener('click', runUpdate);
+            
+            // Set up import file triggers
+            document.getElementById('btn-import').addEventListener('click', () => {
+                document.getElementById('file-import').click();
+            });
+            
+            document.getElementById('file-import').addEventListener('change', handleFileImport);
+
+            // Set up category filters
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterMessages(btn.getAttribute('data-category'));
+                });
+            });
+        });
+
+        // Handle Chat Import File
+        function handleFileImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const btn = document.getElementById('btn-import');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando...`;
+            
+            showToast('Subiendo y procesando archivo de chat...', 'info');
+            
+            fetch('/api/messages/import', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                e.target.value = ''; // Reset file input
+                
+                if (data.success) {
+                    if (data.count > 0) {
+                        showToast(`Importación exitosa. Se agregaron ${data.count} mensajes nuevos (Total: ${data.total}).`, 'success');
+                    } else {
+                        showToast(`El archivo no contiene nuevos mensajes (Total actual: ${data.total}).`, 'warning');
+                    }
+                    fetchData(); // Reload data
+                } else {
+                    showToast('Error al importar chat: ' + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                e.target.value = '';
+                showToast('Error de red al subir el archivo', 'error');
+            });
+        }
+
+        // Toast Alert System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-circle';
+            if (type === 'warning') icon = 'fa-exclamation-triangle';
+
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Fetch Data from Server
+        function fetchData() {
+            fetch('/api/messages')
+                .then(res => res.json())
+                .then(data => {
+                    messagesData = data.messages || [];
+                    
+                    // Update metadata stats
+                    document.getElementById('stat-total').textContent = messagesData.length;
+                    document.getElementById('stat-last-update').textContent = data.last_update || 'Nunca';
+                    
+                    const gitStatus = document.getElementById('stat-git-status');
+                    gitStatus.textContent = data.git_backup || 'Completado';
+                    if (data.git_backup === 'Completado') {
+                        gitStatus.className = 'status-green';
+                    } else if (data.git_backup === 'Fallido') {
+                        gitStatus.className = 'status-red';
+                    }
+
+                    // Set IP Address
+                    document.getElementById('ip-address').textContent = `http://${data.ip_address}:5000`;
+
+                    // Render chart and feed
+                    updateChart(messagesData);
+                    filterMessages('all');
+                })
+                .catch(err => {
+                    console.error('Error fetching data:', err);
+                    showToast('Error al conectar con el servidor', 'error');
+                });
+        }
+
+        // Filter and Render Messages
+        function filterMessages(category) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+
+            const filtered = category === 'all' 
+                ? messagesData 
+                : messagesData.filter(m => m.category === category);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-regular fa-folder-open"></i>
+                        <p>No hay mensajes en esta categoría.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(msg => {
+                const card = document.createElement('div');
+                card.className = 'message-card';
+                
+                // Format links in text
+                const formattedText = formatLinks(msg.text);
+
+                // Options for categories dropdown
+                const categories = ["Música", "Álgebra", "Trigonometría", "Inteligencia Artificial", "Electrónica", "Gestión de Proyectos", "Física", "Estadística", "Redacción de Tesis", "Programación", "Redes Sociales y Videos", "Mensajes de Voz y Audios", "Imágenes y Stickers", "Otros"];
+                const optionsHtml = categories.map(cat => 
+                    `<option value="${cat}" ${msg.category === cat ? 'selected' : ''}>${cat}</option>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="message-meta">
+                        <span class="sender"><i class="fa-solid fa-user"></i> ${msg.sender}</span>
+                        <span class="time"><i class="fa-solid fa-clock"></i> ${msg.timestamp || 'Sin fecha'}</span>
+                    </div>
+                    <div class="message-body">${formattedText}</div>
+                    <div class="message-actions">
+                        <div class="category-selector">
+                            <label><i class="fa-solid fa-tag"></i> Categoría:</label>
+                            <select onchange="updateMessageCategory('${msg.data_id}', this.value)">
+                                ${optionsHtml}
+                            </select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Auto-link URLs
+        function formatLinks(text) {
+            if (!text) return "";
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" class="chat-link"><i class="fa-solid fa-link"></i> Enlace <i class="fa-solid fa-up-right-from-square small-icon"></i></a>`;
+            }).replace(/\n/g, '<br>');
+        }
+
+        // Update Category on Backend
+        function updateMessageCategory(dataId, newCategory) {
+            fetch('/api/messages/update_category', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data_id: dataId, category: newCategory })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Categoría actualizada con éxito', 'success');
+                    // Update local data and chart
+                    const msg = messagesData.find(m => m.data_id === dataId);
+                    if (msg) msg.category = newCategory;
+                    updateChart(messagesData);
+                    
+                    // Update GitHub Status card
+                    const gitStatus = document.getElementById('stat-git-status');
+                    gitStatus.textContent = data.git_backup;
+                    gitStatus.className = data.git_backup === 'Completado' ? 'status-green' : 'status-red';
+                } else {
+                    showToast('Error al guardar categoría: ' + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                showToast('Error de red al actualizar la categoría', 'error');
+            });
+        }
+
+        // Trigger WhatsApp Scraper update
+        function runUpdate() {
+            const btn = document.getElementById('btn-update');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Actualizando...`;
+            showToast('Iniciando extracción de WhatsApp en segundo plano...', 'info');
+
+            fetch('/api/update', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Actualizar Ahora`;
+                
+                if (data.success) {
+                    showToast(`Actualización completada. Se extrajeron ${data.count} mensajes.`, 'success');
+                    fetchData(); // Reload data
+                } else {
+                    showToast('Error al actualizar: ' + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Actualizar Ahora`;
+                showToast('Error de red al intentar actualizar', 'error');
+            });
+        }
+
+        // Update Chart.js rendering
+        function updateChart(messages) {
+            const counts = {
+                "Música": 0,
+                "Álgebra": 0,
+                "Trigonometría": 0,
+                "Inteligencia Artificial": 0,
+                "Electrónica": 0,
+                "Gestión de Proyectos": 0,
+                "Física": 0,
+                "Estadística": 0,
+                "Redacción de Tesis": 0,
+                "Programación": 0,
+                "Redes Sociales y Videos": 0,
+                "Mensajes de Voz y Audios": 0,
+                "Imágenes y Stickers": 0,
+                "Otros": 0
+            };
+
+            messages.forEach(m => {
+                if (counts[m.category] !== undefined) {
+                    counts[m.category]++;
+                } else {
+                    counts["Otros"]++;
+                }
+            });
+
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            'rgba(233, 30, 99, 0.7)',   // Música: Pink
+                            'rgba(156, 39, 176, 0.7)',  // Álgebra: Purple
+                            'rgba(103, 58, 183, 0.7)',  // Trigonometría: Deep Purple
+                            'rgba(63, 81, 181, 0.7)',   // Inteligencia Artificial: Indigo
+                            'rgba(33, 150, 243, 0.7)',   // Electrónica: Blue
+                            'rgba(0, 188, 212, 0.7)',   // Gestión de Proyectos: Cyan
+                            'rgba(0, 150, 136, 0.7)',   // Física: Teal
+                            'rgba(76, 175, 80, 0.7)',    // Estadística: Green
+                            'rgba(139, 195, 74, 0.7)',  // Redacción de Tesis: Light Green
+                            'rgba(255, 152, 0, 0.7)',   // Programación: Orange
+                            'rgba(52, 73, 94, 0.7)',    // Redes Sociales y Videos: Dark Slate
+                            'rgba(26, 188, 156, 0.7)',   // Mensajes de Voz y Audios: Turquoise
+                            'rgba(230, 126, 34, 0.7)',   // Imágenes y Stickers: Pumpkin
+                            'rgba(158, 158, 158, 0.7)'   // Otros: Grey
+                        ],
+                        borderColor: [
+                            '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3',
+                            '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ff9800',
+                            '#34495e', '#1abc9c', '#e67e22', '#9e9e9e'
+                        ],
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Outfit',
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
