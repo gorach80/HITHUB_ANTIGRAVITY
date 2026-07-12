@@ -79,7 +79,7 @@ def auto_classify(text):
         
     return "Otros"
 
-def run_whatsapp_update(headless=True):
+def run_whatsapp_update(headless=True, on_update_callback=None):
     print(f"Iniciando extracción de WhatsApp con Playwright (headless={headless})...")
     
     user_data_dir = os.path.join(os.getcwd(), "whatsapp_session")
@@ -176,11 +176,12 @@ def run_whatsapp_update(headless=True):
             except Exception:
                 page.mouse.click(600, 400)
                 
-            print("Cargando historial de mensajes hacia arriba...")
+            print("Cargando historial inicial de mensajes hacia arriba...")
             last_height = 0
             no_change_count = 0
-            # Reducido a un máximo de 15 pasos de scroll para evitar demoras innecesarias (historial antiguo ya está en messages.json)
-            for scroll_step in range(15):
+            # Hacemos una cantidad corta de scrolls al inicio (15 en background, 5 en visible)
+            max_scrolls = 15 if headless else 5
+            for scroll_step in range(max_scrolls):
                 # Desplazar al tope superior
                 page.evaluate('''() => {
                     const pane = document.querySelector('div[data-testid="conversation-panel-wrapper"]');
@@ -220,7 +221,6 @@ def run_whatsapp_update(headless=True):
                 if current_height == last_height:
                     no_change_count += 1
                     if no_change_count >= 4:
-                        print("Se alcanzó el inicio del historial de mensajes visible.")
                         break
                 else:
                     no_change_count = 0
@@ -228,90 +228,132 @@ def run_whatsapp_update(headless=True):
                     
             time.sleep(1.5)
             
-            # Extraer mensajes de forma instantánea usando Javascript en el contexto de la página
-            print("Extrayendo mensajes de la conversación...")
-            extracted = page.evaluate('''() => {
-                const messages = [];
-                const msgElements = document.querySelectorAll('div[data-id]');
-                msgElements.forEach(msgElem => {
-                    const dataId = msgElem.getAttribute('data-id');
-                    if (!dataId || (dataId.startsWith('album-') && msgElem.innerText.trim() === "")) {
-                        return;
-                    }
-                    
-                    // Extraer texto
-                    let text = "";
-                    const selectable = msgElem.querySelector('span.selectable-text');
-                    if (selectable) {
-                        text = selectable.innerText;
-                    }
-                    
-                    // Extraer metadata
-                    let timestamp = "";
-                    let sender = "";
-                    const copyable = msgElem.querySelector('div.copyable-text');
-                    if (copyable) {
-                        const preText = copyable.getAttribute('data-pre-plain-text');
-                        if (preText) {
-                            try {
-                                const clean = preText.replace(/^\[|\]\s*$/g, '');
-                                const parts = clean.split('] ');
-                                if (parts.length >= 2) {
-                                    timestamp = parts[0];
-                                    sender = parts[1].replace(':', '').trim();
-                                } else {
-                                    const firstRBracket = clean.indexOf(']');
-                                    if (firstRBracket !== -1) {
-                                        timestamp = clean.substring(0, firstRBracket);
-                                        sender = clean.substring(firstRBracket + 1).replace(':', '').trim();
+            # Definir función de extracción del DOM actual
+            def extract_visible_messages():
+                return page.evaluate('''() => {
+                    const messages = [];
+                    const msgElements = document.querySelectorAll('div[data-id]');
+                    msgElements.forEach(msgElem => {
+                        const dataId = msgElem.getAttribute('data-id');
+                        if (!dataId || (dataId.startsWith('album-') && msgElem.innerText.trim() === "")) {
+                            return;
+                        }
+                        
+                        // Extraer texto
+                        let text = "";
+                        const selectable = msgElem.querySelector('span.selectable-text');
+                        if (selectable) {
+                            text = selectable.innerText;
+                        }
+                        
+                        // Extraer metadata
+                        let timestamp = "";
+                        let sender = "";
+                        const copyable = msgElem.querySelector('div.copyable-text');
+                        if (copyable) {
+                            const preText = copyable.getAttribute('data-pre-plain-text');
+                            if (preText) {
+                                try {
+                                    const clean = preText.replace(/^\\\[|\\\]\\s*$/g, '');
+                                    const parts = clean.split('] ');
+                                    if (parts.length >= 2) {
+                                        timestamp = parts[0];
+                                        sender = parts[1].replace(':', '').trim();
                                     } else {
-                                        timestamp = clean;
+                                        const firstRBracket = clean.indexOf(']');
+                                        if (firstRBracket !== -1) {
+                                            timestamp = clean.substring(0, firstRBracket);
+                                            sender = clean.substring(firstRBracket + 1).replace(':', '').trim();
+                                        } else {
+                                            timestamp = clean;
+                                        }
                                     }
+                                } catch (e) {
+                                    timestamp = preText;
                                 }
-                            } catch (e) {
-                                timestamp = preText;
                             }
                         }
-                    }
-                    
-                    if (!text) {
-                        const rawText = msgElem.innerText || "";
-                        const lines = rawText.split('\\n').map(l => l.trim()).filter(Boolean);
-                        if (lines.length > 0) {
-                            if (lines.length > 1 && lines[lines.length - 1].includes(':') && lines[lines.length - 1].length <= 8) {
-                                text = lines.slice(0, -1).join('\\n');
+                        
+                        if (!text) {
+                            const rawText = msgElem.innerText || "";
+                            const lines = rawText.split('\\n').map(l => l.trim()).filter(Boolean);
+                            if (lines.length > 0) {
+                                if (lines.length > 1 && lines[lines.length - 1].includes(':') && lines[lines.length - 1].length <= 8) {
+                                    text = lines.slice(0, -1).join('\\n');
+                                } else {
+                                    text = lines.join('\\n');
+                                }
+                            }
+                        }
+                        
+                        if (!text || text.trim() === "") {
+                            if (msgElem.querySelector('img')) {
+                                text = "[Imagen o Sticker]";
+                            } else if (msgElem.querySelector('audio') || msgElem.querySelector('[data-testid="audio-play"]')) {
+                                text = "[Mensaje de Voz o Audio]";
                             } else {
-                                text = lines.join('\\n');
+                                text = "[Mensaje no de texto o Multimedia]";
                             }
                         }
-                    }
-                    
-                    if (!text || text.trim() === "") {
-                        if (msgElem.querySelector('img')) {
-                            text = "[Imagen o Sticker]";
-                        } else if (msgElem.querySelector('audio') || msgElem.querySelector('[data-testid="audio-play"]')) {
-                            text = "[Mensaje de Voz o Audio]";
-                        } else {
-                            text = "[Mensaje no de texto o Multimedia]";
-                        }
-                    }
-                    
-                    messages.push({
-                        data_id: dataId,
-                        sender: sender || "Yo (Tú)",
-                        timestamp: timestamp,
-                        text: text.trim()
+                        
+                        messages.push({
+                            data_id: dataId,
+                            sender: sender || "Yo (Tú)",
+                            timestamp: timestamp,
+                            text: text.trim()
+                        });
                     });
-                });
-                return messages;
-            }''')
-            
-            # Filtrar duplicados locales antes de retornar
+                    return messages;
+                }''')
+
+            # Extracción y guardado inicial
+            print("Extrayendo mensajes iniciales...")
+            extracted = extract_visible_messages()
             for m in extracted:
                 if not any(x['data_id'] == m['data_id'] for x in extracted_messages):
                     extracted_messages.append(m)
+            
+            if on_update_callback:
+                try:
+                    on_update_callback(extracted_messages)
+                except Exception as e:
+                    print(f"Error en callback inicial: {e}")
+
+            # Si es modo visible (headless=False), nos quedamos escuchando en bucle continuo
+            if not headless:
+                print("\n==================================================")
+                print(" MODO DE CAPTURA CONTINUA ACTIVO")
+                print(" Desplázate por el chat de WhatsApp para cargar")
+                print(" mensajes anteriores. La aplicación web se")
+                print(" actualizará automáticamente en tiempo real.")
+                print(" Cierra la ventana de WhatsApp cuando termines.")
+                print("==================================================\n")
+                
+                while True:
+                    time.sleep(2)
+                    if page.is_closed():
+                        break
                     
-            context.close()
+                    try:
+                        extracted = extract_visible_messages()
+                        new_msgs_added = False
+                        for m in extracted:
+                            if not any(x['data_id'] == m['data_id'] for x in extracted_messages):
+                                extracted_messages.append(m)
+                                new_msgs_added = True
+                                
+                        if new_msgs_added and on_update_callback:
+                            try:
+                                on_update_callback(extracted_messages)
+                            except Exception as cb_err:
+                                print(f"Error en callback de actualización: {cb_err}")
+                    except Exception:
+                        break
+            
+            # Cerrar el navegador limpio si no está cerrado por el usuario
+            if not page.is_closed():
+                context.close()
+                
             print(f"Extracción completada. {len(extracted_messages)} mensajes obtenidos.")
             return extracted_messages
     except Exception as e:
