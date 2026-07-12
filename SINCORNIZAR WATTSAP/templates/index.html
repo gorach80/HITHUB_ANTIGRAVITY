@@ -25,12 +25,17 @@
                 </div>
             </div>
             
-            <div class="ip-info" id="ip-info-box">
-                <i class="fa-solid fa-mobile-screen-button"></i>
-                <div>
-                    <small>Acceso Móvil:</small>
-                    <strong id="ip-address">Cargando...</strong>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="ip-info" id="ip-info-box">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                    <div>
+                        <small>Acceso Móvil:</small>
+                        <strong id="ip-address">Cargando...</strong>
+                    </div>
                 </div>
+                <button class="btn-settings-toggle" onclick="toggleSettings(true)" title="Configuración y Temas">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
             </div>
         </header>
 
@@ -80,18 +85,27 @@
                 <div class="section-header">
                     <h2><i class="fa-solid fa-list-check"></i> Mensajes Clasificados</h2>
                     <div class="header-actions">
+                        <div class="search-container">
+                            <div class="search-input-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="search-input" placeholder="Buscar mensajes..." oninput="handleSearch()">
+                            </div>
+                        </div>
+                        <button class="btn-export" onclick="exportMessages()" title="Exportar mensajes actuales">
+                            <i class="fa-solid fa-file-export"></i> Exportar
+                        </button>
                         <div class="category-creator">
-                            <input type="text" id="new-category-input" placeholder="Nueva categoría..." class="input-category">
+                            <input type="text" id="new-category-input" placeholder="Nueva pestaña..." class="input-category">
                             <button onclick="createCategory()" class="btn-secondary btn-icon-only" title="Crear Categoría">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
                         </div>
                         <button id="btn-import" class="btn-secondary">
-                            <i class="fa-solid fa-file-import"></i> Importar Historial (.txt)
+                            <i class="fa-solid fa-file-import"></i> Importar (.txt)
                         </button>
                         <input type="file" id="file-import" accept=".txt" style="display: none;">
                         <button id="btn-update" class="btn-primary">
-                            <i class="fa-solid fa-arrows-rotate"></i> Actualizar Ahora
+                            <i class="fa-solid fa-arrows-rotate"></i> Actualizar
                         </button>
                     </div>
                 </div>
@@ -124,6 +138,61 @@
     <!-- Alert System -->
     <div id="toast-container"></div>
 
+    <!-- Settings Sidebar -->
+    <div class="settings-overlay" id="settings-overlay" onclick="toggleSettings(false)"></div>
+    <div class="settings-sidebar" id="settings-sidebar">
+        <div class="settings-header">
+            <h2><i class="fa-solid fa-gear"></i> Configuración</h2>
+            <button class="btn-close-settings" onclick="toggleSettings(false)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="settings-content">
+            <!-- Theme & Colors Section -->
+            <div class="settings-section">
+                <h3>🎨 Tema Visual</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">Color de Acento:</p>
+                <div class="theme-picker">
+                    <button class="theme-color-btn purple active" onclick="setAccentColor('purple')" title="Morado"></button>
+                    <button class="theme-color-btn blue" onclick="setAccentColor('blue')" title="Azul"></button>
+                    <button class="theme-color-btn green" onclick="setAccentColor('green')" title="Verde"></button>
+                    <button class="theme-color-btn rose" onclick="setAccentColor('rose')" title="Rosa"></button>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">Modo de Pantalla:</p>
+                <div class="mode-picker">
+                    <button class="mode-btn active" id="mode-dark-btn" onclick="setThemeMode('dark')">
+                        <i class="fa-solid fa-moon"></i> Oscuro
+                    </button>
+                    <button class="mode-btn" id="mode-light-btn" onclick="setThemeMode('light')">
+                        <i class="fa-solid fa-sun"></i> Claro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rules Manager Section -->
+            <div class="settings-section">
+                <h3>🧠 Clasificación Automática</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">Crea reglas automáticas para mensajes entrantes.</p>
+                
+                <div class="rules-form">
+                    <input type="text" id="rule-keyword" placeholder="Si contiene la palabra...">
+                    <select id="rule-category">
+                        <!-- Se poblará dinámicamente -->
+                    </select>
+                    <button class="btn-add-rule" onclick="addCustomRule()">
+                        <i class="fa-solid fa-plus"></i> Agregar Regla
+                    </button>
+                </div>
+
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600;">Reglas Activas:</p>
+                <div class="rules-list" id="rules-list-container">
+                    <!-- Se listarán dinámicamente -->
+                    <div style="font-size:0.8rem; color: var(--text-secondary); text-align:center; padding:10px;">Cargando reglas...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script Logic -->
     <script>
         let messagesData = [];
@@ -131,8 +200,17 @@
         let activeCategory = 'recientes';
         let categoryChart = null;
 
+        // Lazy Loading and Search States
+        let filteredCache = [];
+        let currentPage = 1;
+        const itemsPerPage = 15;
+        let searchQuery = '';
+
         // Initialize Page
         document.addEventListener('DOMContentLoaded', () => {
+            // Cargar configuraciones de tema guardadas
+            applyStoredTheme();
+
             loadCategories().then(() => {
                 fetchData();
             });
@@ -146,6 +224,18 @@
             });
             
             document.getElementById('file-import').addEventListener('change', handleFileImport);
+
+            // Escuchar scroll para scroll infinito
+            const feedEl = document.getElementById('messages-container');
+            if (feedEl) {
+                feedEl.addEventListener('scroll', (e) => {
+                    const el = e.target;
+                    // Detectar si el usuario está cerca del final (40px de margen)
+                    if (el.scrollHeight - el.scrollTop <= el.clientHeight + 40) {
+                        loadMoreMessages();
+                    }
+                });
+            }
         });
 
         // Load Categories from API
@@ -182,10 +272,33 @@
                 const btn = document.createElement('button');
                 btn.className = `filter-btn ${activeCategory === cat ? 'active' : ''}`;
                 btn.setAttribute('data-category', cat);
-                btn.textContent = cat;
+                
+                if (cat !== 'Otros') {
+                    btn.classList.add('has-actions');
+                    btn.innerHTML = `${cat}
+                        <div class="tab-actions">
+                            <button onclick="event.stopPropagation(); renameCategoryPrompt('${cat}')" title="Renombrar pestaña">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="btn-tab-delete" onclick="event.stopPropagation(); deleteCategoryPrompt('${cat}')" title="Eliminar pestaña">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>`;
+                } else {
+                    btn.textContent = cat;
+                }
+                
                 btn.onclick = () => selectFilter(cat, btn);
                 container.appendChild(btn);
             });
+
+            // Actualizar selector de categorías en la configuración de reglas
+            const ruleSelect = document.getElementById('rule-category');
+            if (ruleSelect) {
+                ruleSelect.innerHTML = globalCategories.map(cat => 
+                    `<option value="${cat}">${cat}</option>`
+                ).join('');
+            }
         }
 
         // Handle Filter Click
@@ -454,24 +567,52 @@
 
             let filtered;
             if (category === 'recientes') {
-                // Mostrar mensajes sin clasificar manualmente, del más reciente al más antiguo
                 filtered = messagesData.filter(m => !m.classified);
             } else {
                 filtered = messagesData.filter(m => m.category === category);
             }
 
+            // Aplicar búsqueda si hay consulta activa
+            if (searchQuery) {
+                filtered = filtered.filter(m => 
+                    (m.text || '').toLowerCase().includes(searchQuery) ||
+                    (m.sender || '').toLowerCase().includes(searchQuery)
+                );
+            }
+
+            // Guardar resultados filtrados para scroll infinito
+            filteredCache = filtered;
+            currentPage = 1;
+
             if (filtered.length === 0) {
-                const isEmpty = category === 'recientes';
+                const isEmpty = category === 'recientes' && !searchQuery;
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fa-solid ${isEmpty ? 'fa-check-circle' : 'fa-folder-open'}" style="${isEmpty ? 'color:#10b981' : ''}"></i>
-                        <p>${isEmpty ? '\u00a1Todo clasificado! No hay mensajes pendientes.' : 'No hay mensajes en esta categoría.'}</p>
+                        <p>${searchQuery ? 'No se encontraron resultados para tu búsqueda.' : (isEmpty ? '¡Todo clasificado! No hay mensajes pendientes.' : 'No hay mensajes en esta categoría.')}</p>
                     </div>
                 `;
                 return;
             }
 
-            filtered.forEach(msg => {
+            renderCurrentPageChunk();
+        }
+
+        // Renderiza el lote actual de mensajes para Lazy Loading
+        function renderCurrentPageChunk() {
+            const container = document.getElementById('messages-container');
+            
+            // Quitar el spinner anterior si existe
+            const prevSpinner = container.querySelector('.lazy-loading-spinner');
+            if (prevSpinner) {
+                prevSpinner.remove();
+            }
+
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const chunk = filteredCache.slice(startIdx, endIdx);
+
+            chunk.forEach(msg => {
                 const card = document.createElement('div');
                 card.className = 'message-card';
                 
@@ -520,6 +661,30 @@
                     loadOGPreview(card.querySelector('.og-preview-container'), firstUrl);
                 }
             });
+
+            // Si quedan más por cargar, meter spinner de carga
+            if (endIdx < filteredCache.length) {
+                const spinner = document.createElement('div');
+                spinner.className = 'lazy-loading-spinner';
+                spinner.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Cargando más mensajes...`;
+                container.appendChild(spinner);
+            }
+        }
+
+        // Carga el lote de la siguiente página
+        function loadMoreMessages() {
+            if (currentPage * itemsPerPage < filteredCache.length) {
+                currentPage++;
+                renderCurrentPageChunk();
+            }
+        }
+
+        // Búsqueda en tiempo real
+        function handleSearch() {
+            const val = document.getElementById('search-input').value;
+            searchQuery = val.toLowerCase().trim();
+            filterMessages(activeCategory);
+            updateBulkBar();
         }
 
         // Auto-link URLs
@@ -780,7 +945,7 @@
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: '#ffffff',
+                                color: (localStorage.getItem('themeMode') === 'light') ? '#0f172a' : '#ffffff',
                                 font: {
                                     family: 'Outfit',
                                     size: 10
@@ -790,6 +955,274 @@
                     }
                 }
             });
+        }
+
+        // ── CONFIGURACIÓN Y TEMAS ──────────────────
+
+        function toggleSettings(open) {
+            const sidebar = document.getElementById('settings-sidebar');
+            const overlay = document.getElementById('settings-overlay');
+            if (open) {
+                sidebar.classList.add('open');
+                overlay.classList.add('show');
+                loadRules();
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('show');
+            }
+        }
+
+        // Cambiar color de acento principal
+        function setAccentColor(color) {
+            let primary, glow;
+            if (color === 'purple') {
+                primary = '#9b59b6';
+                glow = 'rgba(155, 89, 182, 0.4)';
+            } else if (color === 'blue') {
+                primary = '#3b82f6';
+                glow = 'rgba(59, 130, 246, 0.4)';
+            } else if (color === 'green') {
+                primary = '#10b981';
+                glow = 'rgba(16, 185, 129, 0.4)';
+            } else if (color === 'rose') {
+                primary = '#f43f5e';
+                glow = 'rgba(244, 63, 94, 0.4)';
+            }
+
+            document.documentElement.style.setProperty('--primary-color', primary);
+            document.documentElement.style.setProperty('--primary-glow', glow);
+
+            localStorage.setItem('themeAccent', color);
+
+            // Actualizar botones activos
+            document.querySelectorAll('.theme-color-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.classList.contains(color));
+            });
+            
+            // Actualizar colores del gráfico si ya existe
+            if (messagesData.length > 0) {
+                updateChart(messagesData);
+            }
+        }
+
+        // Alternar Claro / Oscuro
+        function setThemeMode(mode) {
+            if (mode === 'light') {
+                document.body.classList.add('light-theme');
+                document.getElementById('mode-light-btn').classList.add('active');
+                document.getElementById('mode-dark-btn').classList.remove('active');
+            } else {
+                document.body.classList.remove('light-theme');
+                document.getElementById('mode-dark-btn').classList.add('active');
+                document.getElementById('mode-light-btn').classList.remove('active');
+            }
+            localStorage.setItem('themeMode', mode);
+            
+            // Actualizar leyenda del gráfico
+            if (categoryChart) {
+                categoryChart.options.plugins.legend.labels.color = mode === 'light' ? '#0f172a' : '#ffffff';
+                categoryChart.update();
+            }
+        }
+
+        // Carga preferencias almacenadas
+        function applyStoredTheme() {
+            const storedAccent = localStorage.getItem('themeAccent') || 'purple';
+            setAccentColor(storedAccent);
+            const storedMode = localStorage.getItem('themeMode') || 'dark';
+            setThemeMode(storedMode);
+        }
+
+        // ── GESTIÓN DE REGLAS ──────────────────────
+
+        function loadRules() {
+            const container = document.getElementById('rules-list-container');
+            fetch('/api/rules')
+                .then(r => r.json())
+                .then(rules => {
+                    if (rules.length === 0) {
+                        container.innerHTML = `<div style="font-size:0.8rem; color: var(--text-secondary); text-align:center; padding:10px;">No hay reglas automáticas creadas.</div>`;
+                        return;
+                    }
+                    container.innerHTML = rules.map(rule => `
+                        <div class="rule-item">
+                            <div class="rule-item-content">
+                                <span class="rule-kw">"${rule.keyword}"</span>
+                                <span class="rule-cat"><i class="fa-solid fa-tag"></i> ${rule.category}</span>
+                            </div>
+                            <button class="btn-delete-rule" onclick="deleteCustomRule('${rule.keyword}')" title="Eliminar regla">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                })
+                .catch(() => {
+                    container.innerHTML = `<div style="font-size:0.8rem; color: #ef4444; text-align:center; padding:10px;">Error al cargar las reglas.</div>`;
+                });
+        }
+
+        function addCustomRule() {
+            const kwInput = document.getElementById('rule-keyword');
+            const catSelect = document.getElementById('rule-category');
+            const kw = kwInput.value.trim();
+            const cat = catSelect.value;
+
+            if (!kw) {
+                showToast('Escribe una palabra clave para la regla', 'warning');
+                return;
+            }
+
+            fetch('/api/rules/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyword: kw, category: cat })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Regla agregada con éxito', 'success');
+                    kwInput.value = '';
+                    loadRules();
+                } else {
+                    showToast(data.error || 'Error al agregar regla', 'error');
+                }
+            })
+            .catch(() => {
+                showToast('Error de red al agregar regla', 'error');
+            });
+        }
+
+        function deleteCustomRule(keyword) {
+            if (!confirm(`¿Eliminar la regla automática para "${keyword}"?`)) return;
+
+            fetch('/api/rules/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyword: keyword })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Regla eliminada', 'success');
+                    loadRules();
+                } else {
+                    showToast(data.error || 'Error al eliminar regla', 'error');
+                }
+            })
+            .catch(() => {
+                showToast('Error de red al eliminar regla', 'error');
+            });
+        }
+
+        // ── EDICIÓN Y BORRADO DE PESTAÑAS (CATEGORÍAS) ──
+
+        function renameCategoryPrompt(oldName) {
+            const newName = prompt(`¿Cómo deseas renombrar la categoría "${oldName}"?`, oldName);
+            if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+
+            const trimmedName = newName.trim();
+            fetch('/api/categories/rename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ old_name: oldName, new_name: trimmedName })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`Pestaña renombrada a "${trimmedName}" con éxito`, 'success');
+                    activeCategory = trimmedName; // switch active view
+                    loadCategories().then(() => {
+                        fetchData();
+                    });
+                } else {
+                    showToast(data.error || 'Error al renombrar', 'error');
+                }
+            })
+            .catch(() => {
+                showToast('Error de red al renombrar pestaña', 'error');
+            });
+        }
+
+        function deleteCategoryPrompt(name) {
+            if (!confirm(`¿Estás segura de borrar la categoría "${name}"? Todos sus mensajes se moverán a la categoría "Otros" de forma automática.`)) return;
+
+            fetch('/api/categories/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`Categoría "${name}" eliminada. Mensajes reasignados a "Otros"`, 'success');
+                    activeCategory = 'recientes';
+                    loadCategories().then(() => {
+                        fetchData();
+                    });
+                } else {
+                    showToast(data.error || 'Error al borrar', 'error');
+                }
+            })
+            .catch(() => {
+                showToast('Error de red al borrar categoría', 'error');
+            });
+        }
+
+        // ── EXPORTACIÓN DE MENSAJES ────────────────
+
+        function exportMessages() {
+            if (filteredCache.length === 0) {
+                showToast('No hay mensajes visibles para exportar', 'warning');
+                return;
+            }
+
+            const format = prompt('Escribe "txt" para descargar como archivo de texto, o "csv" para descargar como tabla de Excel:', 'csv');
+            if (!format) return;
+            const fmt = format.toLowerCase().trim();
+
+            if (fmt !== 'txt' && fmt !== 'csv') {
+                showToast('Formato no válido. Utiliza "txt" o "csv".', 'error');
+                return;
+            }
+
+            let fileContent = '';
+            let mimeType = '';
+            let filename = `whatsapp-export-${activeCategory}-${new Date().toISOString().slice(0, 10)}`;
+
+            if (fmt === 'csv') {
+                mimeType = 'text/csv;charset=utf-8;';
+                filename += '.csv';
+                // Cabecera CSV
+                fileContent += '"Fecha y Hora","Remitente","Mensaje","Categoría"\r\n';
+                filteredCache.forEach(m => {
+                    const date = (m.timestamp || '').replace(/"/g, '""');
+                    const sender = (m.sender || '').replace(/"/g, '""');
+                    const text = (m.text || '').replace(/"/g, '""');
+                    const cat = (m.category || '').replace(/"/g, '""');
+                    fileContent += `"${date}","${sender}","${text}","${cat}"\r\n`;
+                });
+            } else {
+                mimeType = 'text/plain;charset=utf-8;';
+                filename += '.txt';
+                filteredCache.forEach(m => {
+                    fileContent += `[${m.timestamp || 'Sin fecha'}] ${m.sender}: ${m.text}\r\n`;
+                    fileContent += `Categoría: ${m.category}\r\n`;
+                    fileContent += `--------------------------------------------------\r\n`;
+                });
+            }
+
+            const blob = new Blob([fileContent], { type: mimeType });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast(`Archivo ${filename} exportado con éxito`, 'success');
+            }
         }
     </script>
 </body>

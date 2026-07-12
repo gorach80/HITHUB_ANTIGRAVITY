@@ -19,6 +19,20 @@ def auto_classify(text):
     
     t = normalize_text(text)
     
+    # Evaluar reglas personalizadas de rules.json
+    rules_file = "rules.json"
+    if os.path.exists(rules_file):
+        try:
+            with open(rules_file, "r", encoding="utf-8") as f:
+                rules = json.load(f)
+                for rule in rules:
+                    kw = normalize_text(rule.get("keyword", ""))
+                    if kw and kw in t:
+                        return rule.get("category", "Otros")
+        except Exception as e:
+            print(f"Error evaluando reglas personalizadas: {e}")
+
+    
     # Función auxiliar para comprobar si existe coincidencia exacta de palabras
     def has_any(words):
         return any(re.search(r'\b' + re.escape(w) + r'\b', t) for w in words)

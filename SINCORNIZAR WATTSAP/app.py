@@ -407,6 +407,161 @@ def add_category():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/categories/rename', methods=['POST'])
+def rename_category():
+    try:
+        req = request.get_json()
+        old_name = req.get('old_name', '').strip()
+        new_name = req.get('new_name', '').strip()
+        if not old_name or not new_name:
+            return jsonify({"success": False, "error": "Parámetros inválidos"}), 400
+        if old_name == "Otros" or new_name == "Otros":
+            return jsonify({"success": False, "error": "No se puede renombrar la categoría Otros"}), 400
+            
+        categories = load_categories()
+        if old_name not in categories:
+            return jsonify({"success": False, "error": "La categoría origen no existe"}), 404
+        if new_name in categories:
+            return jsonify({"success": False, "error": "La categoría destino ya existe"}), 400
+            
+        categories.remove(old_name)
+        categories.append(new_name)
+        if "Otros" in categories:
+            categories.remove("Otros")
+        categories = sorted([c for c in categories if c != "Otros"], key=lambda x: x.lower())
+        categories.append("Otros")
+        
+        with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
+            json.dump(categories, f, ensure_ascii=False, indent=4)
+            
+        # Renombrar en mensajes
+        data = load_messages_data()
+        messages = data.get("messages", [])
+        updated = 0
+        for msg in messages:
+            if msg.get("category") == old_name:
+                msg["category"] = new_name
+                updated += 1
+        if updated > 0:
+            data["messages"] = messages
+            with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+                
+        run_git_backup()
+        return jsonify({"success": True, "categories": categories, "updated_count": updated})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/categories/delete', methods=['POST'])
+def delete_category():
+    try:
+        req = request.get_json()
+        name = req.get('name', '').strip()
+        if not name:
+            return jsonify({"success": False, "error": "Parámetro inválido"}), 400
+        if name == "Otros":
+            return jsonify({"success": False, "error": "No se puede eliminar la categoría Otros"}), 400
+            
+        categories = load_categories()
+        if name not in categories:
+            return jsonify({"success": False, "error": "La categoría no existe"}), 404
+            
+        categories.remove(name)
+        with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
+            json.dump(categories, f, ensure_ascii=False, indent=4)
+            
+        # Mover mensajes a Otros
+        data = load_messages_data()
+        messages = data.get("messages", [])
+        updated = 0
+        for msg in messages:
+            if msg.get("category") == name:
+                msg["category"] = "Otros"
+                updated += 1
+        if updated > 0:
+            data["messages"] = messages
+            with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+                
+        run_git_backup()
+        return jsonify({"success": True, "categories": categories, "updated_count": updated})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+RULES_FILE = "rules.json"
+
+def load_rules():
+    if os.path.exists(RULES_FILE):
+        try:
+            with open(RULES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+@app.route('/api/rules', methods=['GET'])
+def get_rules():
+    return jsonify(load_rules())
+
+@app.route('/api/rules/add', methods=['POST'])
+def add_rule():
+    try:
+        req = request.get_json()
+        keyword = req.get('keyword', '').strip()
+        category = req.get('category', '').strip()
+        if not keyword or not category:
+            return jsonify({"success": False, "error": "Palabra clave y categoría requeridas"}), 400
+            
+        rules = load_rules()
+        for rule in rules:
+            if rule.get("keyword").lower() == keyword.lower():
+                return jsonify({"success": False, "error": "Ya existe una regla para esa palabra clave"}), 400
+                
+        rules.append({"keyword": keyword, "category": category})
+        with open(RULES_FILE, "w", encoding="utf-8") as f:
+            json.dump(rules, f, ensure_ascii=False, indent=4)
+            
+        try:
+            subprocess.run(["git", "add", RULES_FILE], check=True)
+            subprocess.run(["git", "commit", "-m", f"Add custom rule: {keyword} -> {category}"], capture_output=True)
+            subprocess.run(["git", "push", "origin", "main"], capture_output=True)
+        except Exception:
+            pass
+            
+        return jsonify({"success": True, "rules": rules})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/rules/delete', methods=['POST'])
+def delete_rule():
+    try:
+        req = request.get_json()
+        keyword = req.get('keyword', '').strip()
+        if not keyword:
+            return jsonify({"success": False, "error": "Palabra clave requerida"}), 400
+            
+        rules = load_rules()
+        original_count = len(rules)
+        rules = [r for r in rules if r.get("keyword").lower() != keyword.lower()]
+        
+        if len(rules) == original_count:
+            return jsonify({"success": False, "error": "Regla no encontrada"}), 404
+            
+        with open(RULES_FILE, "w", encoding="utf-8") as f:
+            json.dump(rules, f, ensure_ascii=False, indent=4)
+            
+        try:
+            subprocess.run(["git", "add", RULES_FILE], check=True)
+            subprocess.run(["git", "commit", "-m", f"Delete custom rule: {keyword}"], capture_output=True)
+            subprocess.run(["git", "push", "origin", "main"], capture_output=True)
+        except Exception:
+            pass
+            
+        return jsonify({"success": True, "rules": rules})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/api/messages/add_external', methods=['POST'])
 def add_external_message():
     try:

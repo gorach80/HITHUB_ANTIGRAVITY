@@ -906,3 +906,444 @@ body {
     background: rgba(239, 68, 68, 0.1);
 }
 
+/* ── Buscador en Tiempo Real ─────────────────── */
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0 14px;
+    height: 40px;
+    transition: var(--transition);
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px var(--primary-glow);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-input-wrapper i {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+
+.search-input-wrapper input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 0.88rem;
+    width: 100%;
+}
+
+.search-input-wrapper input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* ── Acciones en Pestañas (Editar / Borrar) ────── */
+.filter-btn {
+    position: relative;
+    padding-right: 16px;
+    transition: var(--transition);
+}
+
+/* Ajuste de padding si tiene acciones */
+.filter-btn.has-actions {
+    padding-right: 48px !important;
+}
+
+.filter-btn .tab-actions {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: none;
+    gap: 4px;
+}
+
+.filter-btn:hover .tab-actions {
+    display: flex;
+}
+
+.filter-btn .tab-actions button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.72rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-btn .tab-actions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.filter-btn .tab-actions button.btn-tab-delete:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* ── Panel Lateral de Configuración (Sidebar) ── */
+.btn-settings-toggle {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.btn-settings-toggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.settings-sidebar {
+    position: fixed;
+    top: 0;
+    right: -360px;
+    width: 360px;
+    height: 100vh;
+    background: rgba(8, 12, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-sidebar.open {
+    right: 0;
+}
+
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    display: none;
+}
+
+.settings-overlay.show {
+    display: block;
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.settings-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-close-settings {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+}
+
+.btn-close-settings:hover {
+    color: var(--text-primary);
+}
+
+.settings-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.settings-section h3 {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Selector de Temas */
+.theme-picker {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.theme-color-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.theme-color-btn.active {
+    border-color: #fff;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.theme-color-btn.purple { background: #9b59b6; }
+.theme-color-btn.blue { background: #3b82f6; }
+.theme-color-btn.green { background: #10b981; }
+.theme-color-btn.rose { background: #f43f5e; }
+
+.mode-picker {
+    display: flex;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.mode-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mode-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Light Theme Variables Overrides */
+body.light-theme {
+    --bg-color: #f1f5f9;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --border-color: rgba(0, 0, 0, 0.08);
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    background-image: 
+        radial-gradient(at 10% 20%, rgba(155, 89, 182, 0.07) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+}
+
+body.light-theme .settings-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .category-selector select,
+body.light-theme .mode-picker {
+    background: #e2e8f0;
+}
+
+body.light-theme .message-card {
+    background: rgba(255, 255, 255, 0.4);
+}
+body.light-theme .message-card:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* Gestor de Reglas */
+.rules-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+body.light-theme .rules-form {
+    background: rgba(0,0,0,0.02);
+}
+
+.rules-form input, .rules-form select {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition);
+}
+
+body.light-theme .rules-form input, body.light-theme .rules-form select {
+    background: #fff;
+}
+
+.rules-form input:focus, .rules-form select:focus {
+    border-color: var(--primary-color);
+}
+
+.btn-add-rule {
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-add-rule:hover {
+    opacity: 0.9;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.rule-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+}
+
+body.light-theme .rule-item {
+    background: rgba(0,0,0,0.02);
+}
+
+.rule-item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rule-kw {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.rule-cat {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-delete-rule {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.btn-delete-rule:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Botones de Exportar y Barra de Herramientas ── */
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-export {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.btn-export:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--primary-color);
+}
+
+/* ── Lazy Loading / Scroll Infinito ─────────── */
+.lazy-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    gap: 8px;
+}
+
+
