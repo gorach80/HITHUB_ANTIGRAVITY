@@ -43,7 +43,6 @@ function findMessageBubbles() {
     // Método 1: Encontrar las burbujas de texto/enlaces directamente desde sus spans de texto seleccionable
     const textContainers = document.querySelectorAll('.selectable-text, .copyable-text');
     textContainers.forEach(container => {
-        // Encontrar el div contenedor más cercano que actúa como la tarjeta del mensaje
         const bubble = container.closest('div');
         if (bubble && bubble.innerText && bubble.innerText.trim().length > 0) {
             // Evitar seleccionar contenedores gigantescos
@@ -59,13 +58,12 @@ function findMessageBubbles() {
         const dataId = row.getAttribute('data-id');
         if (dataId && (dataId.startsWith('true_') || dataId.startsWith('false_'))) {
             // La burbuja real es un contenedor interno del row que tiene fondo verde o gris
-            // Buscamos el contenedor interno con contenido que no ocupe todo el ancho
             const innerDivs = row.querySelectorAll('div');
             for (const div of innerDivs) {
                 if (div.offsetWidth > 40 && div.offsetWidth < row.offsetWidth * 0.85) {
                     if (div.innerText && div.innerText.trim().length > 0) {
                         bubbles.add(div);
-                        break; // Tomar el primero que cumpla
+                        break;
                     }
                 }
             }
@@ -80,10 +78,8 @@ function injectClassifyButtons() {
     const bubbles = findMessageBubbles();
     
     bubbles.forEach(bubble => {
-        // Evitar duplicados
         if (bubble.querySelector('.wa-bubble-classify-btn')) return;
 
-        // Asegurar posicionamiento relativo en la burbuja
         bubble.style.position = 'relative';
 
         const btn = document.createElement('button');
@@ -99,7 +95,7 @@ function injectClassifyButtons() {
         btn.style.opacity = '0'; // Invisible por defecto
         btn.style.transition = 'opacity 0.15s ease-in-out';
 
-        // Eventos hover en JS (Totalmente independiente del CSS externo)
+        // Eventos hover en JS
         bubble.addEventListener('mouseenter', () => {
             btn.style.opacity = '1';
         });
@@ -112,13 +108,9 @@ function injectClassifyButtons() {
             e.preventDefault();
             
             const rect = btn.getBoundingClientRect();
-            const messageText = extractTextFromBubble(bubble);
+            // Extraer texto con fallbacks en cascada
+            const messageText = extractTextFromBubble(bubble) || "[Imagen / Sticker / Archivo]";
             
-            if (!messageText) {
-                console.warn('No se pudo extraer texto de esta burbuja.');
-                return;
-            }
-
             showCategoriesPopup(messageText, rect, bubble);
         });
 
@@ -126,10 +118,11 @@ function injectClassifyButtons() {
     });
 }
 
-// Extraer el texto de la burbuja
+// Extraer el texto de la burbuja (con soporte de fila para galerías de imágenes y previews)
 function extractTextFromBubble(bubble) {
     let text = "";
     
+    // 1. Intentar buscar en la burbuja actual
     const selectable = bubble.querySelector('.selectable-text');
     if (selectable) {
         text = selectable.innerText || selectable.textContent;
@@ -142,6 +135,24 @@ function extractTextFromBubble(bubble) {
         }
     }
 
+    // 2. Si no hay texto, subir al contenedor de la fila (row) y buscar texto allí
+    if (!text) {
+        const row = bubble.closest('div[data-id]') || bubble.closest('[role="row"]');
+        if (row) {
+            const rowSelectable = row.querySelector('.selectable-text');
+            if (rowSelectable) {
+                text = rowSelectable.innerText || rowSelectable.textContent;
+            }
+            if (!text) {
+                const rowCopyable = row.querySelector('.copyable-text');
+                if (rowCopyable) {
+                    text = rowCopyable.innerText || rowCopyable.textContent;
+                }
+            }
+        }
+    }
+
+    // 3. Fallback final: innerText de la burbuja
     if (!text) {
         text = bubble.innerText || bubble.textContent;
     }
@@ -290,13 +301,11 @@ function classifyMessage(text, bubbleElement, category) {
                     }
                 }
             } else {
-                // Si la burbuja está a la izquierda (generalmente no tiene data-id con emisor propio o tiene clases específicas)
-                // Usamos una verificación heurística sencilla
                 const row = bubbleElement.closest('div[data-id]');
                 if (row) {
                     const dataId = row.getAttribute('data-id');
                     if (dataId && dataId.startsWith('false_')) {
-                        sender = 'RM'; // Recibido
+                        sender = 'RM';
                     }
                 }
             }
