@@ -356,6 +356,9 @@
                                 ${optionsHtml}
                             </select>
                         </div>
+                        <button class="btn-delete" onclick="deleteMessage('${msg.data_id}', this)" title="Eliminar mensaje">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
                 `;
                 container.appendChild(card);
@@ -369,6 +372,50 @@
             return text.replace(urlRegex, (url) => {
                 return `<a href="${url}" target="_blank" class="chat-link"><i class="fa-solid fa-link"></i> Enlace <i class="fa-solid fa-up-right-from-square small-icon"></i></a>`;
             }).replace(/\n/g, '<br>');
+        }
+
+        // Delete a message by data_id
+        function deleteMessage(dataId, btn) {
+            if (!confirm('¿Estás segura de que deseas eliminar este mensaje? Esta acción no se puede deshacer.')) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            fetch('/api/messages/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data_id: dataId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Eliminar de datos locales y reanimar el card
+                    const card = btn.closest('.message-card');
+                    card.style.transition = 'opacity 0.4s, transform 0.4s';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => card.remove(), 400);
+
+                    messagesData = messagesData.filter(m => m.data_id !== dataId);
+                    updateChart(messagesData);
+                    document.getElementById('stat-total').textContent = messagesData.length;
+
+                    const gitStatus = document.getElementById('stat-git-status');
+                    gitStatus.textContent = data.git_backup;
+                    gitStatus.className = data.git_backup === 'Completado' ? 'status-green' : 'status-red';
+
+                    showToast('Mensaje eliminado correctamente', 'success');
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                    showToast('Error al eliminar: ' + data.error, 'error');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+                showToast('Error de red al eliminar', 'error');
+            });
         }
 
         // Update Category on Backend

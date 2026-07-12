@@ -432,6 +432,33 @@ def add_external_message():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/api/messages/delete', methods=['POST'])
+def delete_message():
+    try:
+        req = request.get_json()
+        data_id = req.get('data_id', '').strip()
+        if not data_id:
+            return jsonify({"success": False, "error": "data_id requerido"}), 400
+
+        data = load_messages_data()
+        messages = data.get("messages", [])
+        original_count = len(messages)
+        messages = [m for m in messages if m.get("data_id") != data_id]
+
+        if len(messages) == original_count:
+            return jsonify({"success": False, "error": "Mensaje no encontrado"}), 404
+
+        data["messages"] = messages
+        data["last_update"] = datetime.datetime.now().strftime("%d/%m/%Y, %I:%M %p")
+
+        with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+        git_status = run_git_backup()
+        return jsonify({"success": True, "git_backup": git_status, "remaining": len(messages)})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 if __name__ == '__main__':
     # Iniciar el hilo del planificador automático
     scheduler_thread = threading.Thread(target=scheduler_worker, daemon=True)
