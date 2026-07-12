@@ -1,0 +1,92 @@
+/* Floating Tag Button */
+.wa-classifier-btn {
+    position: absolute;
+    z-index: 100000;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: wa-bounce-in 0.2s ease-out;
+}
+
+.wa-classifier-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(155, 89, 182, 0.6);
+}
+
+/* Categories Popup Dialog */
+.wa-classifier-popup {
+    position: absolute;
+    z-index: 100001;
+    background: rgba(17, 24, 39, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px;
+    width: 200px;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: wa-fade-in 0.2s ease-out;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.wa-classifier-title {
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    padding: 2px 8px;
+    letter-spacing: 0.5px;
+}
+
+.wa-classifier-option {
+    color: #f1f5f9;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wa-classifier-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.wa-classifier-option:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Custom scrollbar for popup */
+.wa-classifier-popup::-webkit-scrollbar {
+    width: 4px;
+}
+.wa-classifier-popup::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+}
+
+/* Animations */
+@keyframes wa-bounce-in {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+@keyframes wa-fade-in {
+    0% { opacity: 0; transform: translateY(-5px); }
+    100% { opacity: 1; transform: translateY(0); }
+}

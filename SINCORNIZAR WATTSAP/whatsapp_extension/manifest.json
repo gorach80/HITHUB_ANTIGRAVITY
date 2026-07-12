@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Classifier Integration",
+  "version": "1.0",
+  "description": "Clasifica direcciones y mensajes directamente desde WhatsApp Web.",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
+}

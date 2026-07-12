@@ -80,6 +80,12 @@
                 <div class="section-header">
                     <h2><i class="fa-solid fa-list-check"></i> Mensajes Clasificados</h2>
                     <div class="header-actions">
+                        <div class="category-creator">
+                            <input type="text" id="new-category-input" placeholder="Nueva categoría..." class="input-category">
+                            <button onclick="createCategory()" class="btn-secondary btn-icon-only" title="Crear Categoría">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
                         <button id="btn-import" class="btn-secondary">
                             <i class="fa-solid fa-file-import"></i> Importar Historial (.txt)
                         </button>
@@ -91,22 +97,9 @@
                 </div>
 
                 <!-- Filters -->
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-category="all">Todos</button>
-                    <button class="filter-btn" data-category="Música">Música</button>
-                    <button class="filter-btn" data-category="Álgebra">Álgebra</button>
-                    <button class="filter-btn" data-category="Trigonometría">Trigonometría</button>
-                    <button class="filter-btn" data-category="Inteligencia Artificial">Inteligencia Artificial</button>
-                    <button class="filter-btn" data-category="Electrónica">Electrónica</button>
-                    <button class="filter-btn" data-category="Gestión de Proyectos">Gestión de Proyectos</button>
-                    <button class="filter-btn" data-category="Física">Física</button>
-                    <button class="filter-btn" data-category="Estadística">Estadística</button>
-                    <button class="filter-btn" data-category="Redacción de Tesis">Redacción de Tesis</button>
-                    <button class="filter-btn" data-category="Programación">Programación</button>
-                    <button class="filter-btn" data-category="Redes Sociales y Videos">Redes Sociales y Videos</button>
-                    <button class="filter-btn" data-category="Mensajes de Voz y Audios">Mensajes de Voz y Audios</button>
-                    <button class="filter-btn" data-category="Imágenes y Stickers">Imágenes y Stickers</button>
-                    <button class="filter-btn" data-category="Otros">Otros</button>
+                <div class="filter-bar" id="filter-buttons-container">
+                    <button class="filter-btn active" data-category="all" onclick="selectFilter('all', this)">Todos</button>
+                    <!-- Las categorías se cargarán aquí dinámicamente -->
                 </div>
 
                 <!-- Messages Feed -->
@@ -126,11 +119,15 @@
     <!-- Script Logic -->
     <script>
         let messagesData = [];
+        let globalCategories = [];
+        let activeCategory = 'all';
         let categoryChart = null;
 
         // Initialize Page
         document.addEventListener('DOMContentLoaded', () => {
-            fetchData();
+            loadCategories().then(() => {
+                fetchData();
+            });
             
             // Set up update button
             document.getElementById('btn-update').addEventListener('click', runUpdate);
@@ -141,17 +138,76 @@
             });
             
             document.getElementById('file-import').addEventListener('change', handleFileImport);
-
-            // Set up category filters
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            filterButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    filterButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    filterMessages(btn.getAttribute('data-category'));
-                });
-            });
         });
+
+        // Load Categories from API
+        function loadCategories() {
+            return fetch('/api/categories')
+                .then(res => res.json())
+                .then(cats => {
+                    globalCategories = cats;
+                    renderFilterButtons();
+                })
+                .catch(err => {
+                    console.error('Error loading categories:', err);
+                    showToast('Error al cargar categorías', 'error');
+                });
+        }
+
+        // Render Filter Buttons dynamically
+        function renderFilterButtons() {
+            const container = document.getElementById('filter-buttons-container');
+            container.innerHTML = `<button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" data-category="all" onclick="selectFilter('all', this)">Todos</button>`;
+            
+            globalCategories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn ${activeCategory === cat ? 'active' : ''}`;
+                btn.setAttribute('data-category', cat);
+                btn.textContent = cat;
+                btn.onclick = () => selectFilter(cat, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        // Handle Filter Click
+        function selectFilter(category, element) {
+            activeCategory = category;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            filterMessages(category);
+        }
+
+        // Create Custom Category
+        function createCategory() {
+            const input = document.getElementById('new-category-input');
+            const name = input.value.trim();
+            if (!name) {
+                showToast('Escribe un nombre de categoría válido', 'warning');
+                return;
+            }
+
+            fetch('/api/categories/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(`Categoría "${name}" creada con éxito`, 'success');
+                    input.value = '';
+                    loadCategories().then(() => {
+                        fetchData(); // Reload stats and chart with new categories
+                    });
+                } else {
+                    showToast('Error al crear categoría: ' + data.error, 'error');
+                }
+            })
+            .catch(err => {
+                showToast('Error de red al crear categoría', 'error');
+            });
+        }
 
         // Handle Chat Import File
         function handleFileImport(e) {
@@ -283,8 +339,7 @@
                 const formattedText = formatLinks(msg.text);
 
                 // Options for categories dropdown
-                const categories = ["Música", "Álgebra", "Trigonometría", "Inteligencia Artificial", "Electrónica", "Gestión de Proyectos", "Física", "Estadística", "Redacción de Tesis", "Programación", "Redes Sociales y Videos", "Mensajes de Voz y Audios", "Imágenes y Stickers", "Otros"];
-                const optionsHtml = categories.map(cat => 
+                const optionsHtml = globalCategories.map(cat => 
                     `<option value="${cat}" ${msg.category === cat ? 'selected' : ''}>${cat}</option>`
                 ).join('');
 
@@ -350,22 +405,27 @@
             const btn = document.getElementById('btn-update');
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Actualizando...`;
-            showToast('Iniciando extracción de WhatsApp en segundo plano...', 'info');
+            showToast('Navegador abierto. Desplázate por el chat de WhatsApp para cargar mensajes históricos. La página web se actualizará automáticamente en tiempo real. Cierra el navegador de WhatsApp al terminar.', 'info');
+
+            // Iniciar consulta periódica (cada 3 segundos) para actualizar el dashboard en tiempo real mientras el usuario navega
+            const pollInterval = setInterval(fetchData, 3000);
 
             fetch('/api/update', { method: 'POST' })
             .then(res => res.json())
             .then(data => {
+                clearInterval(pollInterval);
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Actualizar Ahora`;
                 
                 if (data.success) {
                     showToast(`Actualización completada. Se extrajeron ${data.count} mensajes.`, 'success');
-                    fetchData(); // Reload data
+                    fetchData(); // Recarga final
                 } else {
                     showToast('Error al actualizar: ' + data.error, 'error');
                 }
             })
             .catch(err => {
+                clearInterval(pollInterval);
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> Actualizar Ahora`;
                 showToast('Error de red al intentar actualizar', 'error');
@@ -374,22 +434,13 @@
 
         // Update Chart.js rendering
         function updateChart(messages) {
-            const counts = {
-                "Música": 0,
-                "Álgebra": 0,
-                "Trigonometría": 0,
-                "Inteligencia Artificial": 0,
-                "Electrónica": 0,
-                "Gestión de Proyectos": 0,
-                "Física": 0,
-                "Estadística": 0,
-                "Redacción de Tesis": 0,
-                "Programación": 0,
-                "Redes Sociales y Videos": 0,
-                "Mensajes de Voz y Audios": 0,
-                "Imágenes y Stickers": 0,
-                "Otros": 0
-            };
+            const counts = {};
+            globalCategories.forEach(cat => {
+                counts[cat] = 0;
+            });
+            if (counts["Otros"] === undefined) {
+                counts["Otros"] = 0;
+            }
 
             messages.forEach(m => {
                 if (counts[m.category] !== undefined) {
@@ -402,6 +453,21 @@
             const labels = Object.keys(counts);
             const values = Object.values(counts);
 
+            // Generar colores premium usando HSL de forma dinámica
+            const backgroundColors = [];
+            const borderColors = [];
+            
+            labels.forEach((label, idx) => {
+                if (label === "Otros") {
+                    backgroundColors.push('rgba(149, 165, 166, 0.7)'); // Gris neutral
+                    borderColors.push('#95a5a6');
+                } else {
+                    const hue = (idx * (360 / (labels.length - 1 || 1))) % 360;
+                    backgroundColors.push(`hsla(${hue}, 70%, 50%, 0.7)`);
+                    borderColors.push(`hsl(${hue}, 70%, 50%)`);
+                }
+            });
+
             if (categoryChart) {
                 categoryChart.destroy();
             }
@@ -413,27 +479,8 @@
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: [
-                            'rgba(233, 30, 99, 0.7)',   // Música: Pink
-                            'rgba(156, 39, 176, 0.7)',  // Álgebra: Purple
-                            'rgba(103, 58, 183, 0.7)',  // Trigonometría: Deep Purple
-                            'rgba(63, 81, 181, 0.7)',   // Inteligencia Artificial: Indigo
-                            'rgba(33, 150, 243, 0.7)',   // Electrónica: Blue
-                            'rgba(0, 188, 212, 0.7)',   // Gestión de Proyectos: Cyan
-                            'rgba(0, 150, 136, 0.7)',   // Física: Teal
-                            'rgba(76, 175, 80, 0.7)',    // Estadística: Green
-                            'rgba(139, 195, 74, 0.7)',  // Redacción de Tesis: Light Green
-                            'rgba(255, 152, 0, 0.7)',   // Programación: Orange
-                            'rgba(52, 73, 94, 0.7)',    // Redes Sociales y Videos: Dark Slate
-                            'rgba(26, 188, 156, 0.7)',   // Mensajes de Voz y Audios: Turquoise
-                            'rgba(230, 126, 34, 0.7)',   // Imágenes y Stickers: Pumpkin
-                            'rgba(158, 158, 158, 0.7)'   // Otros: Grey
-                        ],
-                        borderColor: [
-                            '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3',
-                            '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ff9800',
-                            '#34495e', '#1abc9c', '#e67e22', '#9e9e9e'
-                        ],
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
                         borderWidth: 1.5
                     }]
                 },

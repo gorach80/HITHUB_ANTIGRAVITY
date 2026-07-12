@@ -21,6 +21,7 @@ def add_header(r):
 
 # Rutas de almacenamiento
 MESSAGES_FILE = "messages.json"
+CATEGORIES_FILE = "categories.json"
 
 # Lock para evitar colisiones de Playwright
 playwright_lock = threading.Lock()
@@ -68,64 +69,64 @@ def run_git_backup():
 def update_and_merge_messages(headless=True):
     with playwright_lock:
         print(f"Iniciando ciclo de actualización (headless={headless})...")
-        new_msgs = run_whatsapp_update(headless=headless)
+        
+        def get_existing_data():
+            existing_data = {"last_update": "Nunca", "git_backup": "Sin Verificar", "messages": []}
+            if os.path.exists(MESSAGES_FILE):
+                try:
+                    with open(MESSAGES_FILE, "r", encoding="utf-8") as f:
+                        loaded = json.load(f)
+                        if isinstance(loaded, list):
+                            existing_data["messages"] = loaded
+                        elif isinstance(loaded, dict):
+                            existing_data = loaded
+                except Exception:
+                    pass
+            return existing_data
+
+        last_git_status = ["Sin Verificar"]
+
+        def save_and_backup_callback(current_extracted):
+            existing_data = get_existing_data()
+            existing_map = {m["data_id"]: m for m in existing_data.get("messages", [])}
+            
+            merged_messages = []
+            for nm in current_extracted:
+                data_id = nm["data_id"]
+                if data_id in existing_map:
+                    nm["category"] = existing_map[data_id].get("category", auto_classify(nm["text"]))
+                else:
+                    nm["category"] = auto_classify(nm["text"])
+                merged_messages.append(nm)
+                
+            new_data_ids = {nm["data_id"] for nm in current_extracted}
+            for old_id, old_msg in existing_map.items():
+                if old_id not in new_data_ids:
+                    merged_messages.append(old_msg)
+                    
+            now_str = datetime.datetime.now().strftime("%d/%m/%Y, %I:%M %p")
+            existing_data["last_update"] = now_str
+            existing_data["messages"] = merged_messages
+            
+            with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+                json.dump(existing_data, f, ensure_ascii=False, indent=4)
+                
+            git_status = run_git_backup()
+            last_git_status[0] = git_status
+            existing_data["git_backup"] = git_status
+            
+            with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+                json.dump(existing_data, f, ensure_ascii=False, indent=4)
+                
+            print(f"Sincronizacion en tiempo real ejecutada: {len(merged_messages)} mensajes en messages.json. Git: {git_status}")
+
+        new_msgs = run_whatsapp_update(headless=headless, on_update_callback=save_and_backup_callback)
         
         if new_msgs is None:
             raise Exception("No se pudo extraer información de WhatsApp Web. Verifica tu sesión.")
             
-        # Cargar base de datos existente
-        existing_data = {"last_update": "Nunca", "git_backup": "Sin Verificar", "messages": []}
-        if os.path.exists(MESSAGES_FILE):
-            try:
-                with open(MESSAGES_FILE, "r", encoding="utf-8") as f:
-                    loaded = json.load(f)
-                    if isinstance(loaded, list):
-                        existing_data["messages"] = loaded
-                    elif isinstance(loaded, dict):
-                        existing_data = loaded
-            except Exception:
-                pass
-                
-        # Mapear mensajes existentes por su data_id para conservar su categoría
-        existing_map = {m["data_id"]: m for m in existing_data.get("messages", [])}
-        
-        merged_messages = []
-        
-        # Procesar nuevos mensajes obtenidos
-        for nm in new_msgs:
-            data_id = nm["data_id"]
-            # Si el mensaje ya existía, conservamos su categoría (especialmente las modificadas manualmente)
-            if data_id in existing_map:
-                nm["category"] = existing_map[data_id].get("category", auto_classify(nm["text"]))
-            else:
-                # Si es nuevo, lo auto-clasificamos
-                nm["category"] = auto_classify(nm["text"])
-            merged_messages.append(nm)
-            
-        # Preservar mensajes antiguos que se hayan salido del viewport o historial actual de Playwright
-        new_data_ids = {nm["data_id"] for nm in new_msgs}
-        for old_id, old_msg in existing_map.items():
-            if old_id not in new_data_ids:
-                merged_messages.append(old_msg)
-                
-        # Registrar metadatos
-        now_str = datetime.datetime.now().strftime("%d/%m/%Y, %I:%M %p")
-        existing_data["last_update"] = now_str
-        existing_data["messages"] = merged_messages
-        
-        # Guardar en archivo local
-        with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=4)
-            
-        # Ejecutar respaldo de Git
-        git_status = run_git_backup()
-        existing_data["git_backup"] = git_status
-        
-        # Guardar metadatos actualizados con el estado de Git
-        with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=4)
-            
-        return len(merged_messages), git_status
+        save_and_backup_callback(new_msgs)
+        return len(new_msgs), last_git_status[0]
 
 # Hilo planificador en segundo plano
 def scheduler_worker():
@@ -331,6 +332,103 @@ def manual_update():
     try:
         count, git_status = update_and_merge_messages(headless=False)
         return jsonify({"success": True, "count": count, "git_backup": git_status})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+def load_categories():
+    if os.path.exists(CATEGORIES_FILE):
+        try:
+            with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    # Defaults fallback
+    defaults = ["Música", "Álgebra", "Trigonometría", "Inteligencia Artificial", "Electrónica", "Gestión de Proyectos", "Física", "Estadística", "Redacción de Tesis", "Programación", "Redes Sociales y Videos", "Mensajes de Voz y Audios", "Imágenes y Stickers", "Otros"]
+    with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
+        json.dump(defaults, f, ensure_ascii=False, indent=4)
+    return defaults
+
+@app.route('/api/categories', methods=['GET'])
+def get_categories():
+    return jsonify(load_categories())
+
+@app.route('/api/categories/add', methods=['POST'])
+def add_category():
+    try:
+        req = request.get_json()
+        name = req.get('name', '').strip()
+        if not name:
+            return jsonify({"success": False, "error": "Nombre vacío"}), 400
+        
+        categories = load_categories()
+        if name in categories:
+            return jsonify({"success": False, "error": "La categoría ya existe"}), 400
+            
+        # Añadir antes de 'Otros' si existe
+        if "Otros" in categories:
+            categories.remove("Otros")
+        categories.append(name)
+        categories.append("Otros")
+        
+        with open(CATEGORIES_FILE, "w", encoding="utf-8") as f:
+            json.dump(categories, f, ensure_ascii=False, indent=4)
+            
+        # Git backup de las categorías
+        try:
+            subprocess.run(["git", "add", CATEGORIES_FILE], check=True)
+            subprocess.run(["git", "commit", "-m", f"Add custom category: {name}"], capture_output=True)
+            subprocess.run(["git", "push", "origin", "main"], capture_output=True)
+        except Exception:
+            pass
+            
+        return jsonify({"success": True, "categories": categories})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/messages/add_external', methods=['POST'])
+def add_external_message():
+    try:
+        req = request.get_json()
+        text = req.get('text', '').strip()
+        sender = req.get('sender', 'Yo (Tú)').strip()
+        category = req.get('category', 'Otros').strip()
+        timestamp = req.get('timestamp', '').strip()
+        
+        if not text:
+            return jsonify({"success": False, "error": "El mensaje no tiene texto"}), 400
+            
+        data_id = generate_message_hash(timestamp, sender, text)
+        
+        data = load_messages_data()
+        messages = data.get("messages", [])
+        existing_map = {m["data_id"]: m for m in messages}
+        
+        if data_id in existing_map:
+            existing_map[data_id]["category"] = category
+        else:
+            new_msg = {
+                "data_id": data_id,
+                "sender": sender,
+                "timestamp": timestamp,
+                "text": text,
+                "category": category
+            }
+            messages.append(new_msg)
+            
+        data["messages"] = messages
+        now_str = datetime.datetime.now().strftime("%d/%m/%Y, %I:%M %p")
+        data["last_update"] = now_str
+        
+        with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+            
+        git_status = run_git_backup()
+        data["git_backup"] = git_status
+        
+        with open(MESSAGES_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+            
+        return jsonify({"success": True, "git_backup": git_status})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
