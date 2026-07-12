@@ -7,8 +7,28 @@ import subprocess
 import threading
 import re
 import hashlib
+import urllib.request
+import urllib.parse
+from html.parser import HTMLParser
 from flask import Flask, jsonify, render_template, request
 from whatsapp_classifier import run_whatsapp_update, auto_classify
+
+# ---- Open Graph parser ----
+class OGParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.og = {}
+    def handle_starttag(self, tag, attrs):
+        if tag == 'meta':
+            d = dict(attrs)
+            prop = d.get('property', d.get('name', ''))
+            content = d.get('content', '')
+            if prop in ('og:image', 'og:title', 'og:description', 'og:site_name'):
+                self.og[prop] = content
+            elif prop == 'twitter:image' and 'og:image' not in self.og:
+                self.og['og:image'] = content
+            elif prop == 'twitter:title' and 'og:title' not in self.og:
+                self.og['og:title'] = content
 
 app = Flask(__name__)
 
@@ -431,6 +451,38 @@ def add_external_message():
         return jsonify({"success": True, "git_backup": git_status})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/og-preview', methods=['GET'])
+def og_preview():
+    """Extrae metadatos Open Graph de una URL para mostrar miniatura en la web."""
+    url = request.args.get('url', '').strip()
+    if not url or not url.startswith('http'):
+        return jsonify({"success": False, "error": "URL inválida"}), 400
+    try:
+        req = urllib.request.Request(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (compatible; WhatsAppClassifier/1.0)',
+                'Accept': 'text/html'
+            }
+        )
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            html_bytes = resp.read(8192)  # solo primeros 8KB para rapidez
+            html_text = html_bytes.decode('utf-8', errors='ignore')
+        
+        parser = OGParser()
+        parser.feed(html_text)
+        og = parser.og
+        
+        return jsonify({
+            "success": True,
+            "image": og.get('og:image', ''),
+            "title": og.get('og:title', ''),
+            "description": og.get('og:description', ''),
+            "site": og.get('og:site_name', '')
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 200
 
 @app.route('/api/messages/delete', methods=['POST'])
 def delete_message():

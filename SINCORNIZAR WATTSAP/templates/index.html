@@ -343,12 +343,17 @@
                     `<option value="${cat}" ${msg.category === cat ? 'selected' : ''}>${cat}</option>`
                 ).join('');
 
+                // Detect first URL in message text
+                const urlMatch = (msg.text || '').match(/(https?:\/\/[^\s]+)/);
+                const firstUrl = urlMatch ? urlMatch[1] : null;
+
                 card.innerHTML = `
                     <div class="message-meta">
                         <span class="sender"><i class="fa-solid fa-user"></i> ${msg.sender}</span>
                         <span class="time"><i class="fa-solid fa-clock"></i> ${msg.timestamp || 'Sin fecha'}</span>
                     </div>
                     <div class="message-body">${formattedText}</div>
+                    ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
                     <div class="message-actions">
                         <div class="category-selector">
                             <label><i class="fa-solid fa-tag"></i> Categoría:</label>
@@ -362,6 +367,11 @@
                     </div>
                 `;
                 container.appendChild(card);
+
+                // Load OG preview asynchronously for cards with URLs
+                if (firstUrl) {
+                    loadOGPreview(card.querySelector('.og-preview-container'), firstUrl);
+                }
             });
         }
 
@@ -372,6 +382,62 @@
             return text.replace(urlRegex, (url) => {
                 return `<a href="${url}" target="_blank" class="chat-link"><i class="fa-solid fa-link"></i> Enlace <i class="fa-solid fa-up-right-from-square small-icon"></i></a>`;
             }).replace(/\n/g, '<br>');
+        }
+
+        // Load Open Graph preview for a URL
+        const ogCache = {};
+        function loadOGPreview(container, url) {
+            if (!container) return;
+
+            // Use cache to avoid duplicate fetches
+            if (ogCache[url] !== undefined) {
+                renderOGPreview(container, ogCache[url], url);
+                return;
+            }
+
+            const encodedUrl = encodeURIComponent(url);
+            fetch(`/api/og-preview?url=${encodedUrl}`)
+                .then(r => r.json())
+                .then(data => {
+                    ogCache[url] = data;
+                    renderOGPreview(container, data, url);
+                })
+                .catch(() => {
+                    container.remove();
+                });
+        }
+
+        function renderOGPreview(container, data, url) {
+            if (!data.success || !data.image) {
+                container.remove();
+                return;
+            }
+
+            // Detect site type for icon
+            let siteIcon = 'fa-globe';
+            if (url.includes('tiktok.com')) siteIcon = 'fa-tiktok';
+            else if (url.includes('youtube.com') || url.includes('youtu.be')) siteIcon = 'fa-youtube';
+            else if (url.includes('instagram.com')) siteIcon = 'fa-instagram';
+            else if (url.includes('facebook.com') || url.includes('fb.com')) siteIcon = 'fa-facebook';
+            else if (url.includes('twitter.com') || url.includes('x.com')) siteIcon = 'fa-x-twitter';
+            else if (url.includes('github.com')) siteIcon = 'fa-github';
+
+            const siteName = data.site || new URL(url).hostname.replace('www.', '');
+            const title = data.title ? data.title.substring(0, 80) : '';
+
+            container.innerHTML = `
+                <a href="${url}" target="_blank" class="og-card">
+                    <img class="og-thumb" src="${data.image}" alt="Vista previa" loading="lazy"
+                         onerror="this.closest('.og-preview-container').remove()">
+                    <div class="og-info">
+                        <span class="og-site"><i class="fa-brands ${siteIcon}"></i> ${siteName}</span>
+                        ${title ? `<p class="og-title">${title}</p>` : ''}
+                    </div>
+                </a>
+            `;
+            container.style.opacity = '0';
+            container.style.transition = 'opacity 0.4s';
+            requestAnimationFrame(() => { container.style.opacity = '1'; });
         }
 
         // Delete a message by data_id
