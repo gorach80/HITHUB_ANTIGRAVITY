@@ -643,18 +643,15 @@
                     </div>
                     <div class="message-content-wrapper">
                         <div class="message-body">${formattedText}</div>
-                        ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
-                    </div>
-                    <div class="message-actions">
-                        <div class="category-selector">
-                            <label><i class="fa-solid fa-tag"></i> Categoría:</label>
-                            <select onchange="updateMessageCategory('${msg.data_id}', this.value, this)">
-                                ${optionsHtml}
-                            </select>
+                        <div class="message-right-column">
+                            ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
+                            <div class="category-selector">
+                                <label><i class="fa-solid fa-tag"></i> Categoría:</label>
+                                <select onchange="updateMessageCategory('${msg.data_id}', this.value, this)">
+                                    ${optionsHtml}
+                                </select>
+                            </div>
                         </div>
-                        <button class="btn-delete" onclick="deleteMessage('${msg.data_id}', this)" title="Eliminar mensaje">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
                     </div>
                 `;
                 container.appendChild(card);

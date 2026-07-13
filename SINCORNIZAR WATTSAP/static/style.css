@@ -196,7 +196,7 @@ body {
 
 .card {
     background: rgba(255, 255, 255, 0.02);
-    border: 1px border-solid var(--border-color);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 24px;
 }
@@ -426,6 +426,15 @@ body {
     width: 100%;
 }
 
+.message-right-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
+    width: 350px;
+}
+
 .message-body {
     font-size: 0.95rem;
     line-height: 1.5;
@@ -616,6 +625,11 @@ body {
     .message-content-wrapper {
         flex-direction: column;
         gap: 12px;
+    }
+
+    .message-right-column {
+        width: 100%;
+        align-items: stretch;
     }
 
     .og-preview-container {
