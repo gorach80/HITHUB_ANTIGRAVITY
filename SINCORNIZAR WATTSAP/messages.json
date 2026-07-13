@@ -143,8 +143,8 @@
             "sender": "RM",
             "timestamp": "8:47 p.m., 12/7/2026",
             "text": "TikTok · TipsRecetas\nvm.tiktok.com\n¡Echa un vistazo al vídeo de TipsRecetas! #TikTok Abre TikTok para ver la publicación de  @TipsRecetas Elimina el hongo cándida de un... https://vm.tiktok.com/ZSXYKNxNp/ Esta publicación se ha compartido a través de TikTok Lite. Para disfrutar de más publicaciones, descarga TikTok Lite: https://www.tiktok.com/tiktoklite",
-            "category": "Otros",
-            "classified": false
+            "category": "Medicina",
+            "classified": true
         },
         {
             "data_id": "707F807BC8830D02D734BB9054A2C6FC",
@@ -187,5 +187,5 @@
             "classified": false
         }
     ],
-    "ip_address": "192.168.100.167"
+    "ip_address": "172.17.72.176"
 }
