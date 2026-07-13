@@ -402,9 +402,9 @@ body {
     align-items: center;
     font-size: 0.8rem;
     color: var(--text-secondary);
-    padding-bottom: 0px;
-    margin-bottom: 0px;
-    transition: margin-bottom 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .meta-left {
@@ -433,66 +433,37 @@ body {
     gap: 5px;
 }
 
-/* Hover Expand Effect for Desktop */
-@media (min-width: 769px) {
-    .message-card:hover .message-meta {
-        margin-bottom: 8px;
+.message-content-wrapper {
+    width: 100%;
+}
+
+.message-content-wrapper.has-preview {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .message-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .meta-left {
+        flex-direction: row;
+        width: 100%;
     }
 
     .meta-right {
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-    }
-
-    .message-card:hover .meta-right {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .message-content-wrapper {
         width: 100%;
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin-top 0.3s ease;
-        margin-top: 0;
-        pointer-events: none;
-    }
-
-    .message-card:hover .message-content-wrapper {
-        max-height: 600px;
-        opacity: 1;
-        margin-top: 12px;
-        pointer-events: auto;
+        justify-content: space-between;
     }
 
     .message-content-wrapper.has-preview {
-        display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 20px;
-        align-items: start;
-    }
-}
-
-/* Always expanded on mobile */
-@media (max-width: 768px) {
-    .message-meta {
-        margin-bottom: 8px;
-    }
-    
-    .message-content-wrapper {
-        width: 100%;
-        max-height: none;
-        opacity: 1;
-        margin-top: 12px;
-    }
-
-    .message-content-wrapper.has-preview {
-        display: grid;
         grid-template-columns: 1fr;
         gap: 12px;
-        align-items: start;
     }
 }
 
