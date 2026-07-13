@@ -627,9 +627,17 @@
                     )
                 ].join('');
 
-                // Detect first URL in message text
+                // Detect first URL in message text (supporting both absolute and schemeless URLs)
+                let firstUrl = null;
                 const urlMatch = (msg.text || '').match(/(https?:\/\/[^\s]+)/);
-                const firstUrl = urlMatch ? urlMatch[1] : null;
+                if (urlMatch) {
+                    firstUrl = urlMatch[1];
+                } else {
+                    const noHttpMatch = (msg.text || '').match(/(^|\s)([a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}(?:\/[^\s]*)?)/);
+                    if (noHttpMatch) {
+                        firstUrl = 'https://' + noHttpMatch[2];
+                    }
+                }
 
                 card.innerHTML = `
                     <div class="message-meta">
@@ -687,13 +695,26 @@
             updateBulkBar();
         }
 
-        // Auto-link URLs
+        // Auto-link URLs (supporting absolute and schemeless domains)
         function formatLinks(text) {
             if (!text) return "";
+            // Replace http/https URLs first
             const urlRegex = /(https?:\/\/[^\s]+)/g;
-            return text.replace(urlRegex, (url) => {
+            let formatted = text.replace(urlRegex, (url) => {
                 return `<a href="${url}" target="_blank" class="chat-link"><i class="fa-solid fa-link"></i> Enlace <i class="fa-solid fa-up-right-from-square small-icon"></i></a>`;
-            }).replace(/\n/g, '<br>');
+            });
+            
+            // Replace remaining domain patterns (like vm.tiktok.com) that don't have http prefix
+            const domainRegex = /(^|\s)([a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}(?:\/[^\s]*)?)/g;
+            formatted = formatted.replace(domainRegex, (match, space, domain) => {
+                if (domain.startsWith('http') || match.includes('href') || match.includes('class')) {
+                    return match;
+                }
+                const fullUrl = 'https://' + domain;
+                return `${space}<a href="${fullUrl}" target="_blank" class="chat-link"><i class="fa-solid fa-link"></i> Enlace <i class="fa-solid fa-up-right-from-square small-icon"></i></a>`;
+            });
+
+            return formatted.replace(/\n/g, '<br>');
         }
 
         // Load Open Graph preview for a URL
