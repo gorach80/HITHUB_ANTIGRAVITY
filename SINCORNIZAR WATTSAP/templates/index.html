@@ -633,25 +633,25 @@
 
                 card.innerHTML = `
                     <div class="message-meta">
-                        <div>
+                        <div class="meta-left">
                             <span class="sender"><i class="fa-solid fa-user"></i> ${msg.sender}</span>
                             <span class="time"><i class="fa-solid fa-clock"></i> ${msg.timestamp || 'Sin fecha'}</span>
                         </div>
-                        <button class="btn-delete-msg" onclick="deleteIndividualMessage('${msg.data_id}', this.closest('.message-card'))" title="Borrar mensaje">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                    <div class="message-content-wrapper">
-                        <div class="message-body">${formattedText}</div>
-                        <div class="message-right-column">
-                            ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
-                            <div class="category-selector">
-                                <label><i class="fa-solid fa-tag"></i> Categoría:</label>
+                        <div class="meta-right">
+                            <div class="category-selector-header">
+                                <label><i class="fa-solid fa-tag"></i> Pestaña:</label>
                                 <select onchange="updateMessageCategory('${msg.data_id}', this.value, this)">
                                     ${optionsHtml}
                                 </select>
                             </div>
+                            <button class="btn-delete-msg" onclick="deleteIndividualMessage('${msg.data_id}', this.closest('.message-card'))" title="Borrar mensaje">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
+                    </div>
+                    <div class="message-content-wrapper ${firstUrl ? 'has-preview' : ''}">
+                        <div class="message-body">${formattedText}</div>
+                        ${firstUrl ? `<div class="og-preview-container" data-url="${firstUrl}"><div class="og-loading"><i class="fa-solid fa-spinner fa-spin"></i> Cargando vista previa...</div></div>` : ''}
                     </div>
                 `;
                 container.appendChild(card);
