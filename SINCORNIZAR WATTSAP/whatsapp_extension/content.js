@@ -258,10 +258,15 @@ function showCategoriesPopup(textToClassify, rect, bubbleElement) {
         if (!popupMenu) return; // Evitar carrera asíncrona si el menú se cerró
         
         if (response && response.success) {
-            response.categories.forEach(cat => {
+            const allCategories = ["Recientes", ...response.categories];
+            allCategories.forEach(cat => {
                 const opt = document.createElement('div');
                 opt.className = 'wa-classifier-option';
                 opt.textContent = cat;
+                if (cat === "Recientes") {
+                    opt.style.borderLeft = '3px solid #10b981';
+                    opt.style.fontWeight = '600';
+                }
                 opt.addEventListener('click', (optEvent) => {
                     optEvent.stopPropagation();
                     classifyMessage(textToClassify, bubbleElement, cat);

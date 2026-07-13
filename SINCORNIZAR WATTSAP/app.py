@@ -584,15 +584,21 @@ def add_external_message():
         messages = data.get("messages", [])
         existing_map = {m["data_id"]: m for m in messages}
         
+        is_recientes = (category.lower() == 'recientes')
+        msg_category = 'Otros' if is_recientes else category
+        msg_classified = False if is_recientes else True
+
         if data_id in existing_map:
-            existing_map[data_id]["category"] = category
+            existing_map[data_id]["category"] = msg_category
+            existing_map[data_id]["classified"] = msg_classified
         else:
             new_msg = {
                 "data_id": data_id,
                 "sender": sender,
                 "timestamp": timestamp,
                 "text": text,
-                "category": category
+                "category": msg_category,
+                "classified": msg_classified
             }
             messages.append(new_msg)
             
