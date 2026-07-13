@@ -620,9 +620,12 @@
                 const formattedText = formatLinks(msg.text);
 
                 // Options for categories dropdown
-                const optionsHtml = globalCategories.map(cat => 
-                    `<option value="${cat}" ${msg.category === cat ? 'selected' : ''}>${cat}</option>`
-                ).join('');
+                const optionsHtml = [
+                    `<option value="recientes" ${!msg.classified ? 'selected' : ''}>Recientes (Sin clasificar)</option>`,
+                    ...globalCategories.map(cat => 
+                        `<option value="${cat}" ${msg.classified && msg.category === cat ? 'selected' : ''}>${cat}</option>`
+                    )
+                ].join('');
 
                 // Detect first URL in message text
                 const urlMatch = (msg.text || '').match(/(https?:\/\/[^\s]+)/);
@@ -809,15 +812,25 @@
                     // Actualizar datos locales
                     const msg = messagesData.find(m => m.data_id === dataId);
                     if (msg) {
-                        msg.category = newCategory;
-                        msg.classified = true;
+                        if (newCategory === 'recientes') {
+                            msg.category = 'Otros';
+                            msg.classified = false;
+                        } else {
+                            msg.category = newCategory;
+                            msg.classified = true;
+                        }
                     }
                     updateChart(messagesData);
                     renderFilterButtons(); // Actualizar badge de Recientes
 
-                    // Si estamos en Recientes, animar y retirar la card
-                    if (activeCategory === 'recientes') {
-                        showToast(`✅ Clasificado como "${newCategory}"`, 'success');
+                    // Determinar si el mensaje debe desaparecer de la vista actual
+                    const shouldRemove = (activeCategory === 'recientes' && newCategory !== 'recientes') || 
+                                         (activeCategory !== 'recientes' && newCategory === 'recientes') ||
+                                         (activeCategory !== 'recientes' && newCategory !== activeCategory);
+
+                    if (shouldRemove) {
+                        const displayCatName = newCategory === 'recientes' ? 'Recientes' : newCategory;
+                        showToast(`✅ Movido a "${displayCatName}"`, 'success');
                         const card = cardElement ? cardElement.closest('.message-card') : null;
                         if (card) {
                             card.style.transition = 'opacity 0.4s, transform 0.4s, max-height 0.5s';
@@ -826,14 +839,11 @@
                             setTimeout(() => {
                                 card.remove();
                                 updateBulkBar();
-                                // Si ya no quedan recientes, mostrar estado vacío
-                                const remaining = messagesData.filter(m => !m.classified).length;
-                                if (remaining === 0) {
-                                    document.getElementById('messages-container').innerHTML = `
-                                        <div class="empty-state">
-                                            <i class="fa-solid fa-check-circle" style="color:#10b981"></i>
-                                            <p>¡Todo clasificado! No hay mensajes pendientes.</p>
-                                        </div>`;
+                                
+                                // Si ya no quedan mensajes visibles en el contenedor
+                                const container = document.getElementById('messages-container');
+                                if (container.querySelectorAll('.message-card').length === 0) {
+                                    filterMessages(activeCategory);
                                 }
                             }, 420);
                         }

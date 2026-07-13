@@ -215,8 +215,12 @@ def update_category():
         found = False
         for msg in data.get("messages", []):
             if msg["data_id"] == data_id:
-                msg["category"] = new_category
-                msg["classified"] = True   # marcado como clasificado manualmente
+                if new_category == "recientes":
+                    msg["category"] = "Otros"
+                    msg["classified"] = False
+                else:
+                    msg["category"] = new_category
+                    msg["classified"] = True   # marcado como clasificado manualmente
                 found = True
                 break
                 
