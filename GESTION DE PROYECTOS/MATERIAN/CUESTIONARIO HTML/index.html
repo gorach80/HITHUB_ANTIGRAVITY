@@ -290,9 +290,14 @@
       <label for="cfgBackupUrl">URL del Apps Script Web App</label>
       <input type="text" id="cfgBackupUrl" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:13px;">
     </div>
-    <div class="macts">
-      <button class="mbtn canc" onclick="closeConfigModal()">Cancelar</button>
-      <button class="mbtn conf" onclick="saveConfig()" style="background:linear-gradient(135deg,var(--ac),#059669); color:#fff; box-shadow:0 4px 12px var(--acg);">Guardar</button>
+    <div class="macts" style="display:flex; flex-direction:column; gap:12px;">
+      <div style="display:flex; gap:10px; width:100%;">
+        <button class="mbtn canc" onclick="closeConfigModal()" style="flex:1; margin:0;">Cancelar</button>
+        <button class="mbtn conf" onclick="saveConfig()" style="flex:1; margin:0; background:linear-gradient(135deg,var(--ac),#059669); color:#fff; box-shadow:0 4px 12px var(--acg);">Guardar URL</button>
+      </div>
+      <button class="mbtn conf" onclick="loginAsDocente()" style="width:100%; margin:0; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.25);">
+        <i class="fas fa-user-shield"></i> Ingresar al Examen como Docente (Sin Registro)
+      </button>
     </div>
   </div>
 </div>
@@ -643,6 +648,10 @@ function mLogin(){
 /* --- CONTROL DE DUPLICADOS (LOCAL Y EN LA NUBE) --- */
 function verifyRegistration(acc, onAllowed) {
     const email = acc.email.trim().toLowerCase();
+    if (email === 'luis.palate@upse.edu.ec') {
+        onAllowed();
+        return;
+    }
     const er = document.getElementById('lErr');
     if (er) er.style.display = 'none';
 
@@ -712,6 +721,25 @@ function saveConfig() {
     closeConfigModal();
     toast('Endpoint de respaldo configurado.', 'success');
 }
+function loginAsDocente() {
+    CU = {
+        name: "Ing. Luis A Palate G. Mg",
+        email: "luis.palate@upse.edu.ec",
+        isDocente: true
+    };
+    closeConfigModal();
+    setupInstr();
+    showScr('sInstr');
+    toast('Acceso docente concedido (Modo Auditoría).', 'success');
+}
+function updateExamHeader(label) {
+    const el = document.getElementById('eLbl');
+    if (CU && CU.isDocente) {
+        el.innerHTML = `${label} <span style="font-size:11px; background:var(--ac); color:#000; padding:2px 6px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; text-transform:uppercase;">Modo Auditoría Docente</span>`;
+    } else {
+        el.textContent = label;
+    }
+}
 document.querySelector('#sLogin .ltitle').addEventListener('click', (e) => {
     if (e.detail === 3) openConfigModal();
 });
@@ -741,7 +769,7 @@ function startExam(){
     buildQs();
     showQ(0);
     startTimer();
-    document.getElementById('eLbl').textContent='Sección 1 — Verdadero / Falso';
+    updateExamHeader('Sección 1 — Verdadero / Falso');
     showScr('sExam');
 }
 
@@ -757,8 +785,8 @@ function showTransition(sec){
     const t=document.getElementById('transTitle'),s=document.getElementById('transSub'),sm=document.getElementById('transSum'),b=document.getElementById('transBtn');
     if(sec===1){t.textContent='Sección 1 completada';s.textContent='Has finalizado Verdadero / Falso. Resumen:';const r=secScores.s1;sm.innerHTML=`<div class="sst sok"><div class="sv">${r.correct}</div><div class="sl">Correctas</div></div><div class="sst sbad"><div class="sv">${r.incorrect}</div><div class="sl">Incorrectas</div></div><div class="sst semp"><div class="sv">${r.empty}</div><div class="sl">Sin responder</div></div>`;b.innerHTML='<i class="fas fa-arrow-right"></i> Continuar a Sección 2 — Selección única';}
     else if(sec===2){t.textContent='Sección 2 completada';s.textContent='Has finalizado Selección única. Resumen:';const r=secScores.s2;sm.innerHTML=`<div class="sst sok"><div class="sv">${r.correct}</div><div class="sl">Correctas</div></div><div class="sst sbad"><div class="sv">${r.incorrect}</div><div class="sl">Incorrectas</div></div><div class="sst semp"><div class="sv">${r.empty}</div><div class="sl">Sin responder</div></div>`;b.innerHTML='<i class="fas fa-arrow-right"></i> Continuar a Sección 3 — Ordenamiento';}
-    else if(sec===3){t.textContent='Sección 3 completada';s.textContent='Has finalizado Ordenamiento. Resumen:';const r=secScores.s3;sm.innerHTML=`<div class="sst ssc"><div class="sv">${r.score}</div><div class="sl">Puntos (de 4)</div></div><div class="sst sok"><div class="sv">${r.correct}</div><div class="sl">Posiciones correctas</div></div><div class="sst sbad"><div class="sv">${r.incorrect}</div><div class="sl">Posiciones incorrectas</div></div>`;b.innerHTML='<i class="fas fa-arrow-right"></i> Continuar a Sección 4 — Completamiento';}
-    else if(sec===4){t.textContent='Sección 4 completada';s.textContent='Has finalizado Completamiento. Resumen:';const r=secScores.s4;sm.innerHTML=`<div class="sst ssc"><div class="sv">${r.score}</div><div class="sl">Puntos (de 20)</div></div><div class="sst sok"><div class="sv">${r.correct}</div><div class="sl">Respuestas OK</div></div><div class="sst sbad"><div class="sv">${r.incorrect}</div><div class="sl">Incorrectas</div></div>`;b.innerHTML='<i class="fas fa-arrow-right"></i> Continuar a Sección 5 — Unir Columnas';}
+    else if(sec===3){t.textContent='Sección 3 completada';s.textContent='Has finalizado Ordenamiento. Resumen:';const r=secScores.s3;sm.innerHTML=`<div class="sst ssc"><div class="sv">${r.score}</div><div class="sl">Puntos (de 5)</div></div><div class="sst sok"><div class="sv">${r.correct}</div><div class="sl">Posiciones correctas</div></div><div class="sst sbad"><div class="sv">${r.incorrect}</div><div class="sl">Posiciones incorrectas</div></div>`;b.innerHTML='<i class="fas fa-arrow-right"></i> Continuar a Sección 4 — Completamiento';}
+    else if(sec===4){t.textContent='Sección 4 completada';s.textContent='Has finalizado Completamiento. Resumen:';const r=secScores.s4;sm.innerHTML=`<div class="sst ssc"><div class="sv">${r.score}</div><div class="sl">Puntos (de 10)</div></div><div class="sst sok"><div class="sv">${r.correct}</div><div class="sl">Respuestas OK</div></div><div class="sst sbad"><div class="sv">${r.incorrect}</div><div class="sl">Incorrectas</div></div>`;b.innerHTML='<i class="fas fa-arrow-right"></i> Continuar a Sección 5 — Unir Columnas';}
     else if(sec===5){submitExam();return;}
     showScr('sTrans');
 }
@@ -766,7 +794,7 @@ function showTransition(sec){
 function nextSection(){
     curSec++;timeRem=SEC_TIME[curSec];
     const labels=['','Sección 1 — Verdadero / Falso','Sección 2 — Selección única','Sección 3 — Ordenamiento','Sección 4 — Completamiento','Sección 5 — Unir las Columnas'];
-    document.getElementById('eLbl').textContent=labels[curSec];
+    updateExamHeader(labels[curSec]);
     curQ=SEC_START[curSec];buildMap();buildQs();showQ(curQ);startTimer();showScr('sExam');
 }
 
@@ -797,14 +825,51 @@ function updateProg(){const s=SEC_START[curSec],e=SEC_END[curSec];let c=0;for(le
    CONSTRUIR PREGUNTAS
    ================================================================== */
 function buildQs(){const c=document.getElementById('qCont');c.innerHTML='';
+    const isDocente = CU && CU.isDocente;
     // S1: V/F
-    S1.forEach((q,i)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+i;card.style.display='none';card.innerHTML=`<div class="qnum">${i+1}</div><div class="qtxt">${q.text}</div><div class="vfops"><div class="vfop" data-q="${i}" data-v="true" onclick="selVF(${i},true)"><i class="fas fa-check"></i> Verdadero</div><div class="vfop" data-q="${i}" data-v="false" onclick="selVF(${i},false)"><i class="fas fa-times"></i> Falso</div></div><div class="jarea" id="ja-'+i+'"><div class="jlbl"><i class="fas fa-pen-nib"></i> Justifica tu respuesta</div><textarea class="jtxt" id="jt-${i}" placeholder="Explica por qué..." oninput="updJust(${i})"></textarea></div><div class="qst" id="qs-${i}"><i class="fas fa-info-circle"></i><span></span></div>`;c.appendChild(card);});
+    S1.forEach((q,i)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+i;card.style.display='none';
+        let hintHtml = '';
+        if (isDocente) {
+            hintHtml = `<div class="docente-hint" style="margin-top:16px; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
+                <strong style="color:var(--ac);"><i class="fas fa-user-shield"></i> Docente - Respuesta Correcta:</strong> <strong>${q.answer ? 'Verdadero' : 'Falso'}</strong>.<br>
+                <span style="font-size:12px; color:var(--fg2);"><strong>Explicación:</strong> ${q.expl}</span><br>
+                <a href="#" onclick="autoSolveS1(${i}); return false;" style="color:var(--ac); text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;"><i class="fas fa-magic"></i> Resolver y Justificar</a>
+            </div>`;
+        }
+        card.innerHTML=`<div class="qnum">${i+1}</div><div class="qtxt">${q.text}</div><div class="vfops"><div class="vfop" data-q="${i}" data-v="true" onclick="selVF(${i},true)"><i class="fas fa-check"></i> Verdadero</div><div class="vfop" data-q="${i}" data-v="false" onclick="selVF(${i},false)"><i class="fas fa-times"></i> Falso</div></div><div class="jarea" id="ja-${i}"><div class="jlbl"><i class="fas fa-pen-nib"></i> Justifica tu respuesta</div><textarea class="jtxt" id="jt-${i}" placeholder="Explica por qué..." oninput="updJust(${i})"></textarea></div><div class="qst" id="qs-${i}"><i class="fas fa-info-circle"></i><span></span></div>${hintHtml}`;
+        c.appendChild(card);
+    });
     // S2: MC
-    S2.forEach((q,i)=>{const gi=i+10;const card=document.createElement('div');card.className='qcard';card.id='q-'+gi;card.style.display='none';let oh='<div class="mcopts">';const lt=['A','B','C','D'];q.opts.forEach((o,oi)=>{oh+=`<div class="mcop" data-q="${gi}" data-o="${oi}" onclick="selMC(${gi},${oi})"><span class="mclt">${lt[oi]}</span><span class="mctx">${o}</span></div>`;});oh+='</div>';card.innerHTML=`<div class="qnum">${gi+1}</div><div class="qtxt">${q.text}</div>${oh}`;c.appendChild(card);});
+    S2.forEach((q,i)=>{const gi=i+10;const card=document.createElement('div');card.className='qcard';card.id='q-'+gi;card.style.display='none';let oh='<div class="mcopts">';const lt=['A','B','C','D'];q.opts.forEach((o,oi)=>{oh+=`<div class="mcop" data-q="${gi}" data-o="${oi}" onclick="selMC(${gi},${oi})"><span class="mclt">${lt[oi]}</span><span class="mctx">${o}</span></div>`;});oh+='</div>';
+        let hintHtml = '';
+        if (isDocente) {
+            hintHtml = `<div class="docente-hint" style="margin-top:16px; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
+                <strong style="color:var(--ac);"><i class="fas fa-user-shield"></i> Docente - Respuesta Correcta:</strong> <strong>${lt[q.c]}. ${q.opts[q.c]}</strong>.<br>
+                <span style="font-size:12px; color:var(--fg2);"><strong>Explicación:</strong> ${q.expl}</span><br>
+                <a href="#" onclick="autoSolveS2(${i}); return false;" style="color:var(--ac); text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;"><i class="fas fa-magic"></i> Seleccionar Correcta</a>
+            </div>`;
+        }
+        card.innerHTML=`<div class="qnum">${gi+1}</div><div class="qtxt">${q.text}</div>${oh}${hintHtml}`;c.appendChild(card);});
     // S3: Ordenamiento
-    const s3i=SEC_START[3];S3.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s3i+ii);card.style.display='none';let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-sort-amount-down"></i> ${item.title}</div><div class="ord-pool" id="ordpool-${ii}">`;const order=answers[s3i+ii].order;order.forEach((si,pi)=>{sh+=`<div class="ord-sentence" draggable="true" data-ii="${ii}" data-pi="${pi}" id="ords-${ii}-${pi}"><span class="ord-nums">${pi+1}</span><span>${item.sentences[si]}</span><div class="ord-arrows"><button onclick="moveOrd(${ii},${pi},-1)" title="Subir"><i class="fas fa-chevron-up"></i></button><button onclick="moveOrd(${ii},${pi},1)" title="Bajar"><i class="fas fa-chevron-down"></i></button></div></div>`;});sh+=`</div><div class="ord-result" id="ordres-${ii}"></div><button class="ord-check" id="ordchk-${ii}" onclick="checkOrd(${ii})"><i class="fas fa-check"></i> Verificar orden</button>`;card.innerHTML=sh;c.appendChild(card);});
+    const s3i=SEC_START[3];S3.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s3i+ii);card.style.display='none';let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-sort-amount-down"></i> ${item.title}</div><div class="ord-pool" id="ordpool-${ii}">`;const order=answers[s3i+ii].order;order.forEach((si,pi)=>{sh+=`<div class="ord-sentence" draggable="true" data-ii="${ii}" data-pi="${pi}" id="ords-${ii}-${pi}"><span class="ord-nums">${pi+1}</span><span>${item.sentences[si]}</span><div class="ord-arrows"><button onclick="moveOrd(${ii},${pi},-1)" title="Subir"><i class="fas fa-chevron-up"></i></button><button onclick="moveOrd(${ii},${pi},1)" title="Bajar"><i class="fas fa-chevron-down"></i></button></div></div>`;});sh+=`</div><div class="ord-result" id="ordres-${ii}"></div><button class="ord-check" id="ordchk-${ii}" onclick="checkOrd(${ii})"><i class="fas fa-check"></i> Verificar orden</button>`;
+        if (isDocente) {
+            sh += `<div class="docente-hint" style="margin-top:16px; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
+                <strong style="color:var(--ac);"><i class="fas fa-user-shield"></i> Docente - Guía de Ordenamiento:</strong><br>
+                <span style="font-size:12px; color:var(--fg2);">El orden correcto es la secuencia original en el código (1 al 10).</span><br>
+                <a href="#" onclick="autoSolveS3(${ii}); return false;" style="color:var(--ac); text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;"><i class="fas fa-magic"></i> Autocompletar Orden Correcto</a>
+            </div>`;
+        }
+        card.innerHTML=sh;c.appendChild(card);});
     // S4: Completamiento
-    const s4i=SEC_START[4];S4.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s4i+ii);card.style.display='none';let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-pen"></i> ${item.title}</div>`;item.questions.forEach((q,qi)=>{sh+=`<div style="margin-bottom:18px">`;let sent='';for(let p=0;p<q.parts.length;p++){if(p>0)sent+=`<input class="fill-input" id="fi-${ii}-${qi}-${p}" type="text" autocomplete="off" oninput="updFill(${ii},${qi},${p})">`;sent+=q.parts[p];}sh+=`<div class="fill-sentence">${sent}</div></div>`;});card.innerHTML=sh;c.appendChild(card);});
+    const s4i=SEC_START[4];S4.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s4i+ii);card.style.display='none';let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-pen"></i> ${item.title}</div>`;item.questions.forEach((q,qi)=>{sh+=`<div style="margin-bottom:18px">`;let sent='';for(let p=0;p<q.parts.length;p++){if(p>0)sent+=`<input class="fill-input" id="fi-${ii}-${qi}-${p}" type="text" autocomplete="off" oninput="updFill(${ii},${qi},${p})">`;sent+=q.parts[p];}sh+=`<div class="fill-sentence">${sent}</div></div>`;});
+        if (isDocente) {
+            sh += `<div class="docente-hint" style="margin-top:16px; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
+                <strong style="color:var(--ac);"><i class="fas fa-user-shield"></i> Docente - Respuestas de Completamiento:</strong><br>
+                <span style="font-size:12px; color:var(--fg2);">${item.questions.map((q, qi) => `<strong>P${qi+1}:</strong> "${q.answer}"`).join(', ')}</span><br>
+                <a href="#" onclick="autoSolveS4(${ii}); return false;" style="color:var(--ac); text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;"><i class="fas fa-magic"></i> Autocompletar Respuestas</a>
+            </div>`;
+        }
+        card.innerHTML=sh;c.appendChild(card);});
     // S5: Unir Columnas
     const s5i=SEC_START[5];S5.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s5i+ii);card.style.display='none';
     let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-exchange-alt"></i> ${item.title}</div><div class="match-grp">`;
@@ -817,7 +882,70 @@ function buildQs(){const c=document.getElementById('qCont');c.innerHTML='';
     sh+=`</div><div class="match-col-right"><div class="match-col-right-title">Opciones de correspondencia</div>`;
     s5Shuffled[ii].forEach(ch=>{sh+=`<div class="match-option-desc"><strong>[${ch.letter}]</strong> ${ch.text}</div>`;});
     sh+=`</div>`;
+        if (isDocente) {
+            sh += `<div class="docente-hint" style="margin-top:16px; width:100%; clear:both; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
+                <strong style="color:var(--ac);"><i class="fas fa-user-shield"></i> Docente - Correspondencias de Emparejamiento:</strong><br>
+                <span style="font-size:12px; color:var(--fg2);">${item.leftItems.map((li, pi) => {
+                    const expectedLetter = String.fromCharCode(65 + pi);
+                    const matched = s5Shuffled[ii].find(ch => ch.originalVal === expectedLetter);
+                    return `<strong>${li.id}</strong> ➔ <strong>${matched ? matched.letter : '?'}</strong>`;
+                }).join(' | ')}</span><br>
+                <a href="#" onclick="autoSolveS5(${ii}); return false;" style="color:var(--ac); text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;"><i class="fas fa-magic"></i> Autocompletar Correspondencias</a>
+            </div>`;
+        }
     card.innerHTML=sh;c.appendChild(card);});
+}
+
+/* ==================================================================
+   FUNCIONES DE AUTOCOMPLETADO (DOCENTE)
+   ================================================================== */
+function autoSolveS1(i) {
+    const q = S1[i];
+    selVF(i, q.answer);
+    const txt = document.getElementById(`jt-${i}`);
+    if (txt) {
+        txt.value = q.expl;
+        updJust(i);
+    }
+    toast(`Pregunta ${i+1} resuelta y justificada.`, 'success');
+}
+function autoSolveS2(i) {
+    const q = S2[i];
+    const gi = i + 10;
+    selMC(gi, q.c);
+    toast(`Pregunta ${gi+1} resuelta.`, 'success');
+}
+function autoSolveS3(ii) {
+    const s3i = SEC_START[3];
+    answers[s3i+ii].order = [0,1,2,3,4,5,6,7,8,9];
+    renderOrd(ii);
+    toast('Orden original restaurado para auditoría.', 'success');
+}
+function autoSolveS4(ii) {
+    const item = S4[ii];
+    item.questions.forEach((q, qi) => {
+        const inp = document.getElementById(`fi-${ii}-${qi}-1`);
+        if (inp) {
+            inp.value = q.answer;
+            updFill(ii, qi, 1);
+        }
+    });
+    toast('Campos de completamiento autocompletados.', 'success');
+}
+function autoSolveS5(ii) {
+    const item = S5[ii];
+    item.leftItems.forEach((li, pi) => {
+        const expectedLetter = String.fromCharCode(65 + pi);
+        const matched = s5Shuffled[ii].find(ch => ch.originalVal === expectedLetter);
+        if (matched) {
+            const sel = document.getElementById(`ms-${ii}-${pi}`);
+            if (sel) {
+                sel.value = matched.letter;
+                updMatch(ii, pi);
+            }
+        }
+    });
+    toast('Correspondencias autocompletadas.', 'success');
 }
 
 /* ==================================================================
