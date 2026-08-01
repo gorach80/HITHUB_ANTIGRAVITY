@@ -38,12 +38,12 @@ function doPost(e) {
           'Fecha y Hora', 
           'Nombre Completo', 
           'Correo Electrónico', 
-          'S1: VF (10 pts)', 
-          'S2: Selección (20 pts)', 
-          'S3: Ordenamiento (4 pts)', 
-          'S4: Completar (20 pts)', 
+          'S1: VF (5 pts)', 
+          'S2: Selección (10 pts)', 
+          'S3: Ordenamiento (5 pts)', 
+          'S4: Completar (10 pts)', 
           'S5: Unir Columnas (10 pts)', 
-          'Calificación Total (64 pts)'
+          'Calificación Total (40 pts)'
         ]);
         
         // Dar formato a los encabezados
