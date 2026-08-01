@@ -335,7 +335,7 @@
 </div>
 
 <div class="app">
-<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo"><i class="fas fa-project-diagram"></i></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
+<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo"><i class="fas fa-project-diagram"></i></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><div class="fgrp" style="margin-bottom:15px; text-align:left;"><label for="mCarrera" style="font-weight:600; font-size:12px; color:var(--fg2); display:block; margin-bottom:6px;">Carrera / Especialidad</label><select id="mCarrera" style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:var(--fg); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s;" onchange="updateCareerSub(this.value)"><option value="Ingeniería Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Ingeniería Industrial</option><option value="Ingeniería en Seguridad Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Seguridad Industrial</option></select></div><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
 <!-- INSTR --><div class="screen" id="sInstr"><div class="icard"><div class="ihdr"><div class="iico"><i class="fas fa-clipboard-list"></i></div><div><div class="ititle">Instrucciones de la Evaluación (Segundo Parcial)</div><div class="isub">5 secciones — 40 puntos totales</div></div></div><div class="ubadge"><div class="uav" id="uAv">M</div><div class="uinfo"><div class="uname" id="uNm">María García</div><div class="uemail" id="uEm">maria.lopez@upse.edu.ec</div></div></div><div class="sprev"><div class="sbox"><div class="sn">Sección 1</div><div class="st">V/F + Justificación</div><div class="sd">10 preguntas — Diseño del Producto (5 pts)</div></div><div class="sbox"><div class="sn">Sección 2</div><div class="st">Selección única</div><div class="sd">20 preguntas — Localización (10 pts)</div></div><div class="sbox"><div class="sn">Sección 3</div><div class="st">Ordenamiento</div><div class="sd">2 items de 10 oraciones — Requerimientos (5 pts)</div></div><div class="sbox"><div class="sn">Sección 4</div><div class="st">Completamiento</div><div class="sd">2 items de 10 preguntas — Planificación y Logística (10 pts)</div></div><div class="sbox" style="grid-column: span 2"><div class="sn">Sección 5</div><div class="st">Unir las Columnas</div><div class="sd">2 items de 10 correspondencias — Indicadores Financieros (10 pts)</div></div></div><ul class="ilist"><li><span class="ii"><i class="fas fa-clock"></i></span><span>Tiempo total: <strong style="color:var(--fg)">90 minutos</strong> distribuidos en las 5 secciones.</span></li><li><span class="ii"><i class="fas fa-pen-fancy"></i></span><span>S1: 0.5 pt c/u (0.25 respuesta + 0.25 justificación). S2, S4: 0.5 pt c/u. S3: 0.25 pt por posición. S5: 0.5 pt por correspondencia.</span></li><li><span class="ii"><i class="fas fa-exchange-alt"></i></span><span>S5: Selecciona la letra de la columna derecha que corresponda al concepto de la columna izquierda.</span></li><li><span class="ii"><i class="fas fa-envelope"></i></span><span>Al finalizar, se guardarán los resultados y podrás enviarlos a tu correo institucional.</span></li></ul><button class="strtbtn" onclick="startExam()"><i class="fas fa-play"></i> Comenzar evaluación</button></div></div>
 <!-- TRANS --><div class="screen" id="sTrans"><div class="tcard"><div class="tico"><i class="fas fa-check-double"></i></div><div class="ttitle" id="transTitle">Sección completada</div><div class="tsub" id="transSub"></div><div class="ssum" id="transSum"></div><button class="strtbtn" id="transBtn" onclick="nextSection()"><i class="fas fa-arrow-right"></i> Continuar</button></div></div>
 <!-- EXAM --><div class="screen" id="sExam"><div class="ehdr"><div class="etop"><span class="eslbl" id="eLbl">Sección 1</span><span class="etimer"><i class="fas fa-hourglass-half"></i> <span id="eTim">25:00</span></span></div><div class="pbt"><div class="pbf" id="eProg"></div></div></div><div class="qmap" id="qMap"></div><div id="qCont"></div><div class="navs"><button class="nbtn prev" id="bPrev" onclick="navQ(-1)" disabled><i class="fas fa-arrow-left"></i> Anterior</button><button class="nbtn nxt" id="bNext" onclick="navQ(1)">Siguiente <i class="fas fa-arrow-right"></i></button></div></div>
@@ -640,6 +640,7 @@ function closeMsModal() {
 }
 function selectMsAcc(acc) {
     closeMsModal();
+    acc.career = document.getElementById('mCarrera').value;
     verifyRegistration(acc, () => {
         CU = acc;
         setupInstr();
@@ -654,7 +655,7 @@ function mLogin(){
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){er.textContent='Ingresa un correo válido.';er.style.display='block';return;}
     er.style.display='none';
     
-    const acc = {name:n, email:e};
+    const acc = {name:n, email:e, career: document.getElementById('mCarrera').value};
     verifyRegistration(acc, () => {
         CU = acc;
         setupInstr();
@@ -717,7 +718,17 @@ function verifyRegistration(acc, onAllowed) {
         onAllowed();
     });
 }
-function setupInstr(){document.getElementById('uNm').textContent=CU.name;document.getElementById('uEm').textContent=CU.email;document.getElementById('uAv').textContent=CU.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
+function updateCareerSub(val) {
+    const subLabel = `Gestión de Proyectos — UPSE · ${val} (7mo Semestre)`;
+    document.querySelector('#sLogin .lsub').textContent = subLabel;
+}
+function setupInstr(){
+    document.getElementById('uNm').textContent=CU.name;
+    document.getElementById('uEm').textContent=CU.email;
+    document.getElementById('uAv').textContent=CU.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const car = CU.career || 'Ingeniería Industrial';
+    document.querySelector('#sInstr .isub').textContent = `5 secciones — 40 puntos totales — ${car}`;
+}
 document.getElementById('mE').addEventListener('keydown',e=>{if(e.key==='Enter')mLogin();});
 document.getElementById('mN').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('mE').focus();});
 
@@ -743,7 +754,8 @@ function loginAsDocente() {
     CU = {
         name: "Ing. Luis A Palate G. Mg",
         email: "luis.palate@upse.edu.ec",
-        isDocente: true
+        isDocente: true,
+        career: document.getElementById('mCarrera').value
     };
     closeConfigModal();
     setupInstr();
@@ -1208,6 +1220,9 @@ function exportPDF() {
         const studentEmail = CU ? CU.email : 'Sin registrar';
         const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
         const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
+            ? 'ENCABEZADO  SEGURIDAD INDUSTRIAL.jpg' 
+            : 'ENCABEZADO INGENIERIA INDUSTRIAL.jpg';
 
         // Generar contenido dinámico de la Tabla 3 de preguntas
         let table3Rows = '';
@@ -1458,6 +1473,7 @@ function exportPDF() {
 <html>
 <head>
     <meta charset="UTF-8">
+    <base href="${window.location.href}">
     <title>Evaluación Resultados - ${studentName}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
@@ -1465,7 +1481,7 @@ function exportPDF() {
     <style>
         @page {
             size: A4;
-            margin: 20mm 15mm 20mm 15mm;
+            margin: 20mm 15mm 25mm 15mm;
         }
         body {
             font-family: "Times New Roman", Times, serif;
@@ -1475,6 +1491,15 @@ function exportPDF() {
             background: #fff;
             margin: 0;
             padding: 0;
+            padding-bottom: 45px;
+        }
+        .print-footer {
+            position: fixed;
+            bottom: -15px;
+            left: 0;
+            right: 0;
+            height: 45px;
+            text-align: center;
         }
         .header-section {
             text-align: center;
@@ -1570,10 +1595,8 @@ function exportPDF() {
 </head>
 <body>
 
-    <div class="header-section">
-        <h1 class="header-title">UNIVERSIDAD ESTATAL PENÍNSULA DE SANTA ELENA</h1>
-        <h2 class="header-subtitle">FACULTAD DE CIENCIAS DE LA INGENIERÍA</h2>
-        <h2 class="header-subtitle">CARRERA DE INGENIERÍA INDUSTRIAL - INGENIERÍA EN SEGURIDAD INDUSTRIAL</h2>
+    <div class="header-section" style="margin-bottom: 12pt; text-align: center;">
+        <img src="${headerImgName}" style="width: 100%; max-height: 80px; display: block; margin: 0 auto; object-fit: contain;">
     </div>
 
     <div class="section-label">Datos del Examen:</div>
@@ -1699,6 +1722,9 @@ function exportPDF() {
             window.print();
         }, 500);
     <\/script>
+    <div class="print-footer">
+        <img src="PIE DE PAGINA.jpg" style="width: 100%; height: auto; display: block; margin: 0 auto; object-fit: contain;">
+    </div>
 </body>
 </html>`;
         w.document.write(docHtml);
