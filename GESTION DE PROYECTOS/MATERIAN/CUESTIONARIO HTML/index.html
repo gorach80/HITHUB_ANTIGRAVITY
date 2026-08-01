@@ -335,7 +335,7 @@
 </div>
 
 <div class="app">
-<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo"><i class="fas fa-project-diagram"></i></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><div class="fgrp" style="margin-bottom:15px; text-align:left;"><label for="mCarrera" style="font-weight:600; font-size:12px; color:var(--fg2); display:block; margin-bottom:6px;">Carrera / Especialidad</label><select id="mCarrera" style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:var(--fg); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s;" onchange="updateCareerSub(this.value)"><option value="Ingeniería Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Ingeniería Industrial</option><option value="Ingeniería en Seguridad Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Seguridad Industrial</option></select></div><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
+<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo"><i class="fas fa-project-diagram"></i></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><div class="fgrp" style="margin-bottom:15px; text-align:left;"><label for="mCarrera" style="font-weight:600; font-size:12px; color:var(--fg2); display:block; margin-bottom:6px;">Carrera / Especialidad</label><select id="mCarrera" style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:var(--fg); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s;" onchange="updateCareerSub(this.value)"><option value="Ingeniería Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Ingeniería Industrial</option><option value="Ingeniería en Seguridad Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Seguridad Industrial</option></select></div><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="honesty-box" style="margin-top:20px; padding:12px; background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.15); border-radius:6px; text-align:left;"><div style="font-weight:700; font-size:12px; color:var(--dn); display:flex; align-items:center; gap:6px;"><i class="fas fa-user-shield"></i> Honestidad Académica</div><p style="font-size:11px; color:var(--fg2); margin:6px 0 8px 0; line-height:1.4;">Para garantizar la transparencia de la evaluación, es obligatorio permanecer en <strong>pantalla completa</strong>. Salir de la ventana o cambiar de pestañas sumará advertencias. Al acumular 3 advertencias, el examen se entregará de forma automática.</p><button type="button" onclick="playHonestyAudio()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; padding:5px 10px; border-radius:4px; outline:none;"><i class="fas fa-volume-up"></i> Escuchar Protocolo</button></div><div class="lerr" id="lErr"></div></div></div>
 <!-- INSTR --><div class="screen" id="sInstr"><div class="icard"><div class="ihdr"><div class="iico"><i class="fas fa-clipboard-list"></i></div><div><div class="ititle">Instrucciones de la Evaluación (Segundo Parcial)</div><div class="isub">5 secciones — 40 puntos totales</div></div></div><div class="ubadge"><div class="uav" id="uAv">M</div><div class="uinfo"><div class="uname" id="uNm">María García</div><div class="uemail" id="uEm">maria.lopez@upse.edu.ec</div></div></div><div class="sprev"><div class="sbox"><div class="sn">Sección 1</div><div class="st">V/F + Justificación</div><div class="sd">10 preguntas — Diseño del Producto (5 pts)</div></div><div class="sbox"><div class="sn">Sección 2</div><div class="st">Selección única</div><div class="sd">20 preguntas — Localización (10 pts)</div></div><div class="sbox"><div class="sn">Sección 3</div><div class="st">Ordenamiento</div><div class="sd">2 items de 10 oraciones — Requerimientos (5 pts)</div></div><div class="sbox"><div class="sn">Sección 4</div><div class="st">Completamiento</div><div class="sd">2 items de 10 preguntas — Planificación y Logística (10 pts)</div></div><div class="sbox" style="grid-column: span 2"><div class="sn">Sección 5</div><div class="st">Unir las Columnas</div><div class="sd">2 items de 10 correspondencias — Indicadores Financieros (10 pts)</div></div></div><ul class="ilist"><li><span class="ii"><i class="fas fa-clock"></i></span><span>Tiempo total: <strong style="color:var(--fg)">90 minutos</strong> distribuidos en las 5 secciones.</span></li><li><span class="ii"><i class="fas fa-pen-fancy"></i></span><span>S1: 0.5 pt c/u (0.25 respuesta + 0.25 justificación). S2, S4: 0.5 pt c/u. S3: 0.25 pt por posición. S5: 0.5 pt por correspondencia.</span></li><li><span class="ii"><i class="fas fa-exchange-alt"></i></span><span>S5: Selecciona la letra de la columna derecha que corresponda al concepto de la columna izquierda.</span></li><li><span class="ii"><i class="fas fa-envelope"></i></span><span>Al finalizar, se guardarán los resultados y podrás enviarlos a tu correo institucional.</span></li></ul><button class="strtbtn" onclick="startExam()"><i class="fas fa-play"></i> Comenzar evaluación</button></div></div>
 <!-- TRANS --><div class="screen" id="sTrans"><div class="tcard"><div class="tico"><i class="fas fa-check-double"></i></div><div class="ttitle" id="transTitle">Sección completada</div><div class="tsub" id="transSub"></div><div class="ssum" id="transSum"></div><button class="strtbtn" id="transBtn" onclick="nextSection()"><i class="fas fa-arrow-right"></i> Continuar</button></div></div>
 <!-- EXAM --><div class="screen" id="sExam"><div class="ehdr"><div class="etop"><span class="eslbl" id="eLbl">Sección 1</span><span class="etimer"><i class="fas fa-hourglass-half"></i> <span id="eTim">25:00</span></span></div><div class="pbt"><div class="pbf" id="eProg"></div></div></div><div class="qmap" id="qMap"></div><div id="qCont"></div><div class="navs"><button class="nbtn prev" id="bPrev" onclick="navQ(-1)" disabled><i class="fas fa-arrow-left"></i> Anterior</button><button class="nbtn nxt" id="bNext" onclick="navQ(1)">Siguiente <i class="fas fa-arrow-right"></i></button></div></div>
@@ -774,6 +774,51 @@ function updateExamHeader(label) {
 /* ==================================================================
    SISTEMA ANTI-TRAMPA (SEGURIDAD DE PANTALLA COMPLETA Y FOCO)
    ================================================================== */
+
+/* --- Audio: Síntesis de Voz para Honestidad Académica --- */
+function speakText(text, rate = 1.0) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'es-ES';
+    utter.rate = rate;
+    utter.pitch = 1.0;
+    utter.volume = 1.0;
+    // Intentar usar una voz en español
+    const voices = window.speechSynthesis.getVoices();
+    const esVoice = voices.find(v => v.lang.startsWith('es'));
+    if (esVoice) utter.voice = esVoice;
+    window.speechSynthesis.speak(utter);
+}
+
+function playHonestyAudio() {
+    const msg = 'Protocolo de Honestidad Académica. ' +
+        'Estimado estudiante, esta evaluación cuenta con un sistema de monitoreo de seguridad activo. ' +
+        'Es obligatorio permanecer en modo de pantalla completa durante toda la evaluación. ' +
+        'Está prohibido cambiar de pestaña, minimizar el navegador, o abrir otras aplicaciones. ' +
+        'El sistema detectará automáticamente cualquier intento de salir de la ventana del examen. ' +
+        'Cada infracción será registrada como una advertencia de seguridad. ' +
+        'Al acumular 3 advertencias, su examen será entregado y bloqueado de forma automática e irrevocable, ' +
+        'con las respuestas completadas hasta ese momento. ' +
+        'Cualquier acto de deshonestidad académica será sancionado según la normativa vigente de la Universidad Estatal Península de Santa Elena. ' +
+        'Le deseamos éxito en su evaluación.';
+    speakText(msg, 0.95);
+}
+
+function speakWarning(warningNum, maxWarnings, reason) {
+    const msg = warningNum >= maxWarnings
+        ? 'Atención. Su examen ha sido entregado automáticamente por acumular el límite de advertencias de seguridad.'
+        : `Advertencia de seguridad número ${warningNum} de ${maxWarnings}. Motivo: ${reason}. ` +
+          `Si acumula ${maxWarnings} advertencias, su evaluación se entregará de forma automática.`;
+    speakText(msg, 1.05);
+}
+
+// Precargar voces del navegador
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+}
+
 function reEnterFullscreen() {
     document.documentElement.requestFullscreen()
     .then(() => {
@@ -793,6 +838,7 @@ function handleInfraction(reason) {
     setTimeout(() => { infractionDebounce = false; }, 1500); // Debounce de 1.5s
 
     cheatWarnings++;
+    speakWarning(cheatWarnings, MAX_WARNINGS, reason);
     if (cheatWarnings >= MAX_WARNINGS) {
         examActive = false;
         if (document.fullscreenElement) {
