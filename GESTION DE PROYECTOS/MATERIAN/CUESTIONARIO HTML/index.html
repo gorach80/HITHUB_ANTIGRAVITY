@@ -1221,8 +1221,8 @@ function exportPDF() {
         const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
         const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
-            ? 'ENCABEZADO  SEGURIDAD INDUSTRIAL.jpg' 
-            : 'ENCABEZADO INGENIERIA INDUSTRIAL.jpg';
+            ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
+            : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
 
         // Generar contenido dinámico de la Tabla 3 de preguntas
         let table3Rows = '';
@@ -1473,7 +1473,7 @@ function exportPDF() {
 <html>
 <head>
     <meta charset="UTF-8">
-    <base href="${window.location.href}">
+    <base href="${window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1)}">
     <title>Evaluación Resultados - ${studentName}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
@@ -1723,7 +1723,7 @@ function exportPDF() {
         }, 500);
     <\/script>
     <div class="print-footer">
-        <img src="PIE DE PAGINA.jpg" style="width: 100%; height: auto; display: block; margin: 0 auto; object-fit: contain;">
+        <img src="PIE%20DE%20PAGINA.jpg" style="width: 100%; height: auto; display: block; margin: 0 auto; object-fit: contain;">
     </div>
 </body>
 </html>`;
