@@ -615,13 +615,79 @@ function closeMsModal() {
 }
 function selectMsAcc(acc) {
     closeMsModal();
-    CU = acc;
-    setupInstr();
-    showScr('sInstr');
-    toast(`Conexión exitosa. Bienvenido, ${acc.name.split(' ')[0]}`, 'success');
+    verifyRegistration(acc, () => {
+        CU = acc;
+        setupInstr();
+        showScr('sInstr');
+        toast(`Conexión exitosa. Bienvenido, ${acc.name.split(' ')[0]}`, 'success');
+    });
 }
 
-function mLogin(){const n=document.getElementById('mN').value.trim(),e=document.getElementById('mE').value.trim(),er=document.getElementById('lErr');if(!n||n.length<3){er.textContent='Ingresa tu nombre completo.';er.style.display='block';return;}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){er.textContent='Ingresa un correo válido.';er.style.display='block';return;}er.style.display='none';CU={name:n,email:e};setupInstr();showScr('sInstr');toast(`Bienvenido/a, ${n.split(' ')[0]}`,'success');}
+function mLogin(){
+    const n=document.getElementById('mN').value.trim(),e=document.getElementById('mE').value.trim(),er=document.getElementById('lErr');
+    if(!n||n.length<3){er.textContent='Ingresa tu nombre completo.';er.style.display='block';return;}
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){er.textContent='Ingresa un correo válido.';er.style.display='block';return;}
+    er.style.display='none';
+    
+    const acc = {name:n, email:e};
+    verifyRegistration(acc, () => {
+        CU = acc;
+        setupInstr();
+        showScr('sInstr');
+        toast(`Bienvenido/a, ${n.split(' ')[0]}`,'success');
+    });
+}
+
+/* --- CONTROL DE DUPLICADOS (LOCAL Y EN LA NUBE) --- */
+function verifyRegistration(acc, onAllowed) {
+    const email = acc.email.trim().toLowerCase();
+    const er = document.getElementById('lErr');
+    if (er) er.style.display = 'none';
+
+    // 1. Verificación en Local (Historial de este navegador)
+    const localHistory = JSON.parse(localStorage.getItem('evalH_v5') || '[]');
+    const alreadyTakenLocal = localHistory.some(entry => entry.user && entry.user.email.trim().toLowerCase() === email);
+    
+    if (alreadyTakenLocal) {
+        toast('Acceso denegado: Esta cuenta ya completó la evaluación.', 'error');
+        if (er) {
+            er.textContent = 'Acceso denegado: Esta cuenta ya completó la evaluación.';
+            er.style.display = 'block';
+        }
+        return;
+    }
+    
+    // 2. Verificación en la Nube (Google Apps Script)
+    const urlParams = new URLSearchParams(window.location.search);
+    let endpointUrl = urlParams.get('backup') || localStorage.getItem('backup_endpoint_url') || 'YOUR_APPS_SCRIPT_WEBAPP_URL_HERE';
+    
+    if (endpointUrl === 'YOUR_APPS_SCRIPT_WEBAPP_URL_HERE') {
+        // Si no hay nube configurada, permitimos pasar con el control local
+        onAllowed();
+        return;
+    }
+    
+    toast('Verificando estado de evaluación en la nube...', 'warning');
+    
+    fetch(`${endpointUrl}?checkEmail=${encodeURIComponent(email)}`)
+    .then(r => r.json())
+    .then(res => {
+        if (res && res.exists) {
+            toast('Acceso denegado: Ya has realizado esta evaluación.', 'error');
+            if (er) {
+                er.textContent = 'Acceso denegado: Ya has realizado esta evaluación (Verificado en la nube).';
+                er.style.display = 'block';
+            }
+        } else {
+            onAllowed();
+        }
+    })
+    .catch(err => {
+        console.warn('No se pudo verificar en la nube (CORS o Red). Usando control local:', err);
+        // Fallback: Si falla el script de Google, dejamos pasar para no trabar la clase
+        onAllowed();
+    });
+}
 function setupInstr(){document.getElementById('uNm').textContent=CU.name;document.getElementById('uEm').textContent=CU.email;document.getElementById('uAv').textContent=CU.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();}
 document.getElementById('mE').addEventListener('keydown',e=>{if(e.key==='Enter')mLogin();});
 document.getElementById('mN').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('mE').focus();});

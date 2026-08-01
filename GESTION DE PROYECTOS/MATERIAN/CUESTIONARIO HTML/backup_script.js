@@ -108,3 +108,40 @@ function doPost(e) {
                          .setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+// ----------------------------------------------------
+// VERIFICACIÓN DE EXAMEN ANTERIOR (Evitar duplicados)
+// ----------------------------------------------------
+function doGet(e) {
+  try {
+    const checkEmail = e.parameter.checkEmail;
+    
+    if (checkEmail && SPREADSHEET_ID && SPREADSHEET_ID !== 'ESCRIBE_AQUI_EL_ID_DE_TU_GOOGLE_SHEETS') {
+      const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getActiveSheet();
+      const lastRow = sheet.getLastRow();
+      
+      if (lastRow > 1) {
+        // Obtener los correos registrados (Columna 3: Correo Electrónico)
+        const emails = sheet.getRange(2, 3, lastRow - 1, 1).getValues();
+        const searchEmail = checkEmail.trim().toLowerCase();
+        
+        for (let i = 0; i < emails.length; i++) {
+          if (emails[i][0].toString().trim().toLowerCase() === searchEmail) {
+            return ContentService.createTextOutput(JSON.stringify({ exists: true }))
+                                 .setMimeType(ContentService.MimeType.JSON)
+                                 .setHeader('Access-Control-Allow-Origin', '*');
+          }
+        }
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ exists: false }))
+                         .setMimeType(ContentService.MimeType.JSON)
+                         .setHeader('Access-Control-Allow-Origin', '*');
+                         
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: error.toString() }))
+                         .setMimeType(ContentService.MimeType.JSON)
+                         .setHeader('Access-Control-Allow-Origin', '*');
+  }
+}
