@@ -1481,7 +1481,7 @@ function exportPDF() {
     <style>
         @page {
             size: A4;
-            margin: 20mm 15mm 25mm 15mm;
+            margin: 30mm 15mm 25mm 15mm;
         }
         body {
             font-family: "Times New Roman", Times, serif;
@@ -1491,19 +1491,22 @@ function exportPDF() {
             background: #fff;
             margin: 0;
             padding: 0;
-            padding-bottom: 45px;
+        }
+        .print-header {
+            position: fixed;
+            top: -22mm;
+            left: 0;
+            right: 0;
+            height: 22mm;
+            text-align: center;
         }
         .print-footer {
             position: fixed;
-            bottom: -15px;
+            bottom: -18mm;
             left: 0;
             right: 0;
-            height: 45px;
+            height: 15mm;
             text-align: center;
-        }
-        .header-section {
-            text-align: center;
-            margin-bottom: 12pt;
         }
         .header-title {
             font-size: 10pt;
@@ -1595,7 +1598,7 @@ function exportPDF() {
 </head>
 <body>
 
-    <div class="header-section" style="margin-bottom: 12pt; text-align: center;">
+    <div class="print-header">
         <img src="${headerImgName}" style="width: 100%; max-height: 80px; display: block; margin: 0 auto; object-fit: contain;">
     </div>
 
