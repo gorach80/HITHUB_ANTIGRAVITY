@@ -228,7 +228,9 @@
         .rbtn{padding:14px 20px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;border:none}
         .rbtn.eml{background:linear-gradient(135deg,var(--ac),#059669);color:#fff}
         .rbtn.eml:hover{box-shadow:0 6px 24px rgba(16,185,129,.35);transform:translateY(-1px)}
-        .rbtn.ret{background:var(--bg2);color:var(--fg2);border:1px solid var(--bdr)}
+        .rbtn.pdf{background:linear-gradient(135deg,var(--dn),#b91c1c);color:#fff}
+        .rbtn.pdf:hover{box-shadow:0 6px 24px rgba(239,68,68,.35);transform:translateY(-1px)}
+        .rbtn.ret{background:var(--bg2);color:var(--fg2);border:1px solid var(--bdr);grid-column: span 2}
         .rbtn.ret:hover{background:var(--card-h);color:var(--fg);border-color:var(--bdr2)}
 
         /* TOAST */
@@ -314,11 +316,11 @@
 </div>
 
 <div class="app">
-<!-- LOGIN --><div class="screen active" id="sLogin"><div class="lcard"><div class="llogo"><i class="fas fa-project-diagram"></i></div><h1 class="ltitle">Evaluación Completa Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial</p><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
-<!-- INSTR --><div class="screen" id="sInstr"><div class="icard"><div class="ihdr"><div class="iico"><i class="fas fa-clipboard-list"></i></div><div><div class="ititle">Instrucciones de la evaluación</div><div class="isub">5 secciones — 64 puntos totales</div></div></div><div class="ubadge"><div class="uav" id="uAv">M</div><div class="uinfo"><div class="uname" id="uNm">María García</div><div class="uemail" id="uEm">maria.lopez@upse.edu.ec</div></div></div><div class="sprev"><div class="sbox"><div class="sn">Sección 1</div><div class="st">V/F + Justificación</div><div class="sd">10 preguntas — Diseño del Producto (10 pts)</div></div><div class="sbox"><div class="sn">Sección 2</div><div class="st">Selección única</div><div class="sd">20 preguntas — Localización (20 pts)</div></div><div class="sbox"><div class="sn">Sección 3</div><div class="st">Ordenamiento</div><div class="sd">2 items de 10 oraciones — Requerimientos (4 pts)</div></div><div class="sbox"><div class="sn">Sección 4</div><div class="st">Completamiento</div><div class="sd">2 items de 10 preguntas — Planificación y Logística (20 pts)</div></div><div class="sbox" style="grid-column: span 2"><div class="sn">Sección 5</div><div class="st">Unir las Columnas</div><div class="sd">2 items de 10 correspondencias — Indicadores Financieros (10 pts)</div></div></div><ul class="ilist"><li><span class="ii"><i class="fas fa-clock"></i></span><span>Tiempo total: <strong style="color:var(--fg)">90 minutos</strong> distribuidos en las 5 secciones.</span></li><li><span class="ii"><i class="fas fa-pen-fancy"></i></span><span>S1: 1 pt c/u (0.5 respuesta + 0.5 justificación). S2, S4: 1 pt c/u. S3: 0.2 pt por posición. S5: 0.5 pt por correspondencia.</span></li><li><span class="ii"><i class="fas fa-exchange-alt"></i></span><span>S5: Selecciona la letra de la columna derecha que corresponda al concepto de la columna izquierda.</span></li><li><span class="ii"><i class="fas fa-envelope"></i></span><span>Al finalizar, se guardarán los resultados y podrás enviarlos a tu correo institucional.</span></li></ul><button class="strtbtn" onclick="startExam()"><i class="fas fa-play"></i> Comenzar evaluación</button></div></div>
+<!-- LOGIN --><div class="screen active" id="sLogin"><div class="lcard"><div class="llogo"><i class="fas fa-project-diagram"></i></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
+<!-- INSTR --><div class="screen" id="sInstr"><div class="icard"><div class="ihdr"><div class="iico"><i class="fas fa-clipboard-list"></i></div><div><div class="ititle">Instrucciones de la Evaluación (Segundo Parcial)</div><div class="isub">5 secciones — 40 puntos totales</div></div></div><div class="ubadge"><div class="uav" id="uAv">M</div><div class="uinfo"><div class="uname" id="uNm">María García</div><div class="uemail" id="uEm">maria.lopez@upse.edu.ec</div></div></div><div class="sprev"><div class="sbox"><div class="sn">Sección 1</div><div class="st">V/F + Justificación</div><div class="sd">10 preguntas — Diseño del Producto (5 pts)</div></div><div class="sbox"><div class="sn">Sección 2</div><div class="st">Selección única</div><div class="sd">20 preguntas — Localización (10 pts)</div></div><div class="sbox"><div class="sn">Sección 3</div><div class="st">Ordenamiento</div><div class="sd">2 items de 10 oraciones — Requerimientos (5 pts)</div></div><div class="sbox"><div class="sn">Sección 4</div><div class="st">Completamiento</div><div class="sd">2 items de 10 preguntas — Planificación y Logística (10 pts)</div></div><div class="sbox" style="grid-column: span 2"><div class="sn">Sección 5</div><div class="st">Unir las Columnas</div><div class="sd">2 items de 10 correspondencias — Indicadores Financieros (10 pts)</div></div></div><ul class="ilist"><li><span class="ii"><i class="fas fa-clock"></i></span><span>Tiempo total: <strong style="color:var(--fg)">90 minutos</strong> distribuidos en las 5 secciones.</span></li><li><span class="ii"><i class="fas fa-pen-fancy"></i></span><span>S1: 0.5 pt c/u (0.25 respuesta + 0.25 justificación). S2, S4: 0.5 pt c/u. S3: 0.25 pt por posición. S5: 0.5 pt por correspondencia.</span></li><li><span class="ii"><i class="fas fa-exchange-alt"></i></span><span>S5: Selecciona la letra de la columna derecha que corresponda al concepto de la columna izquierda.</span></li><li><span class="ii"><i class="fas fa-envelope"></i></span><span>Al finalizar, se guardarán los resultados y podrás enviarlos a tu correo institucional.</span></li></ul><button class="strtbtn" onclick="startExam()"><i class="fas fa-play"></i> Comenzar evaluación</button></div></div>
 <!-- TRANS --><div class="screen" id="sTrans"><div class="tcard"><div class="tico"><i class="fas fa-check-double"></i></div><div class="ttitle" id="transTitle">Sección completada</div><div class="tsub" id="transSub"></div><div class="ssum" id="transSum"></div><button class="strtbtn" id="transBtn" onclick="nextSection()"><i class="fas fa-arrow-right"></i> Continuar</button></div></div>
 <!-- EXAM --><div class="screen" id="sExam"><div class="ehdr"><div class="etop"><span class="eslbl" id="eLbl">Sección 1</span><span class="etimer"><i class="fas fa-hourglass-half"></i> <span id="eTim">25:00</span></span></div><div class="pbt"><div class="pbf" id="eProg"></div></div></div><div class="qmap" id="qMap"></div><div id="qCont"></div><div class="navs"><button class="nbtn prev" id="bPrev" onclick="navQ(-1)" disabled><i class="fas fa-arrow-left"></i> Anterior</button><button class="nbtn nxt" id="bNext" onclick="navQ(1)">Siguiente <i class="fas fa-arrow-right"></i></button></div></div>
-<!-- RESULTS --><div class="screen" id="sRes"><div class="rcard"><div class="sring"><svg viewBox="0 0 160 160"><circle class="rbg" cx="80" cy="80" r="70"/><circle class="rfill" id="rRing" cx="80" cy="80" r="70"/></svg><div class="sval"><div class="snum" id="rNum">0</div><div class="slbl" id="rLbl">de 64 puntos</div></div></div><h2 class="rtitle" id="rTit">Resultado</h2><p class="rsub" id="rSub"></p><div id="rStats"></div><div class="revsec"><div class="revtit">Revisión detallada</div><div id="rRev"></div></div><div class="ract"><button class="rbtn eml" onclick="sendEmail()"><i class="fas fa-envelope"></i> Enviar por correo</button><button class="rbtn ret" onclick="retry()"><i class="fas fa-redo"></i> Reintentar</button></div></div></div>
+<!-- RESULTS --><div class="screen" id="sRes"><div class="rcard"><div class="sring"><svg viewBox="0 0 160 160"><circle class="rbg" cx="80" cy="80" r="70"/><circle class="rfill" id="rRing" cx="80" cy="80" r="70"/></svg><div class="sval"><div class="snum" id="rNum">0</div><div class="slbl" id="rLbl">de 40 puntos</div></div></div><h2 class="rtitle" id="rTit">Resultado</h2><p class="rsub" id="rSub"></p><div id="rStats"></div><div class="revsec"><div class="revtit">Revisión detallada</div><div id="rRev"></div></div><div class="ract"><button class="rbtn pdf" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> Guardar como PDF</button><button class="rbtn eml" onclick="sendEmail()"><i class="fas fa-envelope"></i> Enviar por correo</button><button class="rbtn ret" onclick="retry()"><i class="fas fa-redo"></i> Reintentar</button></div></div></div>
 </div>
 
 <script>
@@ -490,7 +492,7 @@ const S5=[
 let CU=null, curSec=1, curQ=0, answers=[], timerInt=null, timeRem=0, s5Shuffled=[];
 let secScores={s1:null,s2:null,s3:null,s4:null,s5:null};
 const SEC_TIME=[0,25*60,20*60,12*60,15*60,18*60]; // 5 secciones
-const SEC_TOTAL=[0,10,20,4,20,10]; // puntos por sección
+const SEC_TOTAL=[0,5,10,5,10,10]; // puntos por sección
 const SEC_START=[0,0,10,30,32,34]; // índice inicial en allQ
 const SEC_END=[0,10,30,32,34,36]; // índice final en allQ
 
@@ -717,7 +719,31 @@ document.querySelector('#sLogin .ltitle').addEventListener('click', (e) => {
 /* ==================================================================
    INICIAR EXAMEN Y SECCIONES
    ================================================================== */
-function startExam(){initAnswers();curSec=1;curQ=0;secScores={s1:null,s2:null,s3:null,s4:null,s5:null};timeRem=SEC_TIME[1];buildMap();buildQs();showQ(0);startTimer();document.getElementById('eLbl').textContent='Sección 1 — Verdadero / Falso';showScr('sExam');}
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function startExam(){
+    shuffleArray(S1);
+    shuffleArray(S2);
+    shuffleArray(S4[0].questions);
+    shuffleArray(S4[1].questions);
+    
+    initAnswers();
+    curSec=1;
+    curQ=0;
+    secScores={s1:null,s2:null,s3:null,s4:null,s5:null};
+    timeRem=SEC_TIME[1];
+    buildMap();
+    buildQs();
+    showQ(0);
+    startTimer();
+    document.getElementById('eLbl').textContent='Sección 1 — Verdadero / Falso';
+    showScr('sExam');
+}
 
 function finishSection(){
     clearInterval(timerInt);document.querySelector('.etimer').style.color='';
@@ -806,10 +832,10 @@ function selMC(qi,oi){answers[qi].sel=oi;document.querySelectorAll(`.mcop[data-q
 function moveOrd(ii,pi,dir){const a=answers[SEC_START[3]+ii];const ni=pi+dir;if(ni<0||ni>=a.order.length)return;[a.order[pi],a.order[ni]]=[a.order[ni],a.order[pi]];renderOrd(ii);}
 function renderOrd(ii){const pool=document.getElementById('ordpool-'+ii);const a=answers[SEC_START[3]+ii];const item=S3[ii];pool.innerHTML='';a.order.forEach((si,pi)=>{pool.innerHTML+=`<div class="ord-sentence" draggable="true" data-ii="${ii}" data-pi="${pi}" id="ords-${ii}-${pi}"><span class="ord-nums">${pi+1}</span><span>${item.sentences[si]}</span><div class="ord-arrows"><button onclick="moveOrd(${ii},${pi},-1)"><i class="fas fa-chevron-up"></i></button><button onclick="moveOrd(${ii},${pi},1)"><i class="fas fa-chevron-down"></i></button></div></div>`;});initDrag(ii);}
 function initDrag(ii){document.querySelectorAll(`.ord-sentence[data-ii="${ii}"]`).forEach(el=>{el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',el.getAttribute('data-pi'));el.classList.add('dragging');});el.addEventListener('dragend',()=>el.classList.remove('dragging'));el.addEventListener('dragover',e=>{e.preventDefault();el.classList.add('drag-over');});el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('drag-over');const fi=parseInt(e.dataTransfer.getData('text/plain'));const ti=parseInt(el.getAttribute('data-pi'));if(fi!==ti){const a=answers[SEC_START[3]+ii];const v=a.order[fi];a.order.splice(fi,1);a.order.splice(ti,0,v);renderOrd(ii);}});});}
-function checkOrd(ii){const a=answers[SEC_START[3]+ii];const item=S3[ii];let correct=0;const pool=document.getElementById('ordpool-'+ii);pool.querySelectorAll('.ord-sentence').forEach((el,pi)=>{el.classList.remove('correct-pos','incorrect-pos');if(a.order[pi]===pi){el.classList.add('correct-pos');correct++;}else{el.classList.add('incorrect-pos');}});a.checked=true;a.score=correct*0.2;const res=document.getElementById('ordres-'+ii);res.className='ord-result vis '+(correct===10?'ok':'bad');res.innerHTML=`<i class="fas fa-${correct===10?'check-circle':'times-circle'}"></i> ${correct}/10 posiciones correctas — ${correct*0.2} puntos`;document.getElementById('ordchk-'+ii).disabled=true;updateProg();updateMap();}
+function checkOrd(ii){const a=answers[SEC_START[3]+ii];const item=S3[ii];let correct=0;const pool=document.getElementById('ordpool-'+ii);pool.querySelectorAll('.ord-sentence').forEach((el,pi)=>{el.classList.remove('correct-pos','incorrect-pos');if(a.order[pi]===pi){el.classList.add('correct-pos');correct++;}else{el.classList.add('incorrect-pos');}});a.checked=true;a.score=correct*0.25;const res=document.getElementById('ordres-'+ii);res.className='ord-result vis '+(correct===10?'ok':'bad');res.innerHTML=`<i class="fas fa-${correct===10?'check-circle':'times-circle'}"></i> ${correct}/10 posiciones correctas — ${correct*0.25} puntos`;document.getElementById('ordchk-'+ii).disabled=true;updateProg();updateMap();}
 
 /* Completamiento */
-function updFill(ii,qi,pi){const inp=document.getElementById(`fi-${ii}-${qi}-${pi}`);answers[SEC_START[4]+ii].responses[qi*10+pi]=inp.value;updateProg();updateMap();}
+function updFill(ii,qi,pi){const inp=document.getElementById(`fi-${ii}-${qi}-${pi}`);answers[SEC_START[4]+ii].responses[qi]=inp.value;updateProg();updateMap();}
 
 /* Unir Columnas */
 function updMatch(ii,pi){const sel=document.getElementById(`ms-${ii}-${pi}`).value;answers[SEC_START[5]+ii].selections[pi]=sel;updateProg();updateMap();}
@@ -830,10 +856,10 @@ function navQ(d){const s=SEC_START[curSec],e=SEC_END[curSec];const ni=curQ+d;if(
    CÁLCULOS DE PUNTUACIÓN
    ================================================================== */
 function calcSecScore(sec){let correct=0,incorrect=0,empty=0,score=0,details=[];
-if(sec===1){S1.forEach((q,i)=>{const a=answers[i];const ic=a.sel===q.answer;const hj=a.just.trim().length>10;let qs=0,st='empty';if(a.sel===null){empty++;st='empty';}else if(ic&&hj){correct++;qs=1;score+=1;st='correct';}else if(ic&&!hj){correct++;qs=0.5;score+=0.5;st='partial';}else{incorrect++;st='incorrect';}details.push({q,a,ic,hj,qs,st,type:'vf'});});}
-else if(sec===2){S2.forEach((q,i)=>{const gi=i+10;const a=answers[gi];const ic=a.sel===q.c;let qs=0,st='empty';if(a.sel===null){empty++;st='empty';}else if(ic){correct++;qs=1;score+=1;st='correct';}else{incorrect++;st='incorrect';}details.push({q,a,ic,qs,st,type:'mc'});});}
+if(sec===1){S1.forEach((q,i)=>{const a=answers[i];const ic=a.sel===q.answer;const hj=a.just.trim().length>10;let qs=0,st='empty';if(a.sel===null){empty++;st='empty';}else if(ic&&hj){correct++;qs=0.5;score+=0.5;st='correct';}else if(ic&&!hj){correct++;qs=0.25;score+=0.25;st='partial';}else{incorrect++;st='incorrect';}details.push({q,a,ic,hj,qs,st,type:'vf'});});}
+else if(sec===2){S2.forEach((q,i)=>{const gi=i+10;const a=answers[gi];const ic=a.sel===q.c;let qs=0,st='empty';if(a.sel===null){empty++;st='empty';}else if(ic){correct++;qs=0.5;score+=0.5;st='correct';}else{incorrect++;st='incorrect';}details.push({q,a,ic,qs,st,type:'mc'});});}
 else if(sec===3){S3.forEach((item,ii)=>{const ai=SEC_START[3]+ii;const a=answers[ai];let cor=0;const posDetails=[];a.order.forEach((si,pi)=>{const ok=si===pi;if(ok)cor++;posDetails.push({userPos:pi,correctPos:si,isCorrect:ok});});correct=cor;incorrect=10-cor;score+=a.score;details.push({item,a,correct:cor,score:a.score,posDetails,type:'ord'});});}
-else if(sec===4){S4.forEach((item,ii)=>{const ai=SEC_START[4]+ii;const a=answers[ai];let cor=0;const qDetails=[];item.questions.forEach((q,qi)=>{const userAns=a.responses[qi*10]||'';const nu=norm(userAns);let isOk=false;const allAns=[q.answer,...q.alts];for(const ca of allAns){if(nu===norm(ca)){isOk=true;break;}}if(isOk)cor++;qDetails.push({q,userAns,isOk,correctAns:q.answer});});correct=cor;incorrect=10-cor;score+=cor;details.push({item,qDetails,correct:cor,score:cor,type:'fill'});});}
+else if(sec===4){S4.forEach((item,ii)=>{const ai=SEC_START[4]+ii;const a=answers[ai];let cor=0;const qDetails=[];item.questions.forEach((q,qi)=>{const userAns=a.responses[qi]||'';const nu=norm(userAns);let isOk=false;const allAns=[q.answer,...q.alts];for(const ca of allAns){if(nu===norm(ca)){isOk=true;break;}}if(isOk)cor++;qDetails.push({q,userAns,isOk,correctAns:q.answer});});correct=cor;incorrect=10-cor;score+=cor*0.5;details.push({item,qDetails,correct:cor,score:cor*0.5,type:'fill'});});}
 else if(sec===5){S5.forEach((item,ii)=>{const ai=SEC_START[5]+ii;const a=answers[ai];let cor=0;const matchDetails=[];
     a.selections.forEach((sel,pi)=>{
         const expectedLetter = String.fromCharCode(65 + pi); // A=65, B=66, etc.
@@ -857,7 +883,7 @@ return{score,correct,incorrect,empty,details,count:SEC_END[sec]-SEC_START[sec]};
    ================================================================== */
 function trySubmit(){let ua=0;
 if(curSec===5){S5.forEach((item,ii)=>{const a=answers[SEC_START[5]+ii];a.selections.forEach(sel=>{if(!sel)ua++;});});}
-else if(curSec===4){S4.forEach((item,ii)=>{const a=answers[SEC_START[4]+ii];item.questions.forEach((_,qi)=>{if(!(a.responses[qi*10]||'').trim())ua++;});});}
+else if(curSec===4){S4.forEach((item,ii)=>{const a=answers[SEC_START[4]+ii];item.questions.forEach((_,qi)=>{if(!(a.responses[qi]||'').trim())ua++;});});}
 else{for(let i=SEC_START[curSec];i<SEC_END[curSec];i++){if(answers[i].type==='mc'&&answers[i].sel===null)ua++;if(answers[i].type==='vf'&&answers[i].sel===null)ua++;}}
 if(ua>0)showModal(`Tienes ${ua} campo(s) sin completar. ¿Deseas entregar de todas formas?`,submitExam);else submitExam();}
 
@@ -868,39 +894,39 @@ if(!secScores.s3)secScores.s3=calcSecScore(3);
 if(!secScores.s4)secScores.s4=calcSecScore(4);
 if(!secScores.s5)secScores.s5=calcSecScore(5);
 const total=secScores.s1.score+secScores.s2.score+secScores.s3.score+secScores.s4.score+secScores.s5.score;saveRes(total);showRes(total);showScr('sRes');
-sendBackupData({user:CU,date:new Date().toISOString(),s1:secScores.s1.score,s2:secScores.s2.score,s3:secScores.s3.score,s4:secScores.s4.score,s5:secScores.s5.score,total,max:64});}
+sendBackupData({user:CU,date:new Date().toISOString(),s1:secScores.s1.score,s2:secScores.s2.score,s3:secScores.s3.score,s4:secScores.s4.score,s5:secScores.s5.score,total,max:40});}
 
-function saveRes(total){const h=JSON.parse(localStorage.getItem('evalH_v5')||'[]');h.push({user:CU,date:new Date().toISOString(),s1:secScores.s1.score,s2:secScores.s2.score,s3:secScores.s3.score,s4:secScores.s4.score,s5:secScores.s5.score,total,max:64});localStorage.setItem('evalH_v5',JSON.stringify(h));toast('Resultados guardados localmente.','success');}
+function saveRes(total){const h=JSON.parse(localStorage.getItem('evalH_v5')||'[]');h.push({user:CU,date:new Date().toISOString(),s1:secScores.s1.score,s2:secScores.s2.score,s3:secScores.s3.score,s4:secScores.s4.score,s5:secScores.s5.score,total,max:40});localStorage.setItem('evalH_v5',JSON.stringify(h));toast('Resultados guardados localmente.','success');}
 
 function showRes(total){
-const ring=document.getElementById('rRing');ring.classList.remove('low','mid');const pct=total/64;if(pct<.4)ring.classList.add('low');else if(pct<.7)ring.classList.add('mid');const circ=2*Math.PI*70;setTimeout(()=>{ring.style.strokeDashoffset=circ-pct*circ;},100);
-const sn=document.getElementById('rNum');let cur=0;const st=total/64;const iv=setInterval(()=>{cur+=st/50;if(cur>=st){cur=st;clearInterval(iv);}sn.textContent=cur%1===0?cur:cur.toFixed(1);},25);
-document.getElementById('rLbl').textContent='de 64 puntos';
+const ring=document.getElementById('rRing');ring.classList.remove('low','mid');const pct=total/40;if(pct<.4)ring.classList.add('low');else if(pct<.7)ring.classList.add('mid');const circ=2*Math.PI*70;setTimeout(()=>{ring.style.strokeDashoffset=circ-pct*circ;},100);
+const sn=document.getElementById('rNum');let cur=0;const st=total/40;const iv=setInterval(()=>{cur+=st/50;if(cur>=st){cur=st;clearInterval(iv);}sn.textContent=cur%1===0?cur:cur.toFixed(1);},25);
+document.getElementById('rLbl').textContent='de 40 puntos';
 const tt=document.getElementById('rTit'),ts=document.getElementById('rSub');
 if(pct>=.9){tt.textContent='Excelente desempeño';ts.textContent='Dominas los temas de las 5 secciones evaluadas.';}else if(pct>=.7){tt.textContent='Buen resultado';ts.textContent='Buena comprensión general con áreas de mejora.';}else if(pct>=.5){tt.textContent='Resultado aceptable';ts.textContent='Necesitas reforzar varios conceptos. Revisa el material.';}else{tt.textContent='Necesitas estudiar más';ts.textContent='Se recomienda revisar a fondo todos los temas.';}
 
 const sc=document.getElementById('rStats');
 sc.innerHTML=`<div class="strow"><div class="stbx ssc"><div class="stv">${total}</div><div class="stl">Puntaje total</div></div><div class="stbx sok"><div class="stv">${secScores.s1.correct+secScores.s2.correct+secScores.s3.correct+secScores.s4.correct+secScores.s5.correct}</div><div class="stl">Correctas / correspondencias ok</div></div></div>
-<div class="sdiv">Sección 1 — V/F</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s1.score}/10</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s1.correct}</div><div class="stl">Correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s1.incorrect}</div><div class="stl">Incorrectas</div></div><div class="stbx semp"><div class="stv">${secScores.s1.empty}</div><div class="stl">Sin responder</div></div></div>
-<div class="sdiv">Sección 2 — Selección única</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s2.score}/20</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s2.correct}</div><div class="stl">Correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s2.incorrect}</div><div class="stl">Incorrectas</div></div><div class="stbx semp"><div class="stv">${secScores.s2.empty}</div><div class="stl">Sin responder</div></div></div>
-<div class="sdiv">Sección 3 — Ordenamiento</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s3.score}/4</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s3.correct}/20</div><div class="stl">Posiciones correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s3.incorrect}/20</div><div class="stl">Posiciones incorrectas</div></div></div>
-<div class="sdiv">Sección 4 — Completamiento</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s4.score}/20</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s4.correct}/20</div><div class="stl">Correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s4.incorrect}/20</div><div class="stl">Incorrectas</div></div></div>
+<div class="sdiv">Sección 1 — V/F</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s1.score}/5</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s1.correct}</div><div class="stl">Correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s1.incorrect}</div><div class="stl">Incorrectas</div></div><div class="stbx semp"><div class="stv">${secScores.s1.empty}</div><div class="stl">Sin responder</div></div></div>
+<div class="sdiv">Sección 2 — Selección única</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s2.score}/10</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s2.correct}</div><div class="stl">Correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s2.incorrect}</div><div class="stl">Incorrectas</div></div><div class="stbx semp"><div class="stv">${secScores.s2.empty}</div><div class="stl">Sin responder</div></div></div>
+<div class="sdiv">Sección 3 — Ordenamiento</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s3.score}/5</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s3.correct}/20</div><div class="stl">Posiciones correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s3.incorrect}/20</div><div class="stl">Posiciones incorrectas</div></div></div>
+<div class="sdiv">Sección 4 — Completamiento</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s4.score}/10</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s4.correct}/20</div><div class="stl">Correctas</div></div><div class="stbx sbad"><div class="stv">${secScores.s4.incorrect}/20</div><div class="stl">Incorrectas</div></div></div>
 <div class="sdiv">Sección 5 — Unir Columnas</div><div class="strow"><div class="stbx ssc"><div class="stv">${secScores.s5.score}/10</div><div class="stl">Puntaje</div></div><div class="stbx sok"><div class="stv">${secScores.s5.correct}/20</div><div class="stl">Correspondencias OK</div></div><div class="stbx sbad"><div class="stv">${secScores.s5.incorrect}/20</div><div class="stl">Incorrectas</div></div></div>`;
 
 // Revisión detallada
 const rc=document.getElementById('rRev');rc.innerHTML='';
 // S1
-secScores.s1.details.forEach((d,i)=>{const el=document.createElement('div');let bc='remp',bg='<span class="ribadge bemp">Sin responder</span>';if(d.st==='correct'){bc='rok';bg='<span class="ribadge bok">Correcta (1.0 pt)</span>';}else if(d.st==='partial'){bc='rok';bg='<span class="ribadge bpar">Parcial (0.5 pt)</span>';}else if(d.st==='incorrect'){bc='rbad';bg='<span class="ribadge bbad">Incorrecta (0.0 pt)</span>';}
+secScores.s1.details.forEach((d,i)=>{const el=document.createElement('div');let bc='remp',bg='<span class="ribadge bemp">Sin responder</span>';if(d.st==='correct'){bc='rok';bg='<span class="ribadge bok">Correcta (0.5 pt)</span>';}else if(d.st==='partial'){bc='rok';bg='<span class="ribadge bpar">Parcial (0.25 pt)</span>';}else if(d.st==='incorrect'){bc='rbad';bg='<span class="ribadge bbad">Incorrecta (0.0 pt)</span>';}
 const at=d.a.sel===null?'No respondida':(d.a.sel?'Verdadero':'Falso');const ct=d.q.answer?'Verdadero':'Falso';let al=`<span class="ubad">${at}</span>`;if(d.st==='incorrect')al+=` — Correcta: <span class="cok">${ct}</span>`;
 el.className=`ritem ${bc}`;el.innerHTML=`<div class="rihead"><span class="rinum">P${i+1} [V/F]</span>${bg}</div><div class="ritxt">${d.q.text}</div><div class="rians"><strong>Tu respuesta:</strong> ${al}</div><div class="rijust"><strong>Tu justificación:</strong><br>${d.a.just.trim()||'<em style="color:var(--fg3)">Sin justificación</em>'}</div>${d.st==='incorrect'?`<div class="riexpl"><strong>Explicación:</strong><br>${d.q.expl}</div>`:''}`;rc.appendChild(el);});
 // S2
-secScores.s2.details.forEach((d,i)=>{const el=document.createElement('div');const gi=i+10;let bc='remp',bg='<span class="ribadge bemp">Sin responder</span>';if(d.st==='correct'){bc='rok';bg='<span class="ribadge bok">Correcta (1.0 pt)</span>';}else if(d.st==='incorrect'){bc='rbad';bg='<span class="ribadge bbad">Incorrecta (0.0 pt)</span>';}
+secScores.s2.details.forEach((d,i)=>{const el=document.createElement('div');const gi=i+10;let bc='remp',bg='<span class="ribadge bemp">Sin responder</span>';if(d.st==='correct'){bc='rok';bg='<span class="ribadge bok">Correcta (0.5 pt)</span>';}else if(d.st==='incorrect'){bc='rbad';bg='<span class="ribadge bbad">Incorrecta (0.0 pt)</span>';}
 const lt=['A','B','C','D'];const at=d.a.sel===null?'No respondida':`${lt[d.a.sel]}. ${d.q.opts[d.a.sel]}`;const ct=`${lt[d.q.c]}. ${d.q.opts[d.q.c]}`;let al=`<span class="ubad">${at}</span>`;if(d.st==='incorrect')al+=`<br>Correcta: <span class="cok">${ct}</span>`;
 el.className=`ritem ${bc}`;el.innerHTML=`<div class="rihead"><span class="rinum">P${gi+1} [MC]</span>${bg}</div><div class="ritxt">${d.q.text}</div><div class="rians"><strong>Tu respuesta:</strong> ${al}</div>${d.st==='incorrect'?`<div class="riexpl"><strong>Explicación:</strong><br>${d.q.expl}</div>`:''}`;rc.appendChild(el);});
 // S3
-secScores.s3.details.forEach((d,ii)=>{const el=document.createElement('div');el.className='ritem';el.style.borderLeftColor=d.score>=1.6?'var(--ok)':d.score>=0.8?'var(--wn)':'var(--fl)';let h=`<div class="rihead"><span class="rinum">Ítem ${String.fromCharCode(65+ii)} [Ord.]</span><span class="ribadge ${d.score>=1.6?'bok':d.score>=0.8?'bpar':'bbad'}">${d.correct}/10 posiciones — ${d.score} pt</span></div><div class="ritxt">${d.item.title}</div>`;d.posDetails.forEach((pd,pi)=>{const col=pd.isCorrect?'var(--ok)':'var(--fl)';h+=`<div style="font-size:13px;color:var(--fg2);margin:4px 0 4px 12px"><span style="color:${col};font-weight:700">Pos ${pi+1}:</span> ${pd.isCorrect?'<i class="fas fa-check" style="color:var(--ok)"></i>':'<i class="fas fa-times" style="color:var(--fl)"></i> Colocaste: "'+d.item.sentences[d.a.order[pi]].substring(0,60)+'..."'} ${!pd.isCorrect?'— Correcta en pos '+(pd.correctPos+1):''}</div>`;});el.innerHTML=h;rc.appendChild(el);});
+secScores.s3.details.forEach((d,ii)=>{const el=document.createElement('div');el.className='ritem';el.style.borderLeftColor=d.score>=2.0?'var(--ok)':d.score>=1.0?'var(--wn)':'var(--fl)';let h=`<div class="rihead"><span class="rinum">Ítem ${String.fromCharCode(65+ii)} [Ord.]</span><span class="ribadge ${d.score>=2.0?'bok':d.score>=1.0?'bpar':'bbad'}">${d.correct}/10 posiciones — ${d.score} pt</span></div><div class="ritxt">${d.item.title}</div>`;d.posDetails.forEach((pd,pi)=>{const col=pd.isCorrect?'var(--ok)':'var(--fl)';h+=`<div style="font-size:13px;color:var(--fg2);margin:4px 0 4px 12px"><span style="color:${col};font-weight:700">Pos ${pi+1}:</span> ${pd.isCorrect?'<i class="fas fa-check" style="color:var(--ok)"></i>':'<i class="fas fa-times" style="color:var(--fl)"></i> Colocaste: "'+d.item.sentences[d.a.order[pi]].substring(0,60)+'..."'} ${!pd.isCorrect?'— Correcta en pos '+(pd.correctPos+1):''}</div>`;});el.innerHTML=h;rc.appendChild(el);});
 // S4
-secScores.s4.details.forEach((d,ii)=>{const el=document.createElement('div');el.className='ritem';el.style.borderLeftColor=d.score>=8?'var(--ok)':d.score>=5?'var(--wn)':'var(--fl)';let h=`<div class="rihead"><span class="rinum">Ítem ${String.fromCharCode(65+ii)} [Compl.]</span><span class="ribadge ${d.score>=8?'bok':d.score>=5?'bpar':'bbad'}">${d.correct}/10 — ${d.score} pt</span></div><div class="ritxt">${d.item.title}</div>`;d.qDetails.forEach((qd,qi)=>{const col=qd.isOk?'var(--ok)':'var(--fl)';const ico=qd.isOk?'fa-check':'fa-times';h+=`<div style="font-size:13px;color:var(--fg2);margin:6px 0 6px 12px;padding:8px 10px;background:var(--card);border-radius:6px;border-left:3px solid ${col}"><i class="fas ${ico}" style="color:${col};margin-right:6px"></i><strong>P${qi+1}:</strong> Tu respuesta: "<span style="color:${qd.isOk?'var(--ok)':'var(--fl)'};font-weight:600">${qd.userAns||'(vacío)'}</span>" ${!qd.isOk?'— Correcta: <span style="color:var(--ok);font-weight:600">'+qd.correctAns+'</span>':''}<br><span style="font-size:12px;color:var(--fg3)">${qd.q.expl}</span></div>`;});el.innerHTML=h;rc.appendChild(el);});
+secScores.s4.details.forEach((d,ii)=>{const el=document.createElement('div');el.className='ritem';el.style.borderLeftColor=d.score>=4.0?'var(--ok)':d.score>=2.0?'var(--wn)':'var(--fl)';let h=`<div class="rihead"><span class="rinum">Ítem ${String.fromCharCode(65+ii)} [Compl.]</span><span class="ribadge ${d.score>=4.0?'bok':d.score>=2.0?'bpar':'bbad'}">${d.correct}/10 — ${d.score} pt</span></div><div class="ritxt">${d.item.title}</div>`;d.qDetails.forEach((qd,qi)=>{const col=qd.isOk?'var(--ok)':'var(--fl)';const ico=qd.isOk?'fa-check':'fa-times';h+=`<div style="font-size:13px;color:var(--fg2);margin:6px 0 6px 12px;padding:8px 10px;background:var(--card);border-radius:6px;border-left:3px solid ${col}"><i class="fas ${ico}" style="color:${col};margin-right:6px"></i><strong>P${qi+1}:</strong> Tu respuesta: "<span style="color:${qd.isOk?'var(--ok)':'var(--fl)'};font-weight:600">${qd.userAns||'(vacío)'}</span>" ${!qd.isOk?'— Correcta: <span style="color:var(--ok);font-weight:600">'+qd.correctAns+'</span>':''}<br><span style="font-size:12px;color:var(--fg3)">${qd.q.expl}</span></div>`;});el.innerHTML=h;rc.appendChild(el);});
 // S5
 secScores.s5.details.forEach((d,ii)=>{const el=document.createElement('div');el.className='ritem';el.style.borderLeftColor=d.score>=4?'var(--ok)':d.score>=2.5?'var(--wn)':'var(--fl)';
 let h=`<div class="rihead"><span class="rinum">Ítem ${String.fromCharCode(65+ii)} [Unir]</span><span class="ribadge ${d.score>=4?'bok':d.score>=2.5?'bpar':'bbad'}">${d.correct}/10 — ${d.score} pt</span></div><div class="ritxt">${d.item.title}</div>`;
@@ -919,16 +945,532 @@ el.innerHTML=h;rc.appendChild(el);});
 setTimeout(()=>rK(document.getElementById('rRev')),100);
 }
 
-/* ==================================================================
-   ENVIAR POR CORREO
-   ================================================================== */
-function sendEmail(){const t=secScores.s1.score+secScores.s2.score+secScores.s3.score+secScores.s4.score+secScores.s5.score;let b=`EVALUACION COMPLETA — UNIDADES 3, 4 Y 5\n${'='.repeat(55)}\n\nEstudiante: ${CU.name}\nCorreo: ${CU.email}\nFecha: ${new Date().toLocaleString('es-ES')}\n\n${'─'.repeat(55)}\nRESULTADO: ${t}/64 puntos\nS1 (V/F): ${secScores.s1.score}/10 | S2 (MC): ${secScores.s2.score}/20\nS3 (Ord): ${secScores.s3.score}/4 | S4 (Compl): ${secScores.s4.score}/20\nS5 (Unir): ${secScores.s5.score}/10\n${'─'.repeat(55)}\n\n`;
+function sendEmail(){const t=secScores.s1.score+secScores.s2.score+secScores.s3.score+secScores.s4.score+secScores.s5.score;let b=`EVALUACION DEL SEGUNDO PARCIAL — GESTION DE PROYECTOS\n${'='.repeat(55)}\n\nEstudiante: ${CU.name}\nCorreo: ${CU.email}\nFecha: ${new Date().toLocaleString('es-ES')}\n\n${'─'.repeat(55)}\nRESULTADO: ${t}/40 puntos\nS1 (V/F): ${secScores.s1.score}/5 | S2 (MC): ${secScores.s2.score}/10\nS3 (Ord): ${secScores.s3.score}/5 | S4 (Compl): ${secScores.s4.score}/10\nS5 (Unir): ${secScores.s5.score}/10\n${'─'.repeat(55)}\n\n`;
 b+=`=== SECCION 1: V/F ===\n\n`;secScores.s1.details.forEach((d,i)=>{const a=d.a.sel===null?'—':(d.a.sel?'V':'F');const c=d.q.answer?'V':'F';b+=`P${i+1}. ${a} ${d.ic?'[OK]':'[X]'} (Correcta: ${c}) — ${d.qs} pt\nJust: ${d.a.just.trim().substring(0,80)||'Sin just.'}\n${!d.ic?'Expl: '+d.q.expl.substring(0,100)+'\n':''}\n`;});
 b+=`\n=== SECCION 2: SELECCION ===\n\n`;const lt=['A','B','C','D'];secScores.s2.details.forEach((d,i)=>{const a=d.a.sel===null?'—':lt[d.a.sel];const c=lt[d.q.c];b+=`P${i+11}. ${a} ${d.ic?'[OK]':'[X]'} (Correcta: ${c}) — ${d.qs} pt\n${!d.ic?'Expl: '+d.q.expl.substring(0,100)+'\n':''}\n`;});
 b+=`\n=== SECCION 3: ORDENAMIENTO ===\n\n`;secScores.s3.details.forEach((d,ii)=>{b+=`Item ${String.fromCharCode(65+ii)}: ${d.correct}/10 posiciones — ${d.score} pt\n`;});
 b+=`\n=== SECCION 4: COMPLETAMIENTO ===\n\n`;secScores.s4.details.forEach((d,ii)=>{b+=`Item ${String.fromCharCode(65+ii)}: ${d.correct}/10 — ${d.score} pt\n`;d.qDetails.forEach((qd,qi)=>{b+=`  P${qi+1}: "${qd.userAns||'(vacio)'}" ${qd.isOk?'[OK]':'[X] Correcta: '+qd.correctAns}\n`;});});
 b+=`\n=== SECCION 5: UNIR COLUMNAS ===\n\n`;secScores.s5.details.forEach((d,ii)=>{b+=`Item ${String.fromCharCode(65+ii)}: ${d.correct}/10 correspondencias — ${d.score} pt\n`;d.matchDetails.forEach((md,qi)=>{b+=`  ${qi+1}. ${md.leftItem.text}: "${md.userSel||'(sin sel)'}" ${md.isCorrect?'[OK]':'[X] Correcta: '+md.correctLetter}\n`;});});
-window.location.href=`mailto:${CU.email}?subject=${encodeURIComponent(`Resultado Evaluacion U3-U4-U5 - ${CU.name} - ${t}/64`)}&body=${encodeURIComponent(b)}`;toast('Abriendo cliente de correo...','success');}
+window.location.href=`mailto:${CU.email}?subject=${encodeURIComponent(`Resultado Evaluacion U3-U4-U5 - ${CU.name} - ${t}/40`)}&body=${encodeURIComponent(b)}`;toast('Abriendo cliente de correo...','success');}
+
+/* ==================================================================
+   EXPORTAR PDF DE RESULTADOS (FORMATO OFICIAL UPSE)
+   ================================================================== */
+function exportPDF() {
+    toast('Generando PDF de resultados...', 'info');
+    setTimeout(() => {
+        const w = window.open('', '_blank');
+        const studentName = CU ? CU.name : 'Estudiante Anónimo';
+        const studentEmail = CU ? CU.email : 'Sin registrar';
+        const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
+        const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+        // Generar contenido dinámico de la Tabla 3 de preguntas
+        let table3Rows = '';
+
+        // SECCIÓN 1: Verdadero o Falso
+        table3Rows += `
+            <tr class="keep-together">
+                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
+                    <strong>Ítem de Verdadero o Falso.</strong> Lee cada pregunta detenidamente y selecciona la única opción correcta.<br>
+                    <strong>Tema: “Diseño del Producto”</strong> // Relación con el RAA1.1
+                </td>
+                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
+                    5,00 puntos<br>(0.5 puntos c/u)
+                </td>
+            </tr>
+            <tr class="keep-together">
+                <td colspan="2" style="padding: 0;">
+                    <table style="width: 100%; margin: 0; border: none;">
+        `;
+        secScores.s1.details.forEach((d, i) => {
+            const userAnsText = d.a.sel === null ? '(Sin responder)' : (d.a.sel ? 'V' : 'F');
+            const correctAnsText = d.q.answer ? 'V' : 'F';
+            const isCorrect = d.st === 'correct' || d.st === 'partial';
+            const pointsStr = d.qs.toFixed(2) + ' / 0.50';
+            const statusStyle = isCorrect ? 'color: green;' : 'color: red;';
+            const mark = isCorrect ? '✓' : '✗';
+            
+            table3Rows += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">P${i+1}.</td>
+                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top; text-align: justify;">
+                        ${d.q.text}<br>
+                        <span style="font-size: 8.5pt; ${statusStyle}">
+                            <strong>Tu respuesta:</strong> ${userAnsText} [${mark}]
+                            ${!isCorrect ? ` (Correcta: ${correctAnsText})` : ''}
+                        </span><br>
+                        <span style="font-size: 8.5pt; color: #444;">
+                            <strong>Justificación:</strong> ${escapeHtml(d.a.just.trim()) || '<em>Sin justificación</em>'}
+                        </span>
+                        ${!isCorrect ? `<br><span style="font-size: 8.5pt; color: #555; font-style: italic;"><strong>Explicación:</strong> ${d.q.expl}</span>` : ''}
+                    </td>
+                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top; ${statusStyle}">
+                        ${pointsStr}
+                    </td>
+                </tr>
+            `;
+        });
+        table3Rows += `
+                    </table>
+                </td>
+            </tr>
+        `;
+
+        // SECCIÓN 2: Selección única
+        table3Rows += `
+            <tr class="keep-together">
+                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
+                    <strong>Ítem de Selección Simple.</strong> Lee cada pregunta detenidamente y selecciona la única respuesta correcta.<br>
+                    <strong>Tema: “Localización de Plantas”</strong> // Relación con el RAA1.2
+                </td>
+                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
+                    10,00 puntos<br>(0.5 puntos c/u)
+                </td>
+            </tr>
+            <tr class="keep-together">
+                <td colspan="2" style="padding: 0;">
+                    <table style="width: 100%; margin: 0; border: none;">
+        `;
+        secScores.s2.details.forEach((d, i) => {
+            const letters = ['A', 'B', 'C', 'D'];
+            const userAnsText = d.a.sel === null ? '(Sin responder)' : `${letters[d.a.sel]}. ${d.q.opts[d.a.sel]}`;
+            const correctAnsText = `${letters[d.q.c]}. ${d.q.opts[d.q.c]}`;
+            const isCorrect = d.st === 'correct';
+            const pointsStr = d.qs.toFixed(2) + ' / 0.50';
+            const statusStyle = isCorrect ? 'color: green;' : 'color: red;';
+            const mark = isCorrect ? '✓' : '✗';
+
+            table3Rows += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">P${i+11}.</td>
+                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top; text-align: justify;">
+                        ${d.q.text}<br>
+                        <span style="font-size: 8.5pt; ${statusStyle}">
+                            <strong>Tu respuesta:</strong> ${userAnsText} [${mark}]
+                            ${!isCorrect ? `<br><strong>Correcta:</strong> ${correctAnsText}` : ''}
+                        </span>
+                        ${!isCorrect ? `<br><span style="font-size: 8.5pt; color: #555; font-style: italic;"><strong>Explicación:</strong> ${d.q.expl}</span>` : ''}
+                    </td>
+                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top; ${statusStyle}">
+                        ${pointsStr}
+                    </td>
+                </tr>
+            `;
+        });
+        table3Rows += `
+                    </table>
+                </td>
+            </tr>
+        `;
+
+        // SECCIÓN 3: Ordenamiento
+        table3Rows += `
+            <tr class="keep-together">
+                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
+                    <strong>Ítem de Ordenamiento.</strong> Lee cada pregunta detenidamente y selecciona la secuencia correcta.<br>
+                    <strong>Tema: “Requerimientos Tecnológicos”</strong> // Relación con el RAA1.2
+                </td>
+                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
+                    5,00 puntos<br>(2.5 puntos c/u)
+                </td>
+            </tr>
+            <tr class="keep-together">
+                <td colspan="2" style="padding: 0;">
+                    <table style="width: 100%; margin: 0; border: none;">
+        `;
+        secScores.s3.details.forEach((d, ii) => {
+            table3Rows += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">${ii+1}.</td>
+                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top;">
+                        <strong>${d.item.title}</strong><br>
+                        <div style="margin-left: 10px; font-size: 8.5pt;">
+            `;
+            d.posDetails.forEach((pd, pi) => {
+                const col = pd.isCorrect ? 'color: green;' : 'color: red;';
+                const mark = pd.isCorrect ? '✓' : '✗';
+                table3Rows += `
+                    <div style="${col}; margin-bottom: 1px;">
+                        Pos ${pi+1}: [${mark}] ${pd.isCorrect ? 'Correcto' : 'Colocaste: "' + d.item.sentences[d.a.order[pi]] + '"'}
+                        ${!pd.isCorrect ? ` — (Debería ser Pos ${pd.correctPos+1})` : ''}
+                    </div>
+                `;
+            });
+            table3Rows += `
+                        </div>
+                    </td>
+                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top;">
+                        ${d.score.toFixed(2)} / 2.50
+                    </td>
+                </tr>
+            `;
+        });
+        table3Rows += `
+                    </table>
+                </td>
+            </tr>
+        `;
+
+        // SECCIÓN 4: Completamiento
+        table3Rows += `
+            <tr class="keep-together">
+                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
+                    <strong>Ítem de Completamiento.</strong> Lee cada pregunta detenidamente y complétala con la única opción correcta.<br>
+                    <strong>Tema: “Planificación y Logística”</strong> // Relación con el RAA1.3
+                </td>
+                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
+                    10,00 puntos<br>(0.5 puntos c/u)
+                </td>
+            </tr>
+            <tr class="keep-together">
+                <td colspan="2" style="padding: 0;">
+                    <table style="width: 100%; margin: 0; border: none;">
+        `;
+        secScores.s4.details.forEach((d, ii) => {
+            table3Rows += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">${ii+1}.</td>
+                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top;">
+                        <strong>${d.item.title}</strong><br>
+                        <div style="margin-left: 10px; font-size: 8.5pt;">
+            `;
+            d.qDetails.forEach((qd, qi) => {
+                const col = qd.isOk ? 'color: green;' : 'color: red;';
+                const mark = qd.isOk ? '✓' : '✗';
+                table3Rows += `
+                    <div style="${col}; margin-bottom: 3px;">
+                        P${qi+1}: [${mark}] Tu respuesta: "${escapeHtml(qd.userAns) || '(vacío)'}" 
+                        ${!qd.isOk ? ` — Correcta: "${qd.correctAns}"` : ''}<br>
+                        <span style="font-size: 8pt; color: #555; font-style: italic;">(${qd.q.expl})</span>
+                    </div>
+                `;
+            });
+            table3Rows += `
+                        </div>
+                    </td>
+                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top;">
+                        ${d.score.toFixed(2)} / 5.00
+                    </td>
+                </tr>
+            `;
+        });
+        table3Rows += `
+                    </table>
+                </td>
+            </tr>
+        `;
+
+        // SECCIÓN 5: Unir Columnas
+        table3Rows += `
+            <tr class="keep-together">
+                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
+                    <strong>Ítem De Unir Las Columnas.</strong> Lee cada pregunta detenidamente une o empareja la pregunta con la opción correcta.<br>
+                    <strong>Tema: “Indicadores Financieros”</strong> // Relación con el RAA1.4
+                </td>
+                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
+                    10,00 puntos<br>(0.5 puntos c/u)
+                </td>
+            </tr>
+            <tr class="keep-together">
+                <td colspan="2" style="padding: 0;">
+                    <table style="width: 100%; margin: 0; border: none;">
+        `;
+        secScores.s5.details.forEach((d, ii) => {
+            table3Rows += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">${ii+1}.</td>
+                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top;">
+                        <strong>${d.item.title}</strong><br>
+                        <div style="margin-left: 10px; font-size: 8.5pt;">
+            `;
+            d.matchDetails.forEach((md, pi) => {
+                const col = md.isCorrect ? 'color: green;' : 'color: red;';
+                const mark = md.isCorrect ? '✓' : '✗';
+                table3Rows += `
+                    <div style="${col}; margin-bottom: 1px;">
+                        ${pi+1}. ${md.leftItem.text}: [${mark}] Tu opción: "${md.userSel || '(sin seleccionar)'}"
+                        ${!md.isCorrect ? ` — Correcta: "${md.correctLetter}"` : ''}
+                    </div>
+                `;
+            });
+            table3Rows += `
+                        </div>
+                    </td>
+                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top;">
+                        ${d.score.toFixed(2)} / 5.00
+                    </td>
+                </tr>
+            `;
+        });
+        table3Rows += `
+                    </table>
+                </td>
+            </tr>
+        `;
+
+        // Generar la página HTML completa del examen
+        let docHtml = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluación Resultados - ${studentName}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"><\/script>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        body {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 10pt;
+            line-height: 1.15;
+            color: #000;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 12pt;
+        }
+        .header-title {
+            font-size: 10pt;
+            font-weight: bold;
+            margin: 0 0 2pt 0;
+            text-transform: uppercase;
+        }
+        .header-subtitle {
+            font-size: 9pt;
+            font-weight: normal;
+            margin: 0 0 2pt 0;
+            text-transform: uppercase;
+        }
+        .section-label {
+            font-size: 9pt;
+            font-weight: bold;
+            margin-top: 10pt;
+            margin-bottom: 2pt;
+        }
+        table.meta-table, table.raa-table, table.activities-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10pt;
+            font-family: "Times New Roman", Times, serif;
+        }
+        table.meta-table th, table.meta-table td, 
+        table.raa-table th, table.raa-table td, 
+        table.activities-table th, table.activities-table td {
+            border: 1px solid #000;
+            padding: 3pt 5pt;
+            font-size: 9pt;
+            vertical-align: middle;
+        }
+        .shading-gray {
+            background-color: #bebebe !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .shading-black {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            text-align: center;
+            font-weight: bold;
+        }
+        .text-bold {
+            font-weight: bold;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-justify {
+            text-align: justify;
+        }
+        .instructions-block {
+            font-size: 9pt;
+            margin-bottom: 12pt;
+            text-align: justify;
+        }
+        .instructions-list {
+            margin: 2pt 0;
+            padding-left: 15pt;
+        }
+        .instructions-list li {
+            margin-bottom: 2pt;
+        }
+        .keep-together {
+            page-break-inside: avoid;
+        }
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30pt;
+            page-break-inside: avoid;
+        }
+        .signature-table td {
+            border: none;
+            text-align: center;
+            width: 50%;
+            padding-top: 40pt;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 200px;
+            margin: 0 auto 5pt auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <h1 class="header-title">UNIVERSIDAD ESTATAL PENÍNSULA DE SANTA ELENA</h1>
+        <h2 class="header-subtitle">FACULTAD DE CIENCIAS DE LA INGENIERÍA</h2>
+        <h2 class="header-subtitle">CARRERA DE INGENIERÍA INDUSTRIAL - INGENIERÍA EN SEGURIDAD INDUSTRIAL</h2>
+    </div>
+
+    <div class="section-label">Datos del Examen:</div>
+    <table class="meta-table">
+        <tr>
+            <td class="text-bold" style="width: 15%;">Fecha:</td>
+            <td style="width: 35%;">${formattedDate}</td>
+            <td class="text-bold" style="width: 15%;">Ciclo:</td>
+            <td style="width: 35%;">I</td>
+        </tr>
+        <tr>
+            <td class="text-bold">Asignatura:</td>
+            <td>GESTIÓN DE PROYECTOS</td>
+            <td class="text-bold">Duración:</td>
+            <td>90 minutos</td>
+        </tr>
+        <tr>
+            <td class="text-bold">Docente:</td>
+            <td>Ing. Luis A Palate G. Mg</td>
+            <td class="text-bold">Valoración:</td>
+            <td>40 puntos (Segundo Parcial)</td>
+        </tr>
+        <tr>
+            <td class="text-bold">Estudiante:</td>
+            <td>${studentName}</td>
+            <td class="text-bold">Calificación:</td>
+            <td class="text-bold" style="font-size: 10pt;">${totalScore.toFixed(2)} / 40.00</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="shading-gray"></td>
+            <td class="text-bold text-center">Calificación:</td>
+            <td></td>
+        </tr>
+    </table>
+
+    <div class="section-label">Relación y Medición de Resultados de Aprendizaje:</div>
+    <table class="raa-table">
+        <thead>
+            <tr class="text-bold text-center">
+                <th style="width: 15%;">Código RAA (Asignatura)</th>
+                <th style="width: 40%;">Descripción del RAA</th>
+                <th style="width: 10%;">Código RAC (Carrera)</th>
+                <th style="width: 35%;">Descripción del RAC</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-bold text-center">RAA1.1</td>
+                <td class="text-justify">Evaluar la viabilidad técnica y operativa de proyectos mediante herramientas de diseño de producto (QFD, balanceo de líneas, ingeniería de valor) para asegurar la eficiencia del proceso productivo.</td>
+                <td class="text-bold text-center" rowspan="4">RAC</td>
+                <td class="text-justify" rowspan="4">Al culminar la asignatura, el estudiante estará en capacidad de formular, evaluar y gestionar proyectos industriales aplicando metodologías técnicas y financieras, asegurando la optimización de recursos y la viabilidad económica en el sector productivo.</td>
+            </tr>
+            <tr>
+                <td class="text-bold text-center">RAA1.2</td>
+                <td class="text-justify">Analizar decisiones de localización de planta y determinación de requerimientos tecnológicos mediante métodos ponderados, de centro de gravedad y análisis de brechas.</td>
+            </tr>
+            <tr>
+                <td class="text-bold text-center">RAA1.3</td>
+                <td class="text-justify">Planificar y programar los requerimientos de materiales (MRP), la producción (MPS) y la gestión logística de inventarios (modelos EOQ y stock de seguridad).</td>
+            </tr>
+            <tr>
+                <td class="text-bold text-center">RAA1.4</td>
+                <td class="text-justify">Evaluar la rentabilidad económica y financiera de proyectos utilizando indicadores de rentabilidad (VAN, TIR, PRI) y considerando el impacto de impuestos y depreciación.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="section-label">Instrucciones Generales:</div>
+    <div class="instructions-block">
+        <ul class="instructions-list">
+            <li>Presentación: Utilice bolígrafo de tinta negra o azul, con letra legible y ordenada (no Utilizar esferográfico borrable).</li>
+            <li>No se permiten correcciones con líquido corrector ni tachaduras excesivas. Conducta:</li>
+            <li>Está prohibido el uso de teléfonos móviles, dispositivos electrónicos no autorizados o materiales no permitidos.</li>
+            <li>Queda prohibida la comunicación entre estudiantes. Cualquier acto de deshonestidad académica se sancionará según la normativa vigente.</li>
+        </ul>
+        <strong style="margin-top: 4px; display: block;">El cuestionario consta de 40 puntos en total.</strong>
+    </div>
+
+    <div class="section-label">Detalle del Examen y Respuestas del Estudiante:</div>
+    <table class="activities-table">
+        <thead>
+            <tr>
+                <th colspan="2" class="shading-black">Actividades en las que se evalúa el nivel de logro de los aprendizajes (40 puntos)</th>
+            </tr>
+            <tr class="text-bold">
+                <td colspan="2" style="padding: 4pt 6pt;">Relación con el resultado de aprendizaje: RAC con RAA1.1, RAA1.2, RAA1.3, RAA1.4</td>
+            </tr>
+        </thead>
+        <tbody>
+            ${table3Rows}
+        </tbody>
+    </table>
+
+    <table class="signature-table">
+        <tr>
+            <td>
+                <div class="signature-line"></div>
+                <strong style="font-size: 9.5pt;">Ing. Luis A Palate G. Mg</strong><br>
+                <span style="font-size: 8.5pt; color: #555;">DOCENTE DE LA ASIGNATURA</span>
+            </td>
+            <td>
+                <div class="signature-line"></div>
+                <strong style="font-size: 9.5pt;">${studentName}</strong><br>
+                <span style="font-size: 8.5pt; color: #555;">ESTUDIANTE (FIRMA)</span>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+        // Renderizar fórmulas con KaTeX
+        if (typeof renderMathInElement === 'function') {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '\\\\(', right: '\\\\)', display: false},
+                    {left: '\\\\[', right: '\\\\]', display: true}
+                ],
+                throwOnError: false
+            });
+        }
+        // Lanzar la impresión automática
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    <\/script>
+</body>
+</html>`;
+        w.document.write(docHtml);
+        w.document.close();
+    }, 400);
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 /* ==================================================================
    REINTENTAR
