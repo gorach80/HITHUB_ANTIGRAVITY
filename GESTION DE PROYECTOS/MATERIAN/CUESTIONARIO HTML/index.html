@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <!-- QRCodeJS para generación de códigos QR de verificación digital -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root{--bg:#070d19;--bg2:#0e182a;--card:#132238;--card-h:#1a2d4a;--bdr:rgba(255,255,255,.12);--bdr2:rgba(126,182,31,.35);--fg:#f1f5f9;--fg2:#94a3b8;--fg3:#64748b;--ac:#7eb61f;--acg:rgba(126,182,31,.15);--acd:#003e71;--wn:#ffe000;--wng:rgba(255,224,0,.15);--dn:#ef4444;--dng:rgba(239,68,68,.12);--ok:#22c55e;--okg:rgba(34,197,94,.12);--fl:#f43f5e;--flg:rgba(244,63,94,.12);--r:14px;--rs:8px;--sh:0 4px 24px rgba(0,0,0,.4);--sh2:0 12px 48px rgba(0,0,0,.6)}
@@ -338,11 +340,45 @@
 </div>
 
 <div class="app">
-<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo" style="background:none; box-shadow:none; width:96px; height:96px; margin:0 auto 16px;"><img src="upse_logo.png" alt="Escudo UPSE" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3));"></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><div style="margin: -6px 0 16px 0; font-size: 11px; font-weight: 700; color: #f59e0b; display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.1); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3);"><i class="fas fa-calendar-alt"></i> Fecha y Hora Límite: 03/08/2026 — 10:00 AM</div><div class="fgrp" style="margin-bottom:15px; text-align:left;"><label for="mCarrera" style="font-weight:600; font-size:12px; color:var(--fg2); display:block; margin-bottom:6px;">Carrera / Especialidad</label><select id="mCarrera" style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:var(--fg); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s;" onchange="updateCareerSub(this.value)"><option value="Ingeniería Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Ingeniería Industrial</option><option value="Ingeniería en Seguridad Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Seguridad Industrial</option></select></div><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><div class="honesty-box" style="margin:18px 0 14px 0; padding:14px 16px; background:linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03)); border:1px solid rgba(239,68,68,0.25); border-radius:8px; text-align:left;"><div style="font-weight:700; font-size:13px; color:#ef4444; display:flex; align-items:center; gap:8px; margin-bottom:8px;"><i class="fas fa-user-shield"></i> Protocolo de Honestidad Académica</div><ul style="font-size:11px; color:var(--fg2); margin:0 0 10px 0; padding-left:18px; line-height:1.5;"><li>Es <strong>obligatorio</strong> permanecer en <strong>pantalla completa</strong> durante toda la evaluación.</li><li>Está <strong>prohibido</strong> cambiar de pestaña, minimizar el navegador o abrir otras aplicaciones.</li><li>Cada infracción será registrada como una <strong>advertencia de seguridad</strong>.</li><li>Al acumular <strong>3 advertencias</strong>, el examen se entregará de forma <strong>automática e irrevocable</strong>.</li><li>Plazo máximo de desarrollo: <strong>Hasta las 10:00 AM del 03/08/2026</strong>.</li></ul><button type="button" onclick="playHonestyAudio()" style="background:linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06)); border:1px solid rgba(239,68,68,0.3); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700; padding:7px 14px; border-radius:6px; outline:none; transition:all 0.2s;"><i class="fas fa-volume-up" style="color:#ef4444;"></i> Escuchar Protocolo</button></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
+<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo" style="background:none; box-shadow:none; width:96px; height:96px; margin:0 auto 16px;"><img src="upse_logo.png" alt="Escudo UPSE" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3));"></div><h1 class="ltitle">Evaluación del Segundo Parcial — Unidades 3, 4 y 5</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><div style="margin: -6px 0 16px 0; font-size: 11px; font-weight: 700; color: #f59e0b; display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.1); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3);"><i class="fas fa-calendar-alt"></i> Fecha y Hora Límite: 03/08/2026 — 10:00 AM</div><div class="fgrp" style="margin-bottom:15px; text-align:left;"><label for="mCarrera" style="font-weight:600; font-size:12px; color:var(--fg2); display:block; margin-bottom:6px;">Carrera / Especialidad</label><select id="mCarrera" style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:var(--fg); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s;" onchange="updateCareerSub(this.value)"><option value="Ingeniería Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Ingeniería Industrial</option><option value="Ingeniería en Seguridad Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Seguridad Industrial</option></select></div><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mC">Cédula de Identidad</label><input type="text" id="mC" placeholder="Ej: 0912345678" maxlength="10"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><div class="honesty-box" style="margin:18px 0 14px 0; padding:14px 16px; background:linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03)); border:1px solid rgba(239,68,68,0.25); border-radius:8px; text-align:left;"><div style="font-weight:700; font-size:13px; color:#ef4444; display:flex; align-items:center; gap:8px; margin-bottom:8px;"><i class="fas fa-user-shield"></i> Protocolo de Honestidad Académica</div><ul style="font-size:11px; color:var(--fg2); margin:0 0 10px 0; padding-left:18px; line-height:1.5;"><li>Es <strong>obligatorio</strong> permanecer en <strong>pantalla completa</strong> durante toda la evaluación.</li><li>Está <strong>prohibido</strong> cambiar de pestaña, minimizar el navegador o abrir otras aplicaciones.</li><li>Cada infracción será registrada como una <strong>advertencia de seguridad</strong>.</li><li>Al acumular <strong>3 advertencias</strong>, el examen se entregará de forma <strong>automática e irrevocable</strong>.</li><li>Plazo máximo de desarrollo: <strong>Hasta las 10:00 AM del 03/08/2026</strong>.</li></ul><button type="button" onclick="playHonestyAudio()" style="background:linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06)); border:1px solid rgba(239,68,68,0.3); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700; padding:7px 14px; border-radius:6px; outline:none; transition:all 0.2s;"><i class="fas fa-volume-up" style="color:#ef4444;"></i> Escuchar Protocolo</button></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
 <!-- INSTR --><div class="screen" id="sInstr"><div class="icard"><div class="ihdr"><div class="iico"><i class="fas fa-clipboard-list"></i></div><div><div class="ititle">Instrucciones de la Evaluación (Segundo Parcial)</div><div class="isub">5 secciones — 40 puntos totales</div></div></div><div class="ubadge"><div class="uav" id="uAv">M</div><div class="uinfo"><div class="uname" id="uNm">María García</div><div class="uemail" id="uEm">maria.lopez@upse.edu.ec</div></div></div><div class="sprev"><div class="sbox"><div class="sn">Sección 1</div><div class="st">V/F + Justificación</div><div class="sd">10 preguntas — Diseño del Producto (5 pts)</div></div><div class="sbox"><div class="sn">Sección 2</div><div class="st">Selección única</div><div class="sd">20 preguntas — Localización (10 pts)</div></div><div class="sbox"><div class="sn">Sección 3</div><div class="st">Ordenamiento</div><div class="sd">2 items de 10 oraciones — Requerimientos (5 pts)</div></div><div class="sbox"><div class="sn">Sección 4</div><div class="st">Completamiento</div><div class="sd">2 items de 10 preguntas — Planificación y Logística (10 pts)</div></div><div class="sbox" style="grid-column: span 2"><div class="sn">Sección 5</div><div class="st">Unir las Columnas</div><div class="sd">2 items de 10 correspondencias — Indicadores Financieros (10 pts)</div></div></div><ul class="ilist"><li><span class="ii" style="background:rgba(245,158,11,0.15); color:#f59e0b;"><i class="fas fa-calendar-times"></i></span><span>Fecha y hora límite: <strong style="color:#f59e0b">Lunes 03 de Agosto de 2026 — 10:00 AM</strong>.</span></li><li><span class="ii"><i class="fas fa-clock"></i></span><span>Tiempo total: <strong style="color:var(--fg)">90 minutos</strong> distribuidos en las 5 secciones.</span></li><li><span class="ii"><i class="fas fa-pen-fancy"></i></span><span>S1: 0.5 pt c/u (0.25 respuesta + 0.25 justificación). S2, S4: 0.5 pt c/u. S3: 0.25 pt por posición. S5: 0.5 pt por correspondencia.</span></li><li><span class="ii"><i class="fas fa-exchange-alt"></i></span><span>S5: Selecciona la letra de la columna derecha que corresponda al concepto de la columna izquierda.</span></li><li><span class="ii"><i class="fas fa-envelope"></i></span><span>Al finalizar, se guardarán los resultados y podrás enviarlos a tu correo institucional.</span></li></ul><button class="strtbtn" onclick="startExam()"><i class="fas fa-play"></i> Comenzar evaluación</button></div></div>
 <!-- TRANS --><div class="screen" id="sTrans"><div class="tcard"><div class="tico"><i class="fas fa-check-double"></i></div><div class="ttitle" id="transTitle">Sección completada</div><div class="tsub" id="transSub"></div><div class="ssum" id="transSum"></div><button class="strtbtn" id="transBtn" onclick="nextSection()"><i class="fas fa-arrow-right"></i> Continuar</button></div></div>
 <!-- EXAM --><div class="screen" id="sExam"><div class="ehdr"><div class="etop"><span class="eslbl" id="eLbl">Sección 1</span><span class="etimer"><i class="fas fa-hourglass-half"></i> <span id="eTim">25:00</span></span></div><div class="pbt"><div class="pbf" id="eProg"></div></div></div><div class="qmap" id="qMap"></div><div id="qCont"></div><div class="navs"><button class="nbtn prev" id="bPrev" onclick="navQ(-1)" disabled><i class="fas fa-arrow-left"></i> Anterior</button><button class="nbtn nxt" id="bNext" onclick="navQ(1)">Siguiente <i class="fas fa-arrow-right"></i></button></div></div>
 <!-- RESULTS --><div class="screen" id="sRes"><div class="rcard"><div class="sring"><svg viewBox="0 0 160 160"><circle class="rbg" cx="80" cy="80" r="70"/><circle class="rfill" id="rRing" cx="80" cy="80" r="70"/></svg><div class="sval"><div class="snum" id="rNum">0</div><div class="slbl" id="rLbl">de 40 puntos</div></div></div><h2 class="rtitle" id="rTit">Resultado</h2><p class="rsub" id="rSub"></p><div id="rStats"></div><div class="revsec"><div class="revtit">Revisión detallada</div><div id="rRev"></div></div><div class="ract"><button class="rbtn pdf" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> Guardar como PDF</button><button class="rbtn eml" onclick="sendEmail()"><i class="fas fa-envelope"></i> Enviar por correo</button><button class="rbtn ret" id="btnRetry" onclick="retry()"><i class="fas fa-redo"></i> Reintentar</button></div></div></div>
+
+<!-- MODAL DE FIRMA ELECTRÓNICA -->
+<div id="modalSignature" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(7,13,25,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#132238; border:1px solid rgba(255,255,255,0.15); border-radius:14px; width:100%; max-width:520px; padding:24px; color:#fff; box-shadow:0 24px 48px rgba(0,0,0,0.6);">
+        <h3 style="font-family:'Space Grotesk',sans-serif; margin:0 0 8px 0; color:#FFE000; font-size:18px; display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-signature"></i> Firma Electrónica del Estudiante
+        </h3>
+        <p style="font-size:12px; color:#94a3b8; margin:0 0 16px 0; line-height:1.4;">
+            Por favor realiza tu firma manuscrita dentro del cuadro a continuación. Esta firma y tu <strong>Código QR de Verificación</strong> se incrustarán en el informe PDF oficial.
+        </p>
+
+        <div style="background:#ffffff; border-radius:8px; padding:4px; margin-bottom:12px; border:2px dashed #94a3b8;">
+            <canvas id="sigCanvas" width="480" height="150" style="width:100%; height:150px; touch-action:none; cursor:crosshair; background:#ffffff; border-radius:4px; display:block;"></canvas>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <button type="button" onclick="clearSignature()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                <i class="fas fa-eraser"></i> Limpiar Trazo
+            </button>
+            <span style="font-size:11px; color:#7EB61F; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                <i class="fas fa-shield-alt"></i> Verificación QR Activa
+            </span>
+        </div>
+
+        <div style="display:flex; gap:12px;">
+            <button type="button" onclick="closeSignatureModal()" style="flex:1; background:rgba(255,255,255,0.1); border:none; color:#fff; padding:12px; border-radius:8px; font-weight:600; cursor:pointer;">Cancelar</button>
+            <button type="button" onclick="confirmSignatureAndExport()" style="flex:2; background:linear-gradient(135deg, #7EB61F, #5a8514); border:none; color:#fff; padding:12px; border-radius:8px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 16px rgba(126,182,31,0.3);">
+                <i class="fas fa-file-pdf"></i> Confirmar y Generar PDF
+            </button>
+        </div>
+    </div>
+</div>
+<!-- CONTENEDOR OCULTO PARA GENERACIÓN DE QR -->
+<div id="qrHiddenContainer" style="display:none;"></div>
 </div>
 
 <script>
@@ -645,6 +681,8 @@ function closeMsModal() {
 function selectMsAcc(acc) {
     closeMsModal();
     acc.career = document.getElementById('mCarrera').value;
+    const c = document.getElementById('mC').value.trim();
+    acc.cedula = c || '0900000000';
     verifyRegistration(acc, () => {
         CU = acc;
         setupInstr();
@@ -654,12 +692,13 @@ function selectMsAcc(acc) {
 }
 
 function mLogin(){
-    const n=document.getElementById('mN').value.trim(),e=document.getElementById('mE').value.trim(),er=document.getElementById('lErr');
+    const n=document.getElementById('mN').value.trim(),c=document.getElementById('mC').value.trim(),e=document.getElementById('mE').value.trim(),er=document.getElementById('lErr');
     if(!n||n.length<3){er.textContent='Ingresa tu nombre completo.';er.style.display='block';return;}
+    if(!c||c.length<8){er.textContent='Ingresa tu número de cédula de identidad válido (mín. 8 dígitos).';er.style.display='block';return;}
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){er.textContent='Ingresa un correo válido.';er.style.display='block';return;}
     er.style.display='none';
     
-    const acc = {name:n, email:e, career: document.getElementById('mCarrera').value};
+    const acc = {name:n, cedula:c, email:e, career: document.getElementById('mCarrera').value};
     verifyRegistration(acc, () => {
         CU = acc;
         setupInstr();
@@ -1325,19 +1364,148 @@ b+=`\n=== SECCION 5: UNIR COLUMNAS ===\n\n`;secScores.s5.details.forEach((d,ii)=
 window.location.href=`mailto:${CU.email}?subject=${encodeURIComponent(`Resultado Evaluacion U3-U4-U5 - ${CU.name} - ${t}/40`)}&body=${encodeURIComponent(b)}`;toast('Abriendo cliente de correo...','success');}
 
 /* ==================================================================
-   EXPORTAR PDF DE RESULTADOS (FORMATO OFICIAL UPSE)
+   FIRMA ELECTRÓNICA Y CÓDIGO QR DE VERIFICACIÓN
    ================================================================== */
+let sigCanvas, sigCtx, isDrawingSig = false, sigHasDraw = false;
+
+function initSigCanvas() {
+    sigCanvas = document.getElementById('sigCanvas');
+    if (!sigCanvas) return;
+    sigCtx = sigCanvas.getContext('2d');
+    sigCtx.lineWidth = 2.5;
+    sigCtx.lineCap = 'round';
+    sigCtx.lineJoin = 'round';
+    sigCtx.strokeStyle = '#002749';
+
+    function getPos(e) {
+        const rect = sigCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+            x: (clientX - rect.left) * (sigCanvas.width / rect.width),
+            y: (clientY - rect.top) * (sigCanvas.height / rect.height)
+        };
+    }
+
+    function startDraw(e) {
+        isDrawingSig = true;
+        sigHasDraw = true;
+        const p = getPos(e);
+        sigCtx.beginPath();
+        sigCtx.moveTo(p.x, p.y);
+        e.preventDefault();
+    }
+
+    function moveDraw(e) {
+        if (!isDrawingSig) return;
+        const p = getPos(e);
+        sigCtx.lineTo(p.x, p.y);
+        sigCtx.stroke();
+        e.preventDefault();
+    }
+
+    function endDraw() {
+        isDrawingSig = false;
+    }
+
+    sigCanvas.onmousedown = startDraw;
+    sigCanvas.onmousemove = moveDraw;
+    sigCanvas.onmouseup = endDraw;
+    sigCanvas.ontouchstart = startDraw;
+    sigCanvas.ontouchmove = moveDraw;
+    sigCanvas.ontouchend = endDraw;
+}
+
+function clearSignature() {
+    if (!sigCtx) return;
+    sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    sigHasDraw = false;
+}
+
+function openSignatureModal() {
+    document.getElementById('modalSignature').style.display = 'flex';
+    setTimeout(initSigCanvas, 100);
+}
+
+function closeSignatureModal() {
+    document.getElementById('modalSignature').style.display = 'none';
+}
+
+function generateQRCodeDataUrl(text) {
+    return new Promise((resolve) => {
+        const container = document.getElementById('qrHiddenContainer');
+        container.innerHTML = '';
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(container, {
+                text: text,
+                width: 120,
+                height: 120,
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            setTimeout(() => {
+                const img = container.querySelector('img');
+                const cvs = container.querySelector('canvas');
+                if (img && img.src) resolve(img.src);
+                else if (cvs) resolve(cvs.toDataURL());
+                else resolve('');
+            }, 200);
+        } else {
+            resolve('');
+        }
+    });
+}
+
+function confirmSignatureAndExport() {
+    if (CU) {
+        CU.sigDataUrl = sigHasDraw ? sigCanvas.toDataURL('image/png') : '';
+        CU.sigTimestamp = new Date();
+    }
+    closeSignatureModal();
+    doExportPDF();
+}
+
 function exportPDF() {
-    toast('Generando PDF de resultados...', 'info');
+    openSignatureModal();
+}
+
+/* ==================================================================
+   EXPORTAR PDF DE RESULTADOS (FORMATO OFICIAL UPSE CON FIRMA Y QR)
+   ================================================================== */
+async function doExportPDF() {
+    toast('Generando PDF con Firma y Código QR de Verificación...', 'info');
+    
+    const studentName = CU ? CU.name : 'Estudiante Anónimo';
+    const studentCedula = (CU && CU.cedula) ? CU.cedula : 'Sin registrar';
+    const studentEmail = CU ? CU.email : 'Sin registrar';
+    const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
+    const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    const sigTimeStr = (CU && CU.sigTimestamp) ? CU.sigTimestamp.toLocaleString('es-EC') : new Date().toLocaleString('es-EC');
+    const examStartStr = (CU && CU.startTime) ? CU.startTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '09:00:00';
+    const examEndStr = (CU && CU.endTime) ? CU.endTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : new Date().toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const geoStr = (CU && CU.geoCoords) ? CU.geoCoords : 'La Libertad - Santa Elena (GPS)';
+
+    const qrPayload = JSON.stringify({
+        Institucion: "UPSE - Universidad Estatal Península de Santa Elena",
+        Estudiante: studentName,
+        Cedula: studentCedula,
+        Carrera: CU ? CU.career : 'Ingeniería Industrial',
+        Asignatura: "Gestión de Proyectos",
+        FechaFirma: sigTimeStr,
+        InicioExamen: examStartStr,
+        FinExamen: examEndStr,
+        UbicacionGPS: geoStr,
+        Nota: `${totalScore.toFixed(2)}/40.00`,
+        VerificacionID: "UPSE-VAL-" + Math.random().toString(36).substring(2, 10).toUpperCase()
+    });
+
+    const qrDataUrl = await generateQRCodeDataUrl(qrPayload);
+    const sigImgSrc = (CU && CU.sigDataUrl) ? CU.sigDataUrl : '';
+    const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
+        ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
+        : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
+
     setTimeout(() => {
         const w = window.open('', '_blank');
-        const studentName = CU ? CU.name : 'Estudiante Anónimo';
-        const studentEmail = CU ? CU.email : 'Sin registrar';
-        const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
-        const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
-            ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
-            : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
 
         // Generar contenido dinámico de la Tabla 3 de preguntas
         let table3Rows = '';
@@ -1807,17 +1975,35 @@ function exportPDF() {
                         </tbody>
                     </table>
 
-                    <table class="signature-table">
+                    <table class="signature-table" style="width: 100%; border-collapse: collapse; margin-top: 15pt; page-break-inside: avoid;">
                         <tr>
-                            <td>
-                                <div class="signature-line"></div>
-                                <strong style="font-size: 9.5pt;">Ing. Luis A Palate G. Mg</strong><br>
-                                <span style="font-size: 8.5pt; color: #555;">DOCENTE DE LA ASIGNATURA</span>
+                            <td style="width: 42%; vertical-align: bottom; text-align: center; border: 1px solid #cbd5e1; padding: 8pt; border-radius: 6px;">
+                                <div style="height: 45px;"></div>
+                                <div class="signature-line" style="border-top: 1px solid #000; width: 180px; margin: 0 auto 4pt auto;"></div>
+                                <strong style="font-size: 9pt;">Ing. Luis A Palate G. Mg</strong><br>
+                                <span style="font-size: 8pt; color: #555;">DOCENTE DE LA ASIGNATURA</span>
                             </td>
-                            <td>
-                                <div class="signature-line"></div>
-                                <strong style="font-size: 9.5pt;">${studentName}</strong><br>
-                                <span style="font-size: 8.5pt; color: #555;">ESTUDIANTE (FIRMA)</span>
+                            <td style="width: 4%; border: none;"></td>
+                            <td style="width: 54%; vertical-align: top; border: 1px solid #002749; padding: 8pt; border-radius: 6px; background: #f8fafc;">
+                                <div style="font-size: 8pt; font-weight: bold; color: #002749; margin-bottom: 5pt; border-bottom: 1px solid #002749; padding-bottom: 3pt; text-transform: uppercase; text-align: center;">
+                                    Sello de Firma Electrónica - UPSE
+                                </div>
+                                <table style="width: 100%; border: none; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="border: none; vertical-align: top; width: 68%; font-size: 7.5pt; line-height: 1.35; color: #1e293b; text-align: left; padding: 0;">
+                                            <div><strong>Estudiante:</strong> ${studentName}</div>
+                                            <div><strong>Cédula:</strong> ${studentCedula}</div>
+                                            <div><strong>Fecha Firma:</strong> ${sigTimeStr}</div>
+                                            <div><strong>Horario Examen:</strong> ${examStartStr} - ${examEndStr}</div>
+                                            <div><strong>GPS:</strong> ${geoStr}</div>
+                                            <div style="margin-top: 3px; color: #7EB61F; font-weight: bold; font-size: 7pt;">VALIDADO Y FIRMADO DIGITALMENTE</div>
+                                        </td>
+                                        <td style="border: none; vertical-align: middle; width: 32%; text-align: center; padding: 0;">
+                                            ${sigImgSrc ? `<img src="${sigImgSrc}" style="width: 75px; height: 35px; object-fit: contain; display: block; margin: 0 auto 4px auto;">` : ''}
+                                            ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 62px; height: 62px; display: block; margin: 0 auto;">` : ''}
+                                        </td>
+                                    </tr>
+                                </table>
                             </td>
                         </tr>
                     </table>

@@ -872,6 +872,7 @@
                     allData.push({
                         name: st.name,
                         email: st.email,
+                        cedula: (res.user && res.user.cedula) ? res.user.cedula : 'N/A',
                         career: st.career,
                         completed: true,
                         date: res.date,
@@ -889,6 +890,7 @@
                     allData.push({
                         name: st.name,
                         email: st.email,
+                        cedula: 'N/A',
                         career: st.career,
                         completed: false,
                         date: null,
@@ -1025,7 +1027,7 @@
             const sortBy = document.getElementById('sortBy').value;
 
             let filtered = allData.filter(st => {
-                const matchSearch = st.name.toLowerCase().includes(search) || st.email.toLowerCase().includes(search);
+                const matchSearch = st.name.toLowerCase().includes(search) || st.email.toLowerCase().includes(search) || (st.cedula && st.cedula.includes(search));
                 const matchStatus = fStatus === 'all' || (fStatus === 'completed' && st.completed) || (fStatus === 'pending' && !st.completed);
                 const matchCareer = fCareer === 'all' || st.career === fCareer;
                 const matchScale = fScale === 'all' || st.scale === fScale;
@@ -1076,6 +1078,7 @@
                             <div>
                                 <div class="user-name">${st.name}</div>
                                 <div class="user-email">${st.email}</div>
+                                <div style="font-size:11px; color:var(--fg3);">C.I.: ${st.cedula || 'N/A'}</div>
                             </div>
                         </div>
                     </td>
@@ -1104,7 +1107,7 @@
             if (!student) return;
 
             document.getElementById('modalStudentName').textContent = student.name;
-            document.getElementById('modalStudentEmail').textContent = `${student.email} · ${student.career}`;
+            document.getElementById('modalStudentEmail').textContent = `${student.email} · CI: ${student.cedula || 'N/A'} · ${student.career}`;
 
             const container = document.getElementById('modalStudentContent');
             if (!student.completed) {
@@ -1179,9 +1182,9 @@
         }
 
         function exportCSV() {
-            let csv = "Nombre,Correo,Carrera,Estado,Puntaje Total,Escala,S1,S2,S3,S4,S5,Infracciones,Fecha\n";
+            let csv = "Nombre,Cédula,Correo,Carrera,Estado,Puntaje Total,Escala,S1,S2,S3,S4,S5,Infracciones,Fecha\n";
             allData.forEach(st => {
-                csv += `"${st.name}","${st.email}","${st.career}","${st.completed ? 'Resuelto' : 'Pendiente'}",${st.total},"${st.scale}",${st.s1},${st.s2},${st.s3},${st.s4},${st.s5},${st.warnings},"${st.date || ''}"\n`;
+                csv += `"${st.name}","${st.cedula || 'N/A'}","${st.email}","${st.career}","${st.completed ? 'Resuelto' : 'Pendiente'}",${st.total},"${st.scale}",${st.s1},${st.s2},${st.s3},${st.s4},${st.s5},${st.warnings},"${st.date || ''}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
