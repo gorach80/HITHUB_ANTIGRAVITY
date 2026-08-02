@@ -66,6 +66,21 @@ function doPost(e) {
         data.s5,
         data.total
       ]);
+
+      // ----------------------------------------------------
+      // ENVÍO AUTOMÁTICO DE REPORTE POR CORREO ELECTRÓNICO
+      // ----------------------------------------------------
+      try {
+        if (data.user && data.user.email) {
+          MailApp.sendEmail({
+            to: data.user.email,
+            subject: "Reporte de Calificación — Evaluación del Segundo Parcial UPSE",
+            body: "Estimado(a) " + data.user.name + ",\n\nSe ha registrado satisfactoriamente tu Evaluación del Segundo Parcial en la asignatura de Gestión de Proyectos.\n\nRESULTADO OBTENIDO: " + data.total + " / 40 puntos.\n\nDetalle por Secciones:\n- Sección 1 (V/F): " + data.s1 + " / 5 pts\n- Sección 2 (Selección): " + data.s2 + " / 10 pts\n- Sección 3 (Ordenamiento): " + data.s3 + " / 5 pts\n- Sección 4 (Completamiento): " + data.s4 + " / 10 pts\n- Sección 5 (Unir Columnas): " + data.s5 + " / 10 pts\n\nDocente: Ing. Luis A Palate G. Mg\nCorreo Docente: lpalate5942@upse.edu.ec\nUniversidad Estatal Península de Santa Elena"
+          });
+        }
+      } catch (mailErr) {
+        console.warn("No se pudo enviar correo automático desde Apps Script: " + mailErr);
+      }
     }
     
     // ----------------------------------------------------
