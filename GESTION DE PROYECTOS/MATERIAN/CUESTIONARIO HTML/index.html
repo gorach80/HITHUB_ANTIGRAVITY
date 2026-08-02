@@ -1596,61 +1596,69 @@ function exportPDF() {
     <style>
         @page {
             size: A4 portrait;
-            margin: 10mm 12mm 22mm 12mm;
+            margin: 6mm 10mm 6mm 10mm;
         }
         body {
             font-family: "Times New Roman", Times, serif;
-            font-size: 10pt;
+            font-size: 9.5pt;
             line-height: 1.15;
             color: #000;
             background: #fff;
             margin: 0;
-            padding: 0 0 20mm 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
-        .print-header {
-            width: 100%;
-            margin-bottom: 8pt;
+        .page-header-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 24mm;
+            background: #ffffff;
             text-align: center;
+            z-index: 1000;
         }
-        .print-footer {
+        .page-header-img {
+            width: 100%;
+            height: 23mm;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+        .page-footer-fixed {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             height: 18mm;
-            text-align: center;
             background: #ffffff;
-            z-index: 9999;
+            text-align: center;
+            z-index: 1000;
         }
-        .print-footer img {
+        .page-footer-img {
             width: 100%;
-            height: 18mm;
+            height: 17mm;
             display: block;
             margin: 0 auto;
             object-fit: contain;
         }
-        .header-title {
-            font-size: 10pt;
-            font-weight: bold;
-            margin: 0 0 2pt 0;
-            text-transform: uppercase;
+        .page-header-space {
+            height: 25mm;
         }
-        .header-subtitle {
-            font-size: 9pt;
-            font-weight: normal;
-            margin: 0 0 2pt 0;
-            text-transform: uppercase;
+        .page-footer-space {
+            height: 19mm;
         }
         .section-label {
             font-size: 9pt;
             font-weight: bold;
-            margin-top: 8pt;
+            margin-top: 6pt;
             margin-bottom: 2pt;
         }
         table.meta-table, table.raa-table, table.activities-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8pt;
+            margin-bottom: 6pt;
             font-family: "Times New Roman", Times, serif;
         }
         table.meta-table th, table.meta-table td, 
@@ -1658,7 +1666,7 @@ function exportPDF() {
         table.activities-table th, table.activities-table td {
             border: 1px solid #000;
             padding: 3pt 5pt;
-            font-size: 9pt;
+            font-size: 8.5pt;
             vertical-align: middle;
         }
         .shading-gray {
@@ -1674,187 +1682,191 @@ function exportPDF() {
             text-align: center;
             font-weight: bold;
         }
-        .text-bold {
-            font-weight: bold;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .text-justify {
-            text-align: justify;
-        }
-        .instructions-block {
-            font-size: 9pt;
-            margin-bottom: 10pt;
-            text-align: justify;
-        }
-        .instructions-list {
-            margin: 2pt 0;
-            padding-left: 15pt;
-        }
-        .instructions-list li {
-            margin-bottom: 2pt;
-        }
-        .keep-together {
-            page-break-inside: avoid;
-        }
-        .signature-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25pt;
-            page-break-inside: avoid;
-        }
-        .signature-table td {
-            border: none;
-            text-align: center;
-            width: 50%;
-            padding-top: 35pt;
-        }
-        .signature-line {
-            border-top: 1px solid #000;
-            width: 200px;
-            margin: 0 auto 5pt auto;
-        }
+        .text-bold { font-weight: bold; }
+        .text-center { text-align: center; }
+        .text-justify { text-align: justify; }
+        .instructions-block { font-size: 8.5pt; margin-bottom: 8pt; text-align: justify; }
+        .instructions-list { margin: 2pt 0; padding-left: 15pt; }
+        .instructions-list li { margin-bottom: 2pt; }
+        .keep-together { page-break-inside: avoid; }
+        .signature-table { width: 100%; border-collapse: collapse; margin-top: 20pt; page-break-inside: avoid; }
+        .signature-table td { border: none; text-align: center; width: 50%; padding-top: 30pt; }
+        .signature-line { border-top: 1px solid #000; width: 200px; margin: 0 auto 5pt auto; }
     </style>
 </head>
 <body>
 
-    <div class="print-header">
-        <img src="${headerImgName}" style="width: 100%; max-height: 90px; display: block; margin: 0 auto; object-fit: contain;">
+    <!-- ENCABEZADO Y PIE DE PÁGINA FIJOS -->
+    <div class="page-header-fixed">
+        <img src="${headerImgName}" class="page-header-img">
+    </div>
+    <div class="page-footer-fixed">
+        <img src="PIE%20DE%20PAGINA.jpg" class="page-footer-img" alt="Pie de página UPSE">
     </div>
 
-    <div class="print-footer">
-        <img src="PIE%20DE%20PAGINA.jpg" alt="Pie de página UPSE">
-    </div>
-
-    <div class="section-label">Datos del Examen:</div>
-    <table class="meta-table">
-        <tr>
-            <td class="text-bold" style="width: 15%;">Fecha:</td>
-            <td style="width: 35%;">${formattedDate}</td>
-            <td class="text-bold" style="width: 15%;">Ciclo:</td>
-            <td style="width: 35%;">I</td>
-        </tr>
-        <tr>
-            <td class="text-bold">Asignatura:</td>
-            <td>GESTIÓN DE PROYECTOS</td>
-            <td class="text-bold">Duración:</td>
-            <td>90 minutos</td>
-        </tr>
-        <tr>
-            <td class="text-bold">Docente:</td>
-            <td>Ing. Luis A Palate G. Mg</td>
-            <td class="text-bold">Valoración:</td>
-            <td>40 puntos (Segundo Parcial)</td>
-        </tr>
-        <tr>
-            <td class="text-bold">Estudiante:</td>
-            <td>${studentName}</td>
-            <td class="text-bold">Calificación:</td>
-            <td class="text-bold" style="font-size: 10pt;">${totalScore.toFixed(2)} / 40.00</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="shading-gray"></td>
-            <td class="text-bold text-center">Calificación:</td>
-            <td></td>
-        </tr>
-    </table>
-
-    <div class="section-label">Relación y Medición de Resultados de Aprendizaje:</div>
-    <table class="raa-table">
+    <!-- ESTRUCTURA PRINCIPAL IMPRESA CON ESPACIOS RESERVADOS -->
+    <table style="width: 100%; border-collapse: collapse; border: none;">
         <thead>
-            <tr class="text-bold text-center">
-                <th style="width: 15%;">Código RAA (Asignatura)</th>
-                <th style="width: 40%;">Descripción del RAA</th>
-                <th style="width: 10%;">Código RAC (Carrera)</th>
-                <th style="width: 35%;">Descripción del RAC</th>
+            <tr>
+                <td style="border: none; padding: 0;">
+                    <div class="page-header-space"></div>
+                </td>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td class="text-bold text-center">RAA1.1</td>
-                <td class="text-justify">Evaluar la viabilidad técnica y operativa de proyectos mediante herramientas de diseño de producto (QFD, balanceo de líneas, ingeniería de valor) para asegurar la eficiencia del proceso productivo.</td>
-                <td class="text-bold text-center" rowspan="4">RAC</td>
-                <td class="text-justify" rowspan="4">Al culminar la asignatura, el estudiante estará en capacidad de formular, evaluar y gestionar proyectos industriales aplicando metodologías técnicas y financieras, asegurando la optimización de recursos y la viabilidad económica en el sector productivo.</td>
-            </tr>
-            <tr>
-                <td class="text-bold text-center">RAA1.2</td>
-                <td class="text-justify">Analizar decisiones de localización de planta y determinación de requerimientos tecnológicos mediante métodos ponderados, de centro de gravedad y análisis de brechas.</td>
-            </tr>
-            <tr>
-                <td class="text-bold text-center">RAA1.3</td>
-                <td class="text-justify">Planificar y programar los requerimientos de materiales (MRP), la producción (MPS) y la gestión logística de inventarios (modelos EOQ y stock de seguridad).</td>
-            </tr>
-            <tr>
-                <td class="text-bold text-center">RAA1.4</td>
-                <td class="text-justify">Evaluar la rentabilidad económica y financiera de proyectos utilizando indicadores de rentabilidad (VAN, TIR, PRI) y considerando el impacto de impuestos y depreciación.</td>
+                <td style="border: none; padding: 0;">
+                    <div class="section-label" style="margin-top: 0;">Datos del Examen:</div>
+                    <table class="meta-table">
+                        <tr>
+                            <td class="text-bold" style="width: 15%;">Fecha:</td>
+                            <td style="width: 35%;">${formattedDate}</td>
+                            <td class="text-bold" style="width: 15%;">Ciclo:</td>
+                            <td style="width: 35%;">I</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Asignatura:</td>
+                            <td>GESTIÓN DE PROYECTOS</td>
+                            <td class="text-bold">Duración:</td>
+                            <td>90 minutos</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Docente:</td>
+                            <td>Ing. Luis A Palate G. Mg</td>
+                            <td class="text-bold">Valoración:</td>
+                            <td>40 puntos (Segundo Parcial)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-bold">Estudiante:</td>
+                            <td>${studentName}</td>
+                            <td class="text-bold">Calificación:</td>
+                            <td class="text-bold" style="font-size: 10pt;">${totalScore.toFixed(2)} / 40.00</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="shading-gray"></td>
+                            <td class="text-bold text-center">Calificación:</td>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <div class="section-label">Relación y Medición de Resultados de Aprendizaje:</div>
+                    <table class="raa-table">
+                        <thead>
+                            <tr class="text-bold text-center">
+                                <th style="width: 15%;">Código RAA (Asignatura)</th>
+                                <th style="width: 40%;">Descripción del RAA</th>
+                                <th style="width: 10%;">Código RAC (Carrera)</th>
+                                <th style="width: 35%;">Descripción del RAC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-bold text-center">RAA1.1</td>
+                                <td class="text-justify">Evaluar la viabilidad técnica y operativa de proyectos mediante herramientas de diseño de producto (QFD, balanceo de líneas, ingeniería de valor) para asegurar la eficiencia del proceso productivo.</td>
+                                <td class="text-bold text-center" rowspan="4">RAC</td>
+                                <td class="text-justify" rowspan="4">Al culminar la asignatura, el estudiante estará en capacidad de formular, evaluar y gestionar proyectos industriales aplicando metodologías técnicas y financieras, asegurando la optimización de recursos y la viabilidad económica en el sector productivo.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold text-center">RAA1.2</td>
+                                <td class="text-justify">Analizar decisiones de localización de planta y determinación de requerimientos tecnológicos mediante métodos ponderados, de centro de gravedad y análisis de brechas.</td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold text-center">RAA1.3</td>
+                                <td class="text-justify">Planificar y programar los requerimientos de materiales (MRP), la producción (MPS) y la gestión logística de inventarios (modelos EOQ y stock de seguridad).</td>
+                            </tr>
+                            <tr>
+                                <td class="text-bold text-center">RAA1.4</td>
+                                <td class="text-justify">Evaluar la rentabilidad económica y financiera de proyectos utilizando indicadores de rentabilidad (VAN, TIR, PRI) y considerando el impacto de impuestos y depreciación.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="section-label">Instrucciones Generales:</div>
+                    <div class="instructions-block">
+                        <ul class="instructions-list">
+                            <li>Presentación: Utilice bolígrafo de tinta negra o azul, con letra legible y ordenada (no Utilizar esferográfico borrable).</li>
+                            <li>No se permiten correcciones con líquido corrector ni tachaduras excesivas. Conducta:</li>
+                            <li>Está prohibido el uso de teléfonos móviles, dispositivos electrónicos no autorizados o materiales no permitidos.</li>
+                            <li>Queda prohibida la comunicación entre estudiantes. Cualquier acto de deshonestidad académica se sancionará según la normativa vigente.</li>
+                        </ul>
+                        <strong style="margin-top: 4px; display: block;">El cuestionario consta de 40 puntos en total.</strong>
+                    </div>
+
+                    <div class="section-label">Detalle del Examen y Respuestas del Estudiante:</div>
+                    <table class="activities-table">
+                        <thead>
+                            <tr>
+                                <th colspan="2" class="shading-black">Actividades en las que se evalúa el nivel de logro de los aprendizajes (40 puntos)</th>
+                            </tr>
+                            <tr class="text-bold">
+                                <td colspan="2" style="padding: 4pt 6pt;">Relación con el resultado de aprendizaje: RAC con RAA1.1, RAA1.2, RAA1.3, RAA1.4</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${table3Rows}
+                        </tbody>
+                    </table>
+
+                    <table class="signature-table">
+                        <tr>
+                            <td>
+                                <div class="signature-line"></div>
+                                <strong style="font-size: 9.5pt;">Ing. Luis A Palate G. Mg</strong><br>
+                                <span style="font-size: 8.5pt; color: #555;">DOCENTE DE LA ASIGNATURA</span>
+                            </td>
+                            <td>
+                                <div class="signature-line"></div>
+                                <strong style="font-size: 9.5pt;">${studentName}</strong><br>
+                                <span style="font-size: 8.5pt; color: #555;">ESTUDIANTE (FIRMA)</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
             </tr>
         </tbody>
-    </table>
-
-    <div class="section-label">Instrucciones Generales:</div>
-    <div class="instructions-block">
-        <ul class="instructions-list">
-            <li>Presentación: Utilice bolígrafo de tinta negra o azul, con letra legible y ordenada (no Utilizar esferográfico borrable).</li>
-            <li>No se permiten correcciones con líquido corrector ni tachaduras excesivas. Conducta:</li>
-            <li>Está prohibido el uso de teléfonos móviles, dispositivos electrónicos no autorizados o materiales no permitidos.</li>
-            <li>Queda prohibida la comunicación entre estudiantes. Cualquier acto de deshonestidad académica se sancionará según la normativa vigente.</li>
-        </ul>
-        <strong style="margin-top: 4px; display: block;">El cuestionario consta de 40 puntos en total.</strong>
-    </div>
-
-    <div class="section-label">Detalle del Examen y Respuestas del Estudiante:</div>
-    <table class="activities-table">
-        <thead>
+        <tfoot>
             <tr>
-                <th colspan="2" class="shading-black">Actividades en las que se evalúa el nivel de logro de los aprendizajes (40 puntos)</th>
+                <td style="border: none; padding: 0;">
+                    <div class="page-footer-space"></div>
+                </td>
             </tr>
-            <tr class="text-bold">
-                <td colspan="2" style="padding: 4pt 6pt;">Relación con el resultado de aprendizaje: RAC con RAA1.1, RAA1.2, RAA1.3, RAA1.4</td>
-            </tr>
-        </thead>
-        <tbody>
-            ${table3Rows}
-        </tbody>
-    </table>
-
-    <table class="signature-table">
-        <tr>
-            <td>
-                <div class="signature-line"></div>
-                <strong style="font-size: 9.5pt;">Ing. Luis A Palate G. Mg</strong><br>
-                <span style="font-size: 8.5pt; color: #555;">DOCENTE DE LA ASIGNATURA</span>
-            </td>
-            <td>
-                <div class="signature-line"></div>
-                <strong style="font-size: 9.5pt;">${studentName}</strong><br>
-                <span style="font-size: 8.5pt; color: #555;">ESTUDIANTE (FIRMA)</span>
-            </td>
-        </tr>
+        </tfoot>
     </table>
 
     <script>
-        // Renderizar fórmulas con KaTeX
-        if (typeof renderMathInElement === 'function') {
-            renderMathInElement(document.body, {
-                delimiters: [
-                    {left: '$$', right: '$$', display: true},
-                    {left: '\\\\(', right: '\\\\)', display: false},
-                    {left: '\\\\[', right: '\\\\]', display: true}
-                ],
-                throwOnError: false
+        function doPrint() {
+            if (typeof renderMathInElement === 'function') {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '\\\\(', right: '\\\\)', display: false},
+                        {left: '\\\\[', right: '\\\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+            const imgs = Array.from(document.images);
+            Promise.all(imgs.map(img => {
+                if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
+                return new Promise(resolve => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+            })).then(() => {
+                setTimeout(() => { window.print(); }, 250);
             });
         }
-        // Lanzar la impresión automática
-        setTimeout(() => {
-            window.print();
-        }, 500);
+        if (document.readyState === 'complete') {
+            doPrint();
+        } else {
+            window.onload = doPrint;
+        }
     <\/script>
 </body>
 </html>`;
         w.document.write(docHtml);
         w.document.close();
-    }, 400);
+    }, 300);
 }
 
 function escapeHtml(text) {
