@@ -713,7 +713,7 @@ function mLogin(){
 /* --- CONTROL DE DUPLICADOS (LOCAL Y EN LA NUBE) --- */
 function verifyRegistration(acc, onAllowed) {
     const email = acc.email.trim().toLowerCase();
-    if (email === 'luis.palate@upse.edu.ec') {
+    if (email === 'lpalate5942@upse.edu.ec' || email === 'luis.palate@upse.edu.ec') {
         onAllowed();
         return;
     }
@@ -811,7 +811,7 @@ function loginAsDocente() {
     sessionStorage.setItem('docente_auth', 'true');
     CU = {
         name: "Ing. Luis A Palate G. Mg",
-        email: "luis.palate@upse.edu.ec",
+        email: "lpalate5942@upse.edu.ec",
         isDocente: true,
         career: document.getElementById('mCarrera').value
     };
