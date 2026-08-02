@@ -1114,11 +1114,22 @@ function buildQs(){const c=document.getElementById('qCont');c.innerHTML='';
                 <a href="#" onclick="autoSolveS1(${i}); return false;" style="color:var(--ac); text-decoration:underline; font-weight:bold; display:inline-block; margin-top:6px;"><i class="fas fa-magic"></i> Resolver y Justificar</a>
             </div>`;
         }
-        card.innerHTML=`<div class="qnum">${i+1}</div><div class="qtxt">${q.text}</div><div class="vfops"><div class="vfop" data-q="${i}" data-v="true" onclick="selVF(${i},true)"><i class="fas fa-check"></i> Verdadero</div><div class="vfop" data-q="${i}" data-v="false" onclick="selVF(${i},false)"><i class="fas fa-times"></i> Falso</div></div><div class="jarea" id="ja-${i}"><div class="jlbl"><i class="fas fa-pen-nib"></i> Justifica tu respuesta</div><textarea class="jtxt" id="jt-${i}" placeholder="Explica por qué..." oninput="updJust(${i})"></textarea></div><div class="qst" id="qs-${i}"><i class="fas fa-info-circle"></i><span></span></div>${hintHtml}`;
+        const a = answers[i];
+        const isVfSel = a && a.sel !== null;
+        const vClass = (isVfSel && a.sel === true) ? 'st' : '';
+        const fClass = (isVfSel && a.sel === false) ? 'vfsf' : '';
+        const jVis = isVfSel ? 'vis' : '';
+        const jVal = (a && a.just) ? escapeHtml(a.just) : '';
+        card.innerHTML=`<div class="qnum">${i+1}</div><div class="qtxt">${q.text}</div><div class="vfops"><div class="vfop ${vClass}" data-q="${i}" data-v="true" onclick="selVF(${i},true)"><i class="fas fa-check"></i> Verdadero</div><div class="vfop ${fClass}" data-q="${i}" data-v="false" onclick="selVF(${i},false)"><i class="fas fa-times"></i> Falso</div></div><div class="jarea ${jVis}" id="ja-${i}"><div class="jlbl"><i class="fas fa-pen-nib"></i> Justifica tu respuesta</div><textarea class="jtxt" id="jt-${i}" placeholder="Explica por qué..." oninput="updJust(${i})">${jVal}</textarea></div><div class="qst" id="qs-${i}"><i class="fas fa-info-circle"></i><span></span></div>${hintHtml}`;
         c.appendChild(card);
     });
     // S2: MC
-    S2.forEach((q,i)=>{const gi=i+10;const card=document.createElement('div');card.className='qcard';card.id='q-'+gi;card.style.display='none';let oh='<div class="mcopts">';const lt=['A','B','C','D'];q.opts.forEach((o,oi)=>{oh+=`<div class="mcop" data-q="${gi}" data-o="${oi}" onclick="selMC(${gi},${oi})"><span class="mclt">${lt[oi]}</span><span class="mctx">${o}</span></div>`;});oh+='</div>';
+    S2.forEach((q,i)=>{const gi=i+10;const card=document.createElement('div');card.className='qcard';card.id='q-'+gi;card.style.display='none';let oh='<div class="mcopts">';const lt=['A','B','C','D'];const a = answers[gi];
+        q.opts.forEach((o,oi)=>{
+            const isSel = (a && a.sel === oi) ? 'sel' : '';
+            oh+=`<div class="mcop ${isSel}" data-q="${gi}" data-o="${oi}" onclick="selMC(${gi},${oi})"><span class="mclt">${lt[oi]}</span><span class="mctx">${o}</span></div>`;
+        });
+        oh+='</div>';
         let hintHtml = '';
         if (isDocente) {
             hintHtml = `<div class="docente-hint" style="margin-top:16px; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
@@ -1139,7 +1150,12 @@ function buildQs(){const c=document.getElementById('qCont');c.innerHTML='';
         }
         card.innerHTML=sh;c.appendChild(card);});
     // S4: Completamiento
-    const s4i=SEC_START[4];S4.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s4i+ii);card.style.display='none';let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-pen"></i> ${item.title}</div>`;item.questions.forEach((q,qi)=>{sh+=`<div style="margin-bottom:18px">`;let sent='';for(let p=0;p<q.parts.length;p++){if(p>0)sent+=`<input class="fill-input" id="fi-${ii}-${qi}-${p}" type="text" autocomplete="off" oninput="updFill(${ii},${qi},${p})">`;sent+=q.parts[p];}sh+=`<div class="fill-sentence">${sent}</div></div>`;});
+    const s4i=SEC_START[4];S4.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s4i+ii);card.style.display='none';let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-pen"></i> ${item.title}</div>`;
+        const a = answers[s4i+ii];
+        item.questions.forEach((q,qi)=>{sh+=`<div style="margin-bottom:18px">`;let sent='';for(let p=0;p<q.parts.length;p++){if(p>0){
+            const curVal = (a && a.responses && a.responses[qi]) ? escapeHtml(a.responses[qi]) : '';
+            sent+=`<input class="fill-input" id="fi-${ii}-${qi}-${p}" type="text" value="${curVal}" autocomplete="off" oninput="updFill(${ii},${qi},${p})">`;
+        }sent+=q.parts[p];}sh+=`<div class="fill-sentence">${sent}</div></div>`;});
         if (isDocente) {
             sh += `<div class="docente-hint" style="margin-top:16px; padding:12px; background:rgba(16,185,129,0.1); border-left:4px solid var(--ac); border-radius:8px; font-size:13px; color:var(--fg); line-height:1.4;">
                 <strong style="color:var(--ac);"><i class="fas fa-user-shield"></i> Docente - Respuestas de Completamiento:</strong><br>
@@ -1151,10 +1167,15 @@ function buildQs(){const c=document.getElementById('qCont');c.innerHTML='';
     // S5: Unir Columnas
     const s5i=SEC_START[5];S5.forEach((item,ii)=>{const card=document.createElement('div');card.className='qcard';card.id='q-'+(s5i+ii);card.style.display='none';
     let sh=`<div class="qnum">${String.fromCharCode(65+ii)}</div><div class="ord-item-label"><i class="fas fa-exchange-alt"></i> ${item.title}</div><div class="match-grp">`;
+    const a = answers[s5i+ii];
     item.leftItems.forEach((li,pi)=>{
+        const curSel = (a && a.selections && a.selections[pi]) ? a.selections[pi] : '';
         sh+=`<div class="match-row"><div class="match-left">${li.id}. ${li.text}</div><div><select class="match-select" id="ms-${ii}-${pi}" onchange="updMatch(${ii},${pi})"><option value="">Selecciona correspondencia...</option>`;
         const letters = ['A','B','C','D','E','F','G','H','I','J'];
-        letters.forEach(l=>{sh+=`<option value="${l}">${l}</option>`;});
+        letters.forEach(l=>{
+            const isSel = (curSel === l) ? 'selected' : '';
+            sh+=`<option value="${l}" ${isSel}>${l}</option>`;
+        });
         sh+=`</select></div></div>`;
     });
     sh+=`</div><div class="match-col-right"><div class="match-col-right-title">Opciones de correspondencia</div>`;
@@ -1254,10 +1275,25 @@ function showQ(idx){document.querySelectorAll('.qcard').forEach(c=>c.style.displ
 const s=SEC_START[curSec],e=SEC_END[curSec];document.getElementById('bPrev').disabled=idx===s;const bn=document.getElementById('bNext');
 if(curSec===3||curSec===4||curSec===5){
     const maxI=curSec===3?S3.length-1: curSec===4?S4.length-1 : S5.length-1;
-    const ci=idx-s;if(ci>=maxI){bn.className='nbtn fin';bn.innerHTML='<i class="fas fa-flag-checkered"></i> Entregar evaluación';bn.onclick=trySubmit;}else{bn.className='nbtn nxt';bn.innerHTML='Siguiente <i class="fas fa-arrow-right"></i>';bn.onclick=()=>navQ(1);}}
-else{if(idx>=e-1){bn.className=curSec<5?'nbtn cont':'nbtn fin';bn.innerHTML=curSec<5?'<i class="fas fa-arrow-right"></i> Terminar sección':'<i class="fas fa-flag-checkered"></i> Entregar evaluación';bn.onclick=curSec<5?finishSection:trySubmit;}else{bn.className='nbtn nxt';bn.innerHTML='Siguiente <i class="fas fa-arrow-right"></i>';bn.onclick=()=>navQ(1);}}
+    const ci=idx-s;
+    if(ci>=maxI){
+        if(curSec < 5){
+            bn.className='nbtn cont';
+            bn.innerHTML='<i class="fas fa-arrow-right"></i> Terminar sección';
+            bn.onclick=finishSection;
+        } else {
+            bn.className='nbtn fin';
+            bn.innerHTML='<i class="fas fa-flag-checkered"></i> Entregar evaluación';
+            bn.onclick=trySubmit;
+        }
+    } else {
+        bn.className='nbtn nxt';
+        bn.innerHTML='Siguiente <i class="fas fa-arrow-right"></i>';
+        bn.onclick=()=>navQ(1);
+    }
+}else{if(idx>=e-1){bn.className=curSec<5?'nbtn cont':'nbtn fin';bn.innerHTML=curSec<5?'<i class="fas fa-arrow-right"></i> Terminar sección':'<i class="fas fa-flag-checkered"></i> Entregar evaluación';bn.onclick=curSec<5?finishSection:trySubmit;}else{bn.className='nbtn nxt';bn.innerHTML='Siguiente <i class="fas fa-arrow-right"></i>';bn.onclick=()=>navQ(1);}}
 updateMap();if(answers[idx]&&answers[idx].type==='vf')updVFSt(idx);if(curSec===3){const ii=idx-s;setTimeout(()=>initDrag(ii),50);}}
-function navQ(d){const s=SEC_START[curSec],e=SEC_END[curSec];const ni=curQ+d;if(ni>=s&&ni<=e)showQ(ni);}
+function navQ(d){const s=SEC_START[curSec],e=SEC_END[curSec];const ni=curQ+d;if(ni>=s&&ni<e)showQ(ni);}
 
 /* ==================================================================
    CÁLCULOS DE PUNTUACIÓN
