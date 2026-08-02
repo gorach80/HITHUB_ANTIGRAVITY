@@ -511,7 +511,7 @@
                     <span class="sync-dot"></span> <span id="syncText">Sincronizado</span>
                 </div>
                 <button class="btn" onclick="loadDashboardData()"><i class="fas fa-sync-alt"></i> Actualizar</button>
-                <button class="btn btn-amber" onclick="loadDemoDataset()"><i class="fas fa-flask"></i> Cargar Datos Demo</button>
+                
                 <button class="btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Exportar CSV</button>
                 <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
                 <button class="btn" style="border-color: rgba(239,68,68,0.4); color: var(--rose);" onclick="logoutDocente()"><i class="fas fa-lock"></i> Bloquear</button>
@@ -722,30 +722,6 @@
 
     <!-- SCRIPT -->
     <script>
-        // Sample Roster for UPSE Course
-        const SAMPLE_STUDENTS_ROSTER = [
-            { name: "Álvarez Mendoza Bryan Manuel", email: "bryan.alvarez@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Balón Reyes Carlos Alberto", email: "carlos.balon@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Beltrán Suárez María José", email: "maria.beltran@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Clemente Cruz Jonathan David", email: "jonathan.clemente@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Del Pezo Tomalá Kevin Steve", email: "kevin.delpezo@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Espinoza Ramírez Diana Carolina", email: "diana.espinoza@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "González Borbor Lisbeth Katherine", email: "lisbeth.gonzalez@upse.edu.ec", career: "Ingeniería en Seguridad Industrial" },
-            { name: "Lainez Tigrero Melany Nicole", email: "melany.lainez@upse.edu.ec", career: "Ingeniería en Seguridad Industrial" },
-            { name: "Limones Catuto Josué Israel", email: "josue.limones@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Matías Pozo Fernando Andrés", email: "fernando.matias@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Mendoza Quimi Andrea Valentina", email: "andrea.mendoza@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Orrala Rodríguez Víctor Hugo", email: "victor.orrala@upse.edu.ec", career: "Ingeniería en Seguridad Industrial" },
-            { name: "Palacios Yagual Genesis Paola", email: "genesis.palacios@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Quinde Vera Luis Eduardo", email: "luis.quinde@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Reyes Soriano Mateo Sebastián", email: "mateo.reyes@upse.edu.ec", career: "Ingeniería en Seguridad Industrial" },
-            { name: "Rodríguez Villón Katherine Anabel", email: "katherine.rodriguez@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Suárez De La Cruz Gabriel Omar", email: "gabriel.suarez@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Tomalá Panchana Paula Doménica", email: "paula.tomala@upse.edu.ec", career: "Ingeniería Industrial" },
-            { name: "Vera Cedeño Romina Nicole", email: "romina.vera@upse.edu.ec", career: "Ingeniería en Seguridad Industrial" },
-            { name: "Yagual Lindao Doménica Elizabeth", email: "domenica.yagual@upse.edu.ec", career: "Ingeniería Industrial" }
-        ];
-
         let allData = [];
         let chartScaleInstance = null;
         let chartSectionsInstance = null;
@@ -757,7 +733,7 @@
                 if (sessionStorage.getItem('docente_auth') === 'true') {
                     loadDashboardData();
                 }
-            }, 5000); // Polling cada 5 segundos si está autenticado
+            }, 5000); // Sincronización continua cada 5 segundos
         });
 
         function checkDocenteAuth() {
@@ -796,111 +772,41 @@
 
         function loadDashboardData() {
             if (sessionStorage.getItem('docente_auth') !== 'true') return;
-            let localResults = JSON.parse(localStorage.getItem(('evalH_v6') || localStorage.getItem('evalH_v5')) || '[]');
             
-            // Si está vacío, auto-cargar dataset de demostración
-            if (localResults.length === 0) {
-                buildDemoData();
-                localResults = JSON.parse(localStorage.getItem(('evalH_v6') || localStorage.getItem('evalH_v5')) || '[]');
-            }
+            // Cargar estrictamente datos reales guardados en localStorage
+            const rawV6 = localStorage.getItem('evalH_v6');
+            const rawV5 = localStorage.getItem('evalH_v5');
+            let localResults = JSON.parse(rawV6 || rawV5 || '[]');
 
             processAllStudents(localResults);
             updateDashboardUI();
         }
 
-        function loadDemoDataset() {
-            buildDemoData();
-            loadDashboardData();
-        }
-
-        function buildDemoData() {
-            const demoResults = [];
-            const dates = ['2026-08-01T09:15:00', '2026-08-01T10:30:00', '2026-08-01T11:45:00', '2026-08-01T14:20:00'];
-            
-            // Simular resoluciones para 15 de los 20 estudiantes
-            for (let i = 0; i < 15; i++) {
-                const st = SAMPLE_STUDENTS_ROSTER[i];
-                const s1 = parseFloat((3.0 + Math.random() * 2.0).toFixed(1));
-                const s2 = parseFloat((6.5 + Math.random() * 3.5).toFixed(1));
-                const s3 = parseFloat((3.0 + Math.random() * 2.0).toFixed(1));
-                const s4 = parseFloat((6.0 + Math.random() * 4.0).toFixed(1));
-                const s5 = parseFloat((6.0 + Math.random() * 4.0).toFixed(1));
-                const total = parseFloat((s1 + s2 + s3 + s4 + s5).toFixed(1));
-                const warnings = Math.floor(Math.random() * 2);
-
-                demoResults.push({
-                    user: st,
-                    date: dates[i % dates.length],
-                    s1: s1,
-                    s2: s2,
-                    s3: s3,
-                    s4: s4,
-                    s5: s5,
-                    total: total,
-                    max: 40,
-                    cheatWarnings: warnings,
-                    details: {
-                        s1: { score: s1, correct: Math.floor(s1), incorrect: 5 - Math.floor(s1), empty: 0, details: sampleS1Details() }
+        function processAllStudents(results) {
+            allData = [];
+            if (Array.isArray(results)) {
+                results.forEach(res => {
+                    if (res && res.user) {
+                        allData.push({
+                            name: res.user.name || 'Estudiante',
+                            email: res.user.email || 'N/A',
+                            cedula: res.user.cedula || 'N/A',
+                            career: res.user.career || 'Ingeniería Industrial',
+                            completed: true,
+                            date: res.date || new Date().toISOString(),
+                            s1: res.s1 || 0,
+                            s2: res.s2 || 0,
+                            s3: res.s3 || 0,
+                            s4: res.s4 || 0,
+                            s5: res.s5 || 0,
+                            total: res.total || 0,
+                            warnings: res.cheatWarnings || 0,
+                            details: res.details || null,
+                            scale: getQualitativeScale(res.total || 0)
+                        });
                     }
                 });
             }
-            localStorage.setItem(('evalH_v6') || localStorage.getItem('evalH_v5'), JSON.stringify(demoResults));
-        }
-
-        function sampleS1Details() {
-            return [
-                { q: { text: "El QFD permite traducir los deseos del cliente en requerimientos técnicos." }, a: { sel: true, just: "Se utiliza la matriz de la Casa de la Calidad para mapear los Qué con los Cómo." }, st: 'correct' },
-                { q: { text: "El Análisis de Valor busca reducir costos afectando la calidad del producto." }, a: { sel: false, just: "El análisis de valor busca optimizar funciones manteniendo o mejorando la calidad." }, st: 'correct' },
-                { q: { text: "El método DFMA optimiza el diseño para facilitar la manufactura y ensamblaje." }, a: { sel: true, just: "Reduce el número de partes y estandariza los componentes." }, st: 'correct' }
-            ];
-        }
-
-        function processAllStudents(results) {
-            allData = [];
-            const evaluatedMap = new Map();
-
-            results.forEach(res => {
-                if (res.user && res.user.email) {
-                    evaluatedMap.set(res.user.email.trim().toLowerCase(), res);
-                }
-            });
-
-            SAMPLE_STUDENTS_ROSTER.forEach(st => {
-                const email = st.email.trim().toLowerCase();
-                if (evaluatedMap.has(email)) {
-                    const res = evaluatedMap.get(email);
-                    allData.push({
-                        name: st.name,
-                        email: st.email,
-                        cedula: (res.user && res.user.cedula) ? res.user.cedula : 'N/A',
-                        career: st.career,
-                        completed: true,
-                        date: res.date,
-                        s1: res.s1,
-                        s2: res.s2,
-                        s3: res.s3,
-                        s4: res.s4,
-                        s5: res.s5,
-                        total: res.total,
-                        warnings: res.cheatWarnings || 0,
-                        details: res.details || null,
-                        scale: getQualitativeScale(res.total)
-                    });
-                } else {
-                    allData.push({
-                        name: st.name,
-                        email: st.email,
-                        cedula: 'N/A',
-                        career: st.career,
-                        completed: false,
-                        date: null,
-                        s1: 0, s2: 0, s3: 0, s4: 0, s5: 0, total: 0,
-                        warnings: 0,
-                        details: null,
-                        scale: 'Pendiente'
-                    });
-                }
-            });
         }
 
         function getQualitativeScale(score) {
@@ -908,270 +814,147 @@
             if (score >= 32) return 'Muy Bueno';
             if (score >= 28) return 'Bueno';
             if (score >= 24) return 'Regular';
-            return 'Insuficiente';
+            return 'Deficiente';
         }
 
         function updateDashboardUI() {
-            const totalEst = allData.length;
-            const completedEst = allData.filter(d => d.completed);
-            const pendingEst = totalEst - completedEst.length;
-
-            document.getElementById('kpiTotal').textContent = totalEst;
-            document.getElementById('kpiSubResueltos').textContent = `${completedEst.length} Resueltos | ${pendingEst} Pendientes`;
-
-            let sumTotal = 0, sumS1 = 0, sumS2 = 0, sumS3 = 0, sumS4 = 0, sumS5 = 0, totalWarn = 0;
-            let passedCount = 0;
-
-            completedEst.forEach(d => {
-                sumTotal += d.total;
-                sumS1 += d.s1; sumS2 += d.s2; sumS3 += d.s3; sumS4 += d.s4; sumS5 += d.s5;
-                totalWarn += d.warnings;
-                if (d.total >= 28) passedCount++;
-            });
-
-            const avgTotal = completedEst.length > 0 ? (sumTotal / completedEst.length).toFixed(1) : 0;
-            const avgS1Val = completedEst.length > 0 ? (sumS1 / completedEst.length).toFixed(1) : 0;
-            const avgS2Val = completedEst.length > 0 ? (sumS2 / completedEst.length).toFixed(1) : 0;
-            const avgS3Val = completedEst.length > 0 ? (sumS3 / completedEst.length).toFixed(1) : 0;
-            const avgS4Val = completedEst.length > 0 ? (sumS4 / completedEst.length).toFixed(1) : 0;
-            const avgS5Val = completedEst.length > 0 ? (sumS5 / completedEst.length).toFixed(1) : 0;
-
-            const passRate = completedEst.length > 0 ? Math.round((passedCount / completedEst.length) * 100) : 0;
-
-            document.getElementById('kpiAvgScore').innerHTML = `${avgTotal} <span style="font-size:14px;color:var(--fg3)">/40</span>`;
-            document.getElementById('kpiAvgPct').textContent = `${((avgTotal / 40) * 100).toFixed(1)}% de rendimiento global`;
-            document.getElementById('kpiPassRate').textContent = `${passRate}%`;
-            document.getElementById('kpiPassCount').textContent = `${passedCount} de ${completedEst.length} aprobaron (≥ 28 pts)`;
-            document.getElementById('kpiWarnings').textContent = totalWarn;
-
-            document.getElementById('avgS1').textContent = avgS1Val;
-            document.getElementById('avgS2').textContent = avgS2Val;
-            document.getElementById('avgS3').textContent = avgS3Val;
-            document.getElementById('avgS4').textContent = avgS4Val;
-            document.getElementById('avgS5').textContent = avgS5Val;
-
-            renderCharts(completedEst, avgS1Val, avgS2Val, avgS3Val, avgS4Val, avgS5Val, pendingEst);
-            applyFilters();
+            updateKPIs();
+            renderTable();
+            renderCharts();
+            updateSectionAnalCards();
         }
 
-        function renderCharts(completedEst, s1, s2, s3, s4, s5, pendingCount) {
-            const scales = { 'Sobresaliente': 0, 'Muy Bueno': 0, 'Bueno': 0, 'Regular': 0, 'Insuficiente': 0 };
-            completedEst.forEach(d => { if (scales[d.scale] !== undefined) scales[d.scale]++; });
+        function updateKPIs() {
+            const total = allData.length;
+            const completedList = allData.filter(d => d.completed);
+            const completedCount = completedList.length;
+            
+            document.getElementById('kpiTotal').textContent = total;
+            document.getElementById('kpiSubResueltos').textContent = `${completedCount} Resueltos`;
 
-            const ctxScale = document.getElementById('chartScale').getContext('2d');
-            if (chartScaleInstance) chartScaleInstance.destroy();
-            chartScaleInstance = new Chart(ctxScale, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(scales),
-                    datasets: [{
-                        data: Object.values(scales),
-                        backgroundColor: ['#10b981', '#0ea5e9', '#f59e0b', '#8b5cf6', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', font: { family: 'Outfit' } } } }
-                }
-            });
+            if (completedCount > 0) {
+                const sumTotal = completedList.reduce((acc, d) => acc + d.total, 0);
+                const avg = (sumTotal / completedCount).toFixed(1);
+                document.getElementById('kpiAvgScore').innerHTML = `${avg} <span style="font-size:14px;color:var(--fg3)">/40</span>`;
+                document.getElementById('kpiAvgPct').textContent = `${((avg / 40) * 100).toFixed(1)}% de rendimiento promedio`;
 
-            const ctxSec = document.getElementById('chartSections').getContext('2d');
-            if (chartSectionsInstance) chartSectionsInstance.destroy();
-            chartSectionsInstance = new Chart(ctxSec, {
-                type: 'bar',
-                data: {
-                    labels: ['S1 (V/F)', 'S2 (MC)', 'S3 (Ord)', 'S4 (Comp)', 'S5 (Unir)'],
-                    datasets: [
-                        { label: 'Promedio Obtenido', data: [s1, s2, s3, s4, s5], backgroundColor: '#0ea5e9' },
-                        { label: 'Puntaje Máximo', data: [5, 10, 5, 10, 10], backgroundColor: 'rgba(255,255,255,0.1)' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { max: 10, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
-                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
-                    },
-                    plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } }
-                }
-            });
+                const passedList = completedList.filter(d => d.total >= 28);
+                const passPct = ((passedList.length / completedCount) * 100).toFixed(1);
+                document.getElementById('kpiPassRate').textContent = `${passPct}%`;
+                document.getElementById('kpiPassCount').textContent = `${passedList.length} de ${completedCount} aprobaron (≥ 28 pts)`;
 
-            const ctxStat = document.getElementById('chartStatus').getContext('2d');
-            if (chartStatusInstance) chartStatusInstance.destroy();
-            chartStatusInstance = new Chart(ctxStat, {
-                type: 'pie',
-                data: {
-                    labels: ['Resueltos', 'Pendientes'],
-                    datasets: [{
-                        data: [completedEst.length, pendingCount],
-                        backgroundColor: ['#10b981', '#f59e0b'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af' } } }
-                }
-            });
+                const sumWarns = completedList.reduce((acc, d) => acc + d.warnings, 0);
+                document.getElementById('kpiWarnings').textContent = sumWarns;
+            } else {
+                document.getElementById('kpiAvgScore').innerHTML = `0.0 <span style="font-size:14px;color:var(--fg3)">/40</span>`;
+                document.getElementById('kpiAvgPct').textContent = '0% de rendimiento';
+                document.getElementById('kpiPassRate').textContent = '0%';
+                document.getElementById('kpiPassCount').textContent = '0 registradas';
+                document.getElementById('kpiWarnings').textContent = '0';
+            }
         }
 
-        function applyFilters() {
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-            const fStatus = document.getElementById('filterStatus').value;
-            const fCareer = document.getElementById('filterCareer').value;
-            const fScale = document.getElementById('filterScale').value;
-            const sortBy = document.getElementById('sortBy').value;
+        function renderTable() {
+            const tbody = document.getElementById('studentsTbody');
+            const searchVal = document.getElementById('searchStudent').value.toLowerCase().trim();
+            const filterCareer = document.getElementById('filterCareer').value;
+            const filterStatus = document.getElementById('filterStatus').value;
 
             let filtered = allData.filter(st => {
-                const matchSearch = st.name.toLowerCase().includes(search) || st.email.toLowerCase().includes(search) || (st.cedula && st.cedula.includes(search));
-                const matchStatus = fStatus === 'all' || (fStatus === 'completed' && st.completed) || (fStatus === 'pending' && !st.completed);
-                const matchCareer = fCareer === 'all' || st.career === fCareer;
-                const matchScale = fScale === 'all' || st.scale === fScale;
-                return matchSearch && matchStatus && matchCareer && matchScale;
+                const matchSearch = st.name.toLowerCase().includes(searchVal) || st.email.toLowerCase().includes(searchVal) || st.cedula.toLowerCase().includes(searchVal);
+                const matchCareer = !filterCareer || st.career === filterCareer;
+                let matchStatus = true;
+                if (filterStatus === 'completed') matchStatus = st.completed;
+                if (filterStatus === 'pending') matchStatus = !st.completed;
+                if (filterStatus === 'passed') matchStatus = st.completed && st.total >= 28;
+                if (filterStatus === 'failed') matchStatus = st.completed && st.total < 28;
+                return matchSearch && matchCareer && matchStatus;
             });
 
-            filtered.sort((a, b) => {
-                if (sortBy === 'name-asc') return a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
-                if (sortBy === 'name-desc') return b.name.localeCompare(a.name, 'es', { sensitivity: 'base' });
-                if (sortBy === 'score-desc') return b.total - a.total;
-                if (sortBy === 'score-asc') return a.total - b.total;
-                if (sortBy === 'date-desc') return (b.date || '').localeCompare(a.date || '');
-                return 0;
-            });
-
-            renderTable(filtered);
-        }
-
-        function renderTable(data) {
-            const tbody = document.getElementById('studentsTbody');
             tbody.innerHTML = '';
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; padding:32px; color:var(--fg3);">No se encontraron estudiantes con los filtros seleccionados.</td></tr>`;
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:45px 20px; color:var(--fg2); font-size:14px;">
+                    <i class="fas fa-inbox" style="font-size:28px; color:var(--fg3); margin-bottom:10px; display:block;"></i>
+                    No hay evaluaciones registradas aún en el sistema.<br>
+                    <span style="font-size:12px; color:var(--fg3);">Los datos reales aparecerán automáticamente aquí cuando los estudiantes entreguen su evaluación.</span>
+                </td></tr>`;
                 return;
             }
 
-            data.forEach((st, idx) => {
+            filtered.forEach((st, idx) => {
                 const tr = document.createElement('tr');
-                const initials = st.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+                
+                let scaleBadge = '';
+                if (st.scale === 'Sobresaliente') scaleBadge = '<span class="badge badge-green"><i class="fas fa-star"></i> Sobresaliente</span>';
+                else if (st.scale === 'Muy Bueno') scaleBadge = '<span class="badge badge-cyan"><i class="fas fa-thumbs-up"></i> Muy Bueno</span>';
+                else if (st.scale === 'Bueno') scaleBadge = '<span class="badge badge-blue"><i class="fas fa-check"></i> Bueno</span>';
+                else if (st.scale === 'Regular') scaleBadge = '<span class="badge badge-amber"><i class="fas fa-exclamation"></i> Regular</span>';
+                else scaleBadge = '<span class="badge badge-rose"><i class="fas fa-times"></i> Deficiente</span>';
 
-                let badgeStatus = st.completed ? `<span class="badge badge-success"><i class="fas fa-check-circle"></i> Resuelto</span>` : `<span class="badge badge-warning"><i class="fas fa-clock"></i> Pendiente</span>`;
-
-                let scaleBadge = '-';
-                if (st.completed) {
-                    if (st.scale === 'Sobresaliente') scaleBadge = `<span class="badge badge-success">${st.scale}</span>`;
-                    else if (st.scale === 'Muy Bueno') scaleBadge = `<span class="badge badge-info">${st.scale}</span>`;
-                    else if (st.scale === 'Bueno') scaleBadge = `<span class="badge badge-purple">${st.scale}</span>`;
-                    else if (st.scale === 'Regular') scaleBadge = `<span class="badge badge-warning">${st.scale}</span>`;
-                    else scaleBadge = `<span class="badge badge-danger">${st.scale}</span>`;
-                }
+                let warnBadge = st.warnings > 0 ? `<span class="badge badge-rose"><i class="fas fa-shield-alt"></i> ${st.warnings} adv</span>` : '<span style="color:var(--fg3); font-size:12px;">Normal</span>';
+                let formattedDate = st.date ? new Date(st.date).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) : '—';
 
                 tr.innerHTML = `
-                    <td style="color:var(--fg3); font-weight:600">${idx + 1}</td>
+                    <td>${idx + 1}</td>
                     <td>
-                        <div class="user-info">
-                            <div class="user-avatar">${initials}</div>
-                            <div>
-                                <div class="user-name">${st.name}</div>
-                                <div class="user-email">${st.email}</div>
-                                <div style="font-size:11px; color:var(--fg3);">C.I.: ${st.cedula || 'N/A'}</div>
-                            </div>
-                        </div>
+                        <div style="font-weight:600; color:#fff;">${st.name}</div>
+                        <div style="font-size:11px; color:var(--fg3);">${st.email}</div>
                     </td>
+                    <td><span style="font-family:'JetBrains Mono',monospace; font-size:12px;">${st.cedula}</span></td>
                     <td style="font-size:12px; color:var(--fg2);">${st.career}</td>
-                    <td>${badgeStatus}</td>
-                    <td><span class="score-pill" style="color:${st.completed ? 'var(--ac)' : 'var(--fg3)'}">${st.completed ? st.total.toFixed(1) + ' /40' : '-'}</span></td>
+                    <td><span style="font-size:12px;">${formattedDate}</span></td>
+                    <td><strong style="color:var(--ac); font-size:15px;">${st.total}</strong> <span style="font-size:11px; color:var(--fg3);">/40</span></td>
                     <td>${scaleBadge}</td>
-                    <td>${st.completed ? st.s1.toFixed(1) : '-'}</td>
-                    <td>${st.completed ? st.s2.toFixed(1) : '-'}</td>
-                    <td>${st.completed ? st.s3.toFixed(1) : '-'}</td>
-                    <td>${st.completed ? st.s4.toFixed(1) : '-'}</td>
-                    <td>${st.completed ? st.s5.toFixed(1) : '-'}</td>
-                    <td>${st.completed ? `<span class="badge ${st.warnings > 0 ? 'badge-danger' : 'badge-success'}">🛡️ ${st.warnings}/3</span>` : '-'}</td>
+                    <td>${st.s1}</td>
+                    <td>${st.s2}</td>
+                    <td>${st.s3}</td>
+                    <td>${st.s4}</td>
+                    <td>${st.s5}</td>
+                    <td>${warnBadge}</td>
                     <td>
-                        <button class="btn" style="padding:4px 10px; font-size:11px;" onclick="openStudentModal('${st.email}')">
-                            <i class="fas fa-eye"></i> Ver Expediente
-                        </button>
+                        <button class="btn" style="padding:4px 8px; font-size:11px;" onclick="viewStudentDetail('${st.email}')"><i class="fas fa-search"></i> Ver</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function openStudentModal(email) {
-            const student = allData.find(s => s.email.trim().toLowerCase() === email.trim().toLowerCase());
-            if (!student) return;
+        function viewStudentDetail(email) {
+            const st = allData.find(d => d.email.toLowerCase() === email.toLowerCase());
+            if (!st) return;
 
-            document.getElementById('modalStudentName').textContent = student.name;
-            document.getElementById('modalStudentEmail').textContent = `${student.email} · CI: ${student.cedula || 'N/A'} · ${student.career}`;
+            document.getElementById('modalStudentName').textContent = st.name;
+            document.getElementById('modalStudentEmail').textContent = `${st.email} | Cédula: ${st.cedula} | ${st.career}`;
 
-            const container = document.getElementById('modalStudentContent');
-            if (!student.completed) {
-                container.innerHTML = `
-                    <div style="text-align:center; padding:40px 20px;">
-                        <i class="fas fa-user-clock" style="font-size:48px; color:var(--amber); margin-bottom:16px;"></i>
-                        <h4 style="font-size:18px; font-weight:700; color:#fff;">Evaluación Pendiente</h4>
-                        <p style="font-size:13px; color:var(--fg2); margin-top:6px;">Este estudiante aún no ha rendido o entregado la evaluación del segundo parcial.</p>
-                    </div>
-                `;
+            const body = document.getElementById('modalStudentContent');
+            if (!st.completed) {
+                body.innerHTML = '<div style="text-align:center; padding:30px; color:var(--fg2);"><i class="fas fa-hourglass-half" style="font-size:24px; margin-bottom:10px;"></i><br>El estudiante aún no ha completado su examen.</div>';
             } else {
-                let html = `
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:24px;">
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                            <div style="font-size:11px; color:var(--fg3);">PUNTAJE TOTAL</div>
-                            <div style="font-size:22px; font-weight:800; color:var(--ac);">${student.total} / 40</div>
+                body.innerHTML = `
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:16px;">
+                        <div style="background:rgba(255,255,255,0.04); padding:12px; border-radius:8px; text-align:center;">
+                            <div style="font-size:11px; color:var(--fg2);">Puntaje Total</div>
+                            <div style="font-size:20px; font-weight:700; color:var(--ac);">${st.total} / 40</div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                            <div style="font-size:11px; color:var(--fg3);">S1 (V/F)</div>
-                            <div style="font-size:18px; font-weight:700; color:var(--cyan);">${student.s1} / 5</div>
+                        <div style="background:rgba(255,255,255,0.04); padding:12px; border-radius:8px; text-align:center;">
+                            <div style="font-size:11px; color:var(--fg2);">Escala Cualitativa</div>
+                            <div style="font-size:15px; font-weight:700; color:#fff; margin-top:4px;">${st.scale}</div>
                         </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                            <div style="font-size:11px; color:var(--fg3);">S2 (MC)</div>
-                            <div style="font-size:18px; font-weight:700; color:var(--cyan);">${student.s2} / 10</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                            <div style="font-size:11px; color:var(--fg3);">S3 (Ord)</div>
-                            <div style="font-size:18px; font-weight:700; color:var(--cyan);">${student.s3} / 5</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                            <div style="font-size:11px; color:var(--fg3);">S4 (Comp)</div>
-                            <div style="font-size:18px; font-weight:700; color:var(--cyan);">${student.s4} / 10</div>
-                        </div>
-                        <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; text-align:center;">
-                            <div style="font-size:11px; color:var(--fg3);">S5 (Unir)</div>
-                            <div style="font-size:18px; font-weight:700; color:var(--cyan);">${student.s5} / 10</div>
+                        <div style="background:rgba(255,255,255,0.04); padding:12px; border-radius:8px; text-align:center;">
+                            <div style="font-size:11px; color:var(--fg2);">Advertencias Seguridad</div>
+                            <div style="font-size:15px; font-weight:700; color:${st.warnings>0?'var(--rose)':'var(--fg2)'}; margin-top:4px;">${st.warnings} registrar(s)</div>
                         </div>
                     </div>
-
-                    <h4 style="font-size:15px; font-weight:700; color:#fff; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-                        <i class="fas fa-align-left" style="color:var(--ac)"></i> Análisis Cualitativo: Justificaciones en Sección 1 (V/F)
-                    </h4>
+                    <div style="font-size:13px; color:var(--fg2); margin-bottom:8px; font-weight:600;">Desglose por Secciones:</div>
+                    <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; text-align:center; font-size:12px;">
+                        <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">S1: V/F<br><strong style="color:var(--ac);">${st.s1}</strong>/5</div>
+                        <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">S2: Selecc<br><strong style="color:var(--cyan);">${st.s2}</strong>/10</div>
+                        <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">S3: Orden<br><strong style="color:var(--amber);">${st.s3}</strong>/5</div>
+                        <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">S4: Compl<br><strong style="color:var(--purple);">${st.s4}</strong>/10</div>
+                        <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">S5: Unir<br><strong style="color:var(--rose);">${st.s5}</strong>/10</div>
+                    </div>
                 `;
-
-                if (student.details && student.details.s1 && student.details.s1.details) {
-                    student.details.s1.details.forEach((d, i) => {
-                        const cls = d.st === 'correct' ? 'ok' : (d.st === 'partial' ? 'part' : 'bad');
-                        html += `
-                            <div class="justification-card ${cls}">
-                                <div style="font-size:13px; font-weight:600; color:#fff; margin-bottom:4px;">P${i+1}. ${d.q.text}</div>
-                                <div style="font-size:12px; color:var(--fg2);">
-                                    Respuesta seleccionada: <strong>${d.a.sel ? 'Verdadero' : 'Falso'}</strong>
-                                </div>
-                                <div class="just-txt">
-                                    <strong>Justificación redactada:</strong> "${d.a.just || 'Sin justificación'}"
-                                </div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    html += `<p style="font-size:12px; color:var(--fg3);">Detalles cuantitativos sin desglose de justificación guardado previo.</p>`;
-                }
-
-                container.innerHTML = html;
             }
 
             document.getElementById('studentModal').classList.add('active');
@@ -1181,17 +964,136 @@
             document.getElementById('studentModal').classList.remove('active');
         }
 
+        function renderCharts() {
+            const completedList = allData.filter(d => d.completed);
+            
+            // 1. Chart Scale
+            const scalesCount = { 'Sobresaliente': 0, 'Muy Bueno': 0, 'Bueno': 0, 'Regular': 0, 'Deficiente': 0 };
+            completedList.forEach(d => { if (scalesCount[d.scale] !== undefined) scalesCount[d.scale]++; });
+
+            const ctxScale = document.getElementById('chartScale').getContext('2d');
+            if (chartScaleInstance) chartScaleInstance.destroy();
+            chartScaleInstance = new Chart(ctxScale, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sobresaliente', 'Muy Bueno', 'Bueno', 'Regular', 'Deficiente'],
+                    datasets: [{
+                        data: [scalesCount['Sobresaliente'], scalesCount['Muy Bueno'], scalesCount['Bueno'], scalesCount['Regular'], scalesCount['Deficiente']],
+                        backgroundColor: ['#10b981', '#00a8e8', '#3b82f6', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } }
+                }
+            });
+
+            // 2. Chart Sections Average
+            let avgS1 = 0, avgS2 = 0, avgS3 = 0, avgS4 = 0, avgS5 = 0;
+            if (completedList.length > 0) {
+                avgS1 = (completedList.reduce((acc, d) => acc + d.s1, 0) / completedList.length).toFixed(1);
+                avgS2 = (completedList.reduce((acc, d) => acc + d.s2, 0) / completedList.length).toFixed(1);
+                avgS3 = (completedList.reduce((acc, d) => acc + d.s3, 0) / completedList.length).toFixed(1);
+                avgS4 = (completedList.reduce((acc, d) => acc + d.s4, 0) / completedList.length).toFixed(1);
+                avgS5 = (completedList.reduce((acc, d) => acc + d.s5, 0) / completedList.length).toFixed(1);
+            }
+
+            const ctxSections = document.getElementById('chartSections').getContext('2d');
+            if (chartSectionsInstance) chartSectionsInstance.destroy();
+            chartSectionsInstance = new Chart(ctxSections, {
+                type: 'bar',
+                data: {
+                    labels: ['S1 (V/F)', 'S2 (Selecc)', 'S3 (Orden)', 'S4 (Compl)', 'S5 (Unir)'],
+                    datasets: [{
+                        label: 'Promedio Obtenido',
+                        data: [avgS1, avgS2, avgS3, avgS4, avgS5],
+                        backgroundColor: ['#10b981', '#00a8e8', '#ffe000', '#8b5cf6', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // 3. Chart Status
+            const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+            if (chartStatusInstance) chartStatusInstance.destroy();
+            chartStatusInstance = new Chart(ctxStatus, {
+                type: 'pie',
+                data: {
+                    labels: ['Entregados', 'En proceso / Pendientes'],
+                    datasets: [{
+                        data: [completedList.length, Math.max(0, allData.length - completedList.length)],
+                        backgroundColor: ['#10b981', 'rgba(255,255,255,0.1)'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } }
+                }
+            });
+        }
+
+        function updateSectionAnalCards() {
+            const completedList = allData.filter(d => d.completed);
+            const count = completedList.length;
+
+            if (count > 0) {
+                const s1 = (completedList.reduce((a, b) => a + b.s1, 0) / count).toFixed(1);
+                const s2 = (completedList.reduce((a, b) => a + b.s2, 0) / count).toFixed(1);
+                const s3 = (completedList.reduce((a, b) => a + b.s3, 0) / count).toFixed(1);
+                const s4 = (completedList.reduce((a, b) => a + b.s4, 0) / count).toFixed(1);
+                const s5 = (completedList.reduce((a, b) => a + b.s5, 0) / count).toFixed(1);
+
+                document.getElementById('secAnalS1').textContent = `${s1} / 5.0 pts`;
+                document.getElementById('secAnalS2').textContent = `${s2} / 10.0 pts`;
+                document.getElementById('secAnalS3').textContent = `${s3} / 5.0 pts`;
+                document.getElementById('secAnalS4').textContent = `${s4} / 10.0 pts`;
+                document.getElementById('secAnalS5').textContent = `${s5} / 10.0 pts`;
+
+                document.getElementById('secPctS1').textContent = `${((s1/5)*100).toFixed(0)}% rendimiento`;
+                document.getElementById('secPctS2').textContent = `${((s2/10)*100).toFixed(0)}% rendimiento`;
+                document.getElementById('secPctS3').textContent = `${((s3/5)*100).toFixed(0)}% rendimiento`;
+                document.getElementById('secPctS4').textContent = `${((s4/10)*100).toFixed(0)}% rendimiento`;
+                document.getElementById('secPctS5').textContent = `${((s5/10)*100).toFixed(0)}% rendimiento`;
+            } else {
+                ['S1','S2','S3','S4','S5'].forEach(s => {
+                    const max = s==='S1'||s==='S3' ? '5.0' : '10.0';
+                    document.getElementById('secAnal' + s).textContent = `0.0 / ${max} pts`;
+                    document.getElementById('secPct' + s).textContent = '0% rendimiento';
+                });
+            }
+        }
+
         function exportCSV() {
-            let csv = "Nombre,Cédula,Correo,Carrera,Estado,Puntaje Total,Escala,S1,S2,S3,S4,S5,Infracciones,Fecha\n";
-            allData.forEach(st => {
-                csv += `"${st.name}","${st.cedula || 'N/A'}","${st.email}","${st.career}","${st.completed ? 'Resuelto' : 'Pendiente'}",${st.total},"${st.scale}",${st.s1},${st.s2},${st.s3},${st.s4},${st.s5},${st.warnings},"${st.date || ''}"\n`;
+            if (allData.length === 0) {
+                alert('No hay datos para exportar.');
+                return;
+            }
+
+            let csv = 'No.,Nombre Completo,Correo,Cedula,Carrera,Fecha Entrega,Total (40 pts),Escala,S1 (5),S2 (10),S3 (5),S4 (10),S5 (10),Advertencias\n';
+            allData.forEach((st, idx) => {
+                csv += `"${idx+1}","${st.name}","${st.email}","${st.cedula}","${st.career}","${st.date || ''}","${st.total}","${st.scale}","${st.s1}","${st.s2}","${st.s3}","${st.s4}","${st.s5}","${st.warnings}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `reporte_evaluacion_gestion_proyectos_${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('download', `Reporte_Evaluacion_GestionProyectos_${new Date().toISOString().substring(0,10)}.csv`);
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
