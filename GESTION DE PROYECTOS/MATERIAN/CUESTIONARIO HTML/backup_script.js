@@ -160,3 +160,18 @@ function doGet(e) {
                          .setHeader('Access-Control-Allow-Origin', '*');
   }
 }
+
+
+// ----------------------------------------------------
+// ELIMINAR TODOS LOS REGISTROS PARA PERMITIR RE-INTENTOS
+// ----------------------------------------------------
+function clearAllSheetData() {
+  if (SPREADSHEET_ID && SPREADSHEET_ID !== 'ESCRIBE_AQUI_EL_ID_DE_TU_GOOGLE_SHEETS') {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getActiveSheet();
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      sheet.deleteRows(2, lastRow - 1);
+      console.log('Se eliminaron correctamente todos los registros previos de estudiantes.');
+    }
+  }
+}

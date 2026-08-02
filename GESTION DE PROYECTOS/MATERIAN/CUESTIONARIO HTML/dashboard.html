@@ -796,12 +796,12 @@
 
         function loadDashboardData() {
             if (sessionStorage.getItem('docente_auth') !== 'true') return;
-            let localResults = JSON.parse(localStorage.getItem('evalH_v5') || '[]');
+            let localResults = JSON.parse(localStorage.getItem(('evalH_v6') || localStorage.getItem('evalH_v5')) || '[]');
             
             // Si está vacío, auto-cargar dataset de demostración
             if (localResults.length === 0) {
                 buildDemoData();
-                localResults = JSON.parse(localStorage.getItem('evalH_v5') || '[]');
+                localResults = JSON.parse(localStorage.getItem(('evalH_v6') || localStorage.getItem('evalH_v5')) || '[]');
             }
 
             processAllStudents(localResults);
@@ -844,7 +844,7 @@
                     }
                 });
             }
-            localStorage.setItem('evalH_v5', JSON.stringify(demoResults));
+            localStorage.setItem(('evalH_v6') || localStorage.getItem('evalH_v5'), JSON.stringify(demoResults));
         }
 
         function sampleS1Details() {
