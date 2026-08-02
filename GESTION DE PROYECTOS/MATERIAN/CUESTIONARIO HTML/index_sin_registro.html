@@ -550,6 +550,13 @@ const S5=[
 /* ==================================================================
    ESTADO GLOBAL
    ================================================================== */
+
+    // WIPE PREVIOUS REGISTERS ON START
+    try {
+        localStorage.removeItem('evalH_v5');
+        localStorage.removeItem('evalH_v4');
+    } catch(e){}
+    
 let CU=null, curSec=1, curQ=0, answers=[], timerInt=null, timeRem=0, s5Shuffled=[];
 let secScores={s1:null,s2:null,s3:null,s4:null,s5:null};
 let cheatWarnings=0;

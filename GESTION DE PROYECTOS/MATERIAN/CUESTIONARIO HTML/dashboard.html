@@ -722,7 +722,14 @@
 
     <!-- SCRIPT -->
     <script>
-        let allData = [];
+        
+        // WIPE PREVIOUS REGISTERS ON START
+        try {
+            localStorage.removeItem('evalH_v5');
+            localStorage.removeItem('evalH_v4');
+        } catch(e){}
+    
+let allData = [];
         let chartScaleInstance = null;
         let chartSectionsInstance = null;
         let chartStatusInstance = null;
