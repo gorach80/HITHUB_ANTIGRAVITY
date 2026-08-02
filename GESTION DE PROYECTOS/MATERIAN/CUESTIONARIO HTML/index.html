@@ -1512,6 +1512,13 @@ function exportPDF() {
    EXPORTAR PDF DE RESULTADOS (FORMATO OFICIAL UPSE CON FIRMA Y QR)
    ================================================================== */
 async function doExportPDF() {
+    const w = window.open('', '_blank');
+    if (!w) {
+        toast('El navegador bloqueó la ventana emergente. Habilita los pop-ups para imprimir.', 'error');
+        return;
+    }
+    w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando informe oficial firmado UPSE...</h2><p>Por favor espera un momento mientras se procesa la firma y el código QR...</p></body></html>');
+
     toast('Generando PDF con Firma y Código QR de Verificación...', 'info');
     
     const studentName = CU ? CU.name : 'Estudiante Anónimo';
@@ -1544,11 +1551,8 @@ async function doExportPDF() {
         ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
         : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
 
-    setTimeout(() => {
-        const w = window.open('', '_blank');
-
-        // Generar contenido dinámico de la Tabla 3 de preguntas
-        let table3Rows = '';
+    // Generar contenido dinámico de la Tabla 3 de preguntas
+    let table3Rows = '';
 
         // SECCIÓN 1: Verdadero o Falso
         table3Rows += `
@@ -2090,9 +2094,9 @@ async function doExportPDF() {
     <\/script>
 </body>
 </html>`;
-        w.document.write(docHtml);
-        w.document.close();
-    }, 300);
+    w.document.open();
+    w.document.write(docHtml);
+    w.document.close();
 }
 
 function escapeHtml(text) {
