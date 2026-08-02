@@ -1436,24 +1436,29 @@ function closeSignatureModal() {
 
 function generateQRCodeDataUrl(text) {
     return new Promise((resolve) => {
-        const container = document.getElementById('qrHiddenContainer');
-        container.innerHTML = '';
-        if (typeof QRCode !== 'undefined') {
-            new QRCode(container, {
-                text: text,
-                width: 120,
-                height: 120,
-                correctLevel: QRCode.CorrectLevel.M
-            });
-            setTimeout(() => {
-                const img = container.querySelector('img');
-                const cvs = container.querySelector('canvas');
-                if (img && img.src) resolve(img.src);
-                else if (cvs) resolve(cvs.toDataURL());
-                else resolve('');
-            }, 200);
-        } else {
-            resolve('');
+        try {
+            const container = document.getElementById('qrHiddenContainer');
+            if (container && typeof QRCode !== 'undefined') {
+                container.innerHTML = '';
+                new QRCode(container, {
+                    text: text,
+                    width: 120,
+                    height: 120,
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                setTimeout(() => {
+                    const img = container.querySelector('img');
+                    const cvs = container.querySelector('canvas');
+                    if (img && img.src && img.src.length > 50) resolve(img.src);
+                    else if (cvs) resolve(cvs.toDataURL());
+                    else resolve(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}`);
+                }, 150);
+            } else {
+                resolve(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}`);
+            }
+        } catch (err) {
+            console.error('Error al generar QR:', err);
+            resolve(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}`);
         }
     });
 }
@@ -1512,6 +1517,16 @@ function exportPDF() {
    EXPORTAR PDF DE RESULTADOS (FORMATO OFICIAL UPSE CON FIRMA Y QR)
    ================================================================== */
 async function doExportPDF() {
+    if (!secScores || !secScores.s1 || !secScores.s2 || !secScores.s3 || !secScores.s4 || !secScores.s5) {
+        secScores = {
+            s1: calcSecScore(1),
+            s2: calcSecScore(2),
+            s3: calcSecScore(3),
+            s4: calcSecScore(4),
+            s5: calcSecScore(5)
+        };
+    }
+
     const w = window.open('', '_blank');
     if (!w) {
         toast('El navegador bloqueó la ventana emergente. Habilita los pop-ups para imprimir.', 'error');
@@ -1519,89 +1534,91 @@ async function doExportPDF() {
     }
     w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando informe oficial firmado UPSE...</h2><p>Por favor espera un momento mientras se procesa la firma y el código QR...</p></body></html>');
 
-    toast('Generando PDF con Firma y Código QR de Verificación...', 'info');
-    
-    const studentName = CU ? CU.name : 'Estudiante Anónimo';
-    const studentCedula = (CU && CU.cedula) ? CU.cedula : 'Sin registrar';
-    const studentEmail = CU ? CU.email : 'Sin registrar';
-    const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
-    const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    const sigTimeStr = (CU && CU.sigTimestamp) ? CU.sigTimestamp.toLocaleString('es-EC') : new Date().toLocaleString('es-EC');
-    const examStartStr = (CU && CU.startTime) ? CU.startTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '09:00:00';
-    const examEndStr = (CU && CU.endTime) ? CU.endTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : new Date().toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    const geoStr = (CU && CU.geoCoords) ? CU.geoCoords : 'La Libertad - Santa Elena (GPS)';
+    try {
+        toast('Generando PDF con Firma y Código QR de Verificación...', 'info');
+        
+        const studentName = CU ? CU.name : 'Estudiante Anónimo';
+        const studentCedula = (CU && CU.cedula) ? CU.cedula : 'Sin registrar';
+        const studentEmail = CU ? CU.email : 'Sin registrar';
+        const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
+        const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const sigTimeStr = (CU && CU.sigTimestamp) ? CU.sigTimestamp.toLocaleString('es-EC') : new Date().toLocaleString('es-EC');
+        const examStartStr = (CU && CU.startTime) ? CU.startTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '09:00:00';
+        const examEndStr = (CU && CU.endTime) ? CU.endTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : new Date().toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+        const geoStr = (CU && CU.geoCoords) ? CU.geoCoords : 'La Libertad - Santa Elena (GPS)';
 
-    const qrPayload = JSON.stringify({
-        Institucion: "UPSE - Universidad Estatal Península de Santa Elena",
-        Estudiante: studentName,
-        Cedula: studentCedula,
-        Carrera: CU ? CU.career : 'Ingeniería Industrial',
-        Asignatura: "Gestión de Proyectos",
-        FechaFirma: sigTimeStr,
-        InicioExamen: examStartStr,
-        FinExamen: examEndStr,
-        UbicacionGPS: geoStr,
-        Nota: `${totalScore.toFixed(2)}/40.00`,
-        VerificacionID: "UPSE-VAL-" + Math.random().toString(36).substring(2, 10).toUpperCase()
-    });
+        const qrPayload = JSON.stringify({
+            Institucion: "UPSE - Universidad Estatal Península de Santa Elena",
+            Estudiante: studentName,
+            Cedula: studentCedula,
+            Carrera: CU ? CU.career : 'Ingeniería Industrial',
+            Asignatura: "Gestión de Proyectos",
+            FechaFirma: sigTimeStr,
+            InicioExamen: examStartStr,
+            FinExamen: examEndStr,
+            UbicacionGPS: geoStr,
+            Nota: `${totalScore.toFixed(2)}/40.00`,
+            VerificacionID: "UPSE-VAL-" + Math.random().toString(36).substring(2, 10).toUpperCase()
+        });
 
-    const qrDataUrl = await generateQRCodeDataUrl(qrPayload);
-    const sigImgSrc = (CU && CU.sigDataUrl) ? CU.sigDataUrl : '';
-    const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
-        ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
-        : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
+        const qrDataUrl = await generateQRCodeDataUrl(qrPayload);
+        const sigImgSrc = (CU && CU.sigDataUrl) ? CU.sigDataUrl : '';
+        const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
+            ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
+            : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
 
-    // Generar contenido dinámico de la Tabla 3 de preguntas
-    let table3Rows = '';
+        // Generar contenido dinámico de la Tabla 3 de preguntas
+        let table3Rows = '';
 
-        // SECCIÓN 1: Verdadero o Falso
-        table3Rows += `
-            <tr class="keep-together">
-                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
-                    <strong>Ítem de Verdadero o Falso.</strong> Lee cada pregunta detenidamente y selecciona la única opción correcta.<br>
-                    <strong>Tema: “Diseño del Producto”</strong> // Relación con el RAA1.1
-                </td>
-                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
-                    5,00 puntos<br>(0.5 puntos c/u)
-                </td>
-            </tr>
-            <tr class="keep-together">
-                <td colspan="2" style="padding: 0;">
-                    <table style="width: 100%; margin: 0; border: none;">
-        `;
-        secScores.s1.details.forEach((d, i) => {
-            const userAnsText = d.a.sel === null ? '(Sin responder)' : (d.a.sel ? 'V' : 'F');
-            const correctAnsText = d.q.answer ? 'V' : 'F';
-            const isCorrect = d.st === 'correct' || d.st === 'partial';
-            const pointsStr = d.qs.toFixed(2) + ' / 0.50';
-            const statusStyle = isCorrect ? 'color: green;' : 'color: red;';
-            const mark = isCorrect ? '✓' : '✗';
-            
+            // SECCIÓN 1: Verdadero o Falso
             table3Rows += `
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">P${i+1}.</td>
-                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top; text-align: justify;">
-                        ${d.q.text}<br>
-                        <span style="font-size: 8.5pt; ${statusStyle}">
-                            <strong>Tu respuesta:</strong> ${userAnsText} [${mark}]
-                            ${!isCorrect ? ` (Correcta: ${correctAnsText})` : ''}
-                        </span><br>
-                        <span style="font-size: 8.5pt; color: #444;">
-                            <strong>Justificación:</strong> ${escapeHtml(d.a.just.trim()) || '<em>Sin justificación</em>'}
-                        </span>
-                        ${!isCorrect ? `<br><span style="font-size: 8.5pt; color: #555; font-style: italic;"><strong>Explicación:</strong> ${d.q.expl}</span>` : ''}
+                <tr class="keep-together">
+                    <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
+                        <strong>Ítem de Verdadero o Falso.</strong> Lee cada pregunta detenidamente y selecciona la única opción correcta.<br>
+                        <strong>Tema: “Diseño del Producto”</strong> // Relación con el RAA1.1
                     </td>
-                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top; ${statusStyle}">
-                        ${pointsStr}
+                    <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
+                        5,00 puntos<br>(0.5 puntos c/u)
+                    </td>
+                </tr>
+                <tr class="keep-together">
+                    <td colspan="2" style="padding: 0;">
+                        <table style="width: 100%; margin: 0; border: none;">
+            `;
+            secScores.s1.details.forEach((d, i) => {
+                const userAnsText = (d.a && d.a.sel === null) ? '(Sin responder)' : (d.a && d.a.sel ? 'V' : 'F');
+                const correctAnsText = d.q.answer ? 'V' : 'F';
+                const isCorrect = d.st === 'correct' || d.st === 'partial';
+                const pointsStr = d.qs.toFixed(2) + ' / 0.50';
+                const statusStyle = isCorrect ? 'color: green;' : 'color: red;';
+                const mark = isCorrect ? '✓' : '✗';
+                const justTxt = (d.a && d.a.just) ? d.a.just.trim() : '';
+                
+                table3Rows += `
+                    <tr style="border-bottom: 1px solid #ddd;">
+                        <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">P${i+1}.</td>
+                        <td style="border: none; padding: 4pt; width: 80%; vertical-align: top; text-align: justify;">
+                            ${d.q.text}<br>
+                            <span style="font-size: 8.5pt; ${statusStyle}">
+                                <strong>Tu respuesta:</strong> ${userAnsText} [${mark}]
+                                ${!isCorrect ? ` (Correcta: ${correctAnsText})` : ''}
+                            </span><br>
+                            <span style="font-size: 8.5pt; color: #444;">
+                                <strong>Justificación:</strong> ${escapeHtml(justTxt) || '<em>Sin justificación</em>'}
+                            </span>
+                            ${!isCorrect ? `<br><span style="font-size: 8.5pt; color: #555; font-style: italic;"><strong>Explicación:</strong> ${d.q.expl}</span>` : ''}
+                        </td>
+                        <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top; ${statusStyle}">
+                            ${pointsStr}
+                        </td>
+                    </tr>
+                `;
+            });
+            table3Rows += `
+                        </table>
                     </td>
                 </tr>
             `;
-        });
-        table3Rows += `
-                    </table>
-                </td>
-            </tr>
-        `;
 
         // SECCIÓN 2: Selección única
         table3Rows += `
@@ -2097,6 +2114,16 @@ async function doExportPDF() {
     w.document.open();
     w.document.write(docHtml);
     w.document.close();
+
+    } catch (err) {
+        console.error('Error al generar informe:', err);
+        toast('Ocurrió un error al preparar el documento: ' + err.message, 'error');
+        if (w) {
+            w.document.open();
+            w.document.write('<!DOCTYPE html><html><body style="font-family:sans-serif; text-align:center; padding:50px; color:#1e293b;"><h2 style="color:#ef4444;">Error al preparar la impresión</h2><p>' + err.message + '</p><button onclick="window.close()" style="padding:10px 20px; font-weight:bold; cursor:pointer;">Cerrar ventana</button></body></html>');
+            w.document.close();
+        }
+    }
 }
 
 function escapeHtml(text) {
