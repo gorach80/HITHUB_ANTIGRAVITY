@@ -1345,7 +1345,9 @@ const total=secScores.s1.score+secScores.s2.score+secScores.s3.score+secScores.s
 sendBackupData({user:CU,date:new Date().toISOString(),s1:secScores.s1.score,s2:secScores.s2.score,s3:secScores.s3.score,s4:secScores.s4.score,s5:secScores.s5.score,total,max:40,cheatWarnings:cheatWarnings,details:secScores});
 setTimeout(()=>{if(CU&&CU.email&&!CU.isDocente){sendEmail();}},1200);}
 
-function saveRes(total){const h=JSON.parse(localStorage.getItem('evalH_v5')||'[]');h.push({user:CU,date:new Date().toISOString(),s1:secScores.s1.score,s2:secScores.s2.score,s3:secScores.s3.score,s4:secScores.s4.score,s5:secScores.s5.score,total,max:40,cheatWarnings:cheatWarnings,details:secScores});localStorage.setItem('evalH_v5',JSON.stringify(h));toast('Resultados guardados localmente.','success');}
+function saveRes(total){
+    console.log('Modo Sin Registro: No se guarda historial local.');
+}
 
 function showRes(total){
 const ring=document.getElementById('rRing');ring.classList.remove('low','mid');const pct=total/40;if(pct<.4)ring.classList.add('low');else if(pct<.7)ring.classList.add('mid');const circ=2*Math.PI*70;setTimeout(()=>{ring.style.strokeDashoffset=circ-pct*circ;},100);
