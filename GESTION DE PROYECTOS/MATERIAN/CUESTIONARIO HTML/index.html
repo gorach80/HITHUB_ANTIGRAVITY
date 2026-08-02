@@ -819,6 +819,21 @@ if ('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
 }
 
+// Auto-reproducir protocolo en la primera interacción del usuario
+// (Los navegadores bloquean audio sin interacción previa)
+let honestyAutoPlayed = false;
+function autoPlayHonesty() {
+    if (honestyAutoPlayed) return;
+    honestyAutoPlayed = true;
+    playHonestyAudio();
+    document.removeEventListener('click', autoPlayHonesty);
+    document.removeEventListener('keydown', autoPlayHonesty);
+    document.removeEventListener('touchstart', autoPlayHonesty);
+}
+document.addEventListener('click', autoPlayHonesty, { once: false });
+document.addEventListener('keydown', autoPlayHonesty, { once: false });
+document.addEventListener('touchstart', autoPlayHonesty, { once: false });
+
 function reEnterFullscreen() {
     document.documentElement.requestFullscreen()
     .then(() => {
