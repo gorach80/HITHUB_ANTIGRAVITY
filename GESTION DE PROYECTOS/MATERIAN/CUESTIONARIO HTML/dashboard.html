@@ -19,7 +19,7 @@
     <style>
         :root {
             --bg: #0b0f17;
-            --bg-card: rgba(22, 27, 34, 0.85);
+            --bg-card: rgba(22, 27, 34, 0.9);
             --bdr: rgba(255, 255, 255, 0.1);
             --bdr-hover: rgba(255, 255, 255, 0.25);
             --fg: #f3f4f6;
@@ -36,12 +36,43 @@
             --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
-        body { background-color: var(--bg); color: var(--fg); min-height: 100vh; overflow-x: hidden; padding-bottom: 60px; line-height: 1.5; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         
+        html, body {
+            background-color: #0b0f17 !important;
+            color: #f3f4f6 !important;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 60px;
+            line-height: 1.5;
+        }
+
+        /* Security Lock Overlay */
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0b0f17 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .auth-card {
+            background: #121721;
+            border: 1px solid var(--bdr);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+        }
+
         /* Layout & Header */
         .header {
-            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(11, 15, 23, 0) 100%);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(11, 15, 23, 0.95) 100%);
             border-bottom: 1px solid var(--bdr);
             padding: 24px 32px;
             position: sticky;
@@ -370,7 +401,7 @@
             font-size: 14px;
         }
 
-        /* Modal Student Detail & Lock Overlay */
+        /* Modal Student Detail */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -442,8 +473,8 @@
 <body>
 
     <!-- MODAL DE ACCESO DOCENTE (BLOQUEO DE SEGURIDAD) -->
-    <div class="modal-overlay active" id="authModal" style="z-index: 9999; background: rgba(11, 15, 23, 0.96);">
-        <div style="background: #121721; border: 1px solid var(--bdr); border-radius: 16px; width: 100%; max-width: 420px; padding: 32px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);">
+    <div class="auth-overlay" id="authModal">
+        <div class="auth-card">
             <div style="width: 60px; height: 60px; background: rgba(16, 185, 129, 0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px auto; color: var(--ac); font-size: 26px;">
                 <i class="fas fa-user-lock"></i>
             </div>
@@ -733,11 +764,9 @@
             const isAuth = sessionStorage.getItem('docente_auth') === 'true';
             const modal = document.getElementById('authModal');
             if (isAuth) {
-                modal.classList.remove('active');
                 modal.style.display = 'none';
                 loadDashboardData();
             } else {
-                modal.classList.add('active');
                 modal.style.display = 'flex';
                 setTimeout(() => {
                     const inp = document.getElementById('authPasscode');
