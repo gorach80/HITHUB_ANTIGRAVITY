@@ -511,6 +511,7 @@
                     <span class="sync-dot"></span> <span id="syncText">Sincronizado</span>
                 </div>
                 <button class="btn" onclick="loadDashboardData()"><i class="fas fa-sync-alt"></i> Actualizar</button>
+                <button class="btn" style="border-color: rgba(239, 68, 68, 0.5); color: #ef4444;" onclick="purgeAllData()"><i class="fas fa-trash-alt"></i> Vaciar Registros (0)</button>
                 
                 <button class="btn" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Exportar CSV</button>
                 <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
@@ -775,6 +776,16 @@ let allData = [];
             sessionStorage.removeItem('docente_auth');
             document.getElementById('authPasscode').value = '';
             checkDocenteAuth();
+        }
+
+        function purgeAllData() {
+            if (confirm("¿Estás seguro de que deseas vaciar completamente el dashboard a 0 registros?")) {
+                localStorage.removeItem('evalH_v6');
+                localStorage.removeItem('evalH_v5');
+                localStorage.removeItem('evalH_v4');
+                localStorage.removeItem('evalH_v3');
+                loadDashboardData();
+            }
         }
 
         function loadDashboardData() {

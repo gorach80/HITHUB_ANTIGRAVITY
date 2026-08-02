@@ -553,8 +553,10 @@ const S5=[
 
     // WIPE PREVIOUS REGISTERS ON START
     try {
+        localStorage.removeItem('evalH_v6');
         localStorage.removeItem('evalH_v5');
         localStorage.removeItem('evalH_v4');
+        localStorage.removeItem('evalH_v3');
     } catch(e){}
     
 let CU=null, curSec=1, curQ=0, answers=[], timerInt=null, timeRem=0, s5Shuffled=[];
