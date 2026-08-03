@@ -1657,7 +1657,8 @@ async function generateBlankPDF() {
                 .replace(/\\times/g, '×')
                 .replace(/\\pi/g, 'π')
                 .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
-                .replace(/_\{([^}]+)\}/g, '_$1')
+                .replace(/_\{([^}]+)\}/g, '$1')
+                .replace(/_([a-zA-Z0-9])/g, '$1')
                 .replace(/\\text\{([^}]+)\}/g, '$1')
                 .replace(/\\max/g, 'max')
                 .replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
