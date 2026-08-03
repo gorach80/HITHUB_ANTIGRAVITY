@@ -1564,12 +1564,30 @@ async function generateBlankPDF() {
         
         let y = 15;
         
+        function cleanLaTeX(str) {
+            if (typeof str !== 'string') return str;
+            return str
+                .replace(/\\\(\s*/g, '')
+                .replace(/\s*\\\)/g, '')
+                .replace(/\\sum_\{([^}]+)\}\^\{([^}]+)\}/g, 'SUM($1...$2)')
+                .replace(/\\sum_\{([^}]+)\}/g, 'SUM($1)')
+                .replace(/\\sum/g, 'SUM')
+                .replace(/\\cdot/g, '·')
+                .replace(/\\times/g, '×')
+                .replace(/\\pi/g, 'π')
+                .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
+                .replace(/_\{([^}]+)\}/g, '_$1')
+                .replace(/\\text\{([^}]+)\}/g, '$1')
+                .replace(/\\max/g, 'max')
+                .replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
+        }
+        
         // Función auxiliar para dibujar texto y controlar salto de página
         function drawText(text, x, currentY, size = 10, isBold = false, align = 'left', maxWidth = 180) {
             if (currentY > 280) { doc.addPage(); currentY = 15; }
             doc.setFont("helvetica", isBold ? "bold" : "normal");
             doc.setFontSize(size);
-            const lines = doc.splitTextToSize(text, maxWidth);
+            const lines = doc.splitTextToSize(cleanLaTeX(text), maxWidth);
             doc.text(lines, x, currentY, { align: align });
             return currentY + (lines.length * (size * 0.4)) + 2;
         }
@@ -1672,7 +1690,7 @@ async function generateBlankPDF() {
             for (let j = 0; j < Math.max(q.leftItems.length, shuffledOptions.length); j++) {
                 const left = q.leftItems[j] ? `[   ] ${q.leftItems[j].text}` : "";
                 const letter = String.fromCharCode(65 + j);
-                const right = shuffledOptions[j] ? `${letter}) ${shuffledOptions[j].text}` : "";
+                const right = shuffledOptions[j] ? `${letter}) ${cleanLaTeX(shuffledOptions[j].text)}` : "";
                 tableBody.push([left, right]);
             }
             
