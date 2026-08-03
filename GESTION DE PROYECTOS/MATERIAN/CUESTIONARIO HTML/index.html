@@ -1670,15 +1670,19 @@ async function generateBlankPDF() {
         y += 5;
         y = drawText("SECCIÓN 4: COMPLETAMIENTO (10 pts)", 15, y, 12, true);
         y += 2;
-        S4.forEach((q, i) => {
-            let paragraph = `${i+1}. `;
-            q.parts.forEach((p, pi) => {
-                paragraph += p;
-                if (pi < q.parts.length - 1) {
-                    paragraph += " ________________________ ";
-                }
+        S4.forEach((cat, i) => {
+            y = drawText(`${i+1}. ${cat.title}`, 15, y, 10, true, 'left', 175);
+            cat.questions.forEach((q, qi) => {
+                let paragraph = `${qi+1}) `;
+                q.parts.forEach((p, pi) => {
+                    paragraph += p;
+                    if (pi < q.parts.length - 1) {
+                        paragraph += " ________________________ ";
+                    }
+                });
+                y = drawText(paragraph, 20, y, 10, false, 'left', 170);
+                y += 2;
             });
-            y = drawText(paragraph, 15, y, 10, false, 'left', 175);
             y += 4;
         });
 
@@ -1696,9 +1700,9 @@ async function generateBlankPDF() {
             
             let tableBody = [];
             for (let j = 0; j < Math.max(q.leftItems.length, shuffledOptions.length); j++) {
-                const left = q.leftItems[j] ? `[   ] ${q.leftItems[j]}` : "";
+                const left = q.leftItems[j] ? `[   ] ${q.leftItems[j].text}` : "";
                 const letter = String.fromCharCode(65 + j);
-                const right = shuffledOptions[j] ? `${letter}) ${shuffledOptions[j]}` : "";
+                const right = shuffledOptions[j] ? `${letter}) ${shuffledOptions[j].text}` : "";
                 tableBody.push([left, right]);
             }
             
