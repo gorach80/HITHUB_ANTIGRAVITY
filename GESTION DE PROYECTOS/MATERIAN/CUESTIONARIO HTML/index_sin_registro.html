@@ -273,11 +273,34 @@
             .match-row { grid-template-columns: 1fr; gap: 8px; }
         }
         @media(prefers-reduced-motion:reduce){.bg-blob,.particle{animation:none!important}.screen{animation:none!important}*{transition-duration:.01ms!important}}
+    
+        @media print {
+            body > *:not(#print-container) {
+                display: none !important;
+            }
+            #print-container {
+                display: block !important;
+                color: #000;
+                background: #fff;
+            }
+            body {
+                background: #fff !important;
+                margin: 0;
+                padding: 0;
+            }
+            @page {
+                margin: 15mm;
+            }
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
+
+<div id="print-container" style="display: none;"></div>
+
 <div class="bg-layer"><div class="bg-blob"></div><div class="bg-blob"></div><div class="bg-blob"></div></div>
 <div class="bg-grid"></div>
 <div class="particles" id="particles"></div>
@@ -1552,74 +1575,167 @@ function confirmSignatureAndExport() {
 }
 
 async function generateBlankPDF() {
-    toast('Generando PDF en blanco...', 'info');
+    toast('Preparando documento para impresión...', 'info');
     
-    // Abrimos ventana de carga
-    const w = window.open('', '_blank');
-    w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...<\\/title><\\/head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando evaluación física UPSE...<\\/h2><p>Por favor espera un momento...<\\/p><\\/body><\\/html>');
+    const printContainer = document.getElementById('print-container');
+    if (!printContainer) {
+        console.error('Print container not found');
+        return;
+    }
+
+    const c = localStorage.getItem("carrera") || "Ingeniería Industrial";
+    let headerImg = c === "Ingeniería Industrial" ? "ENCABEZADO INDUSTRIAL.jpg" : "ENCABEZADO CIVIL.jpg";
+    const headerUrl = "https://raw.githubusercontent.com/gorach80/HITHUB_ANTIGRAVITY/main/GESTION%20DE%20PROYECTOS/MATERIAN/CUESTIONARIO%20HTML/" + encodeURIComponent(headerImg);
+    const footerUrl = "https://raw.githubusercontent.com/gorach80/HITHUB_ANTIGRAVITY/main/GESTION%20DE%20PROYECTOS/MATERIAN/CUESTIONARIO%20HTML/PIE%20DE%20PAGINA.jpg";
+
+    let html = `
+        <div style="font-family: Arial, sans-serif; color: #000; line-height: 1.5; font-size: 14px;">
+            <img src="${headerUrl}" style="width: 100%; height: auto; margin-bottom: 20px;" alt="Header">
+            
+            <div style="border: 2px solid #002749; padding: 15px; margin-bottom: 20px; font-size: 13px;">
+                <h3 style="color: #002749; margin-top: 0;">DATOS DEL ESTUDIANTE</h3>
+                <p style="margin-top: 10px;">Nombre Completo: ____________________________________________________________________________________</p>
+                <p style="margin-top: 10px;">Cédula: ________________________ Fecha: ________________________</p>
+            </div>
+            
+            <h3 style="color: #002749; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 30px;">SECCIÓN 1: VERDADERO Y FALSO (5 pts)</h3>
+    `;
     
-    try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-        
-        // --- IMAGE FETCHING LOGIC ---
-        const getBase64ImageFromURL = (url) => {
-            return new Promise((resolve, reject) => {
-                var img = new Image();
-                img.setAttribute("crossOrigin", "anonymous");
-                img.onload = () => {
-                    var canvas = document.createElement("canvas");
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    resolve({ dataURL: canvas.toDataURL("image/jpeg"), width: img.width, height: img.height });
-                };
-                img.onerror = error => reject(error);
-                img.src = url;
+    S1.forEach((q, i) => {
+        html += `
+            <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                <p style="margin-bottom: 8px;">${i + 1}. ${q.text}</p>
+                <p style="color: #002749; font-weight: bold; margin-bottom: 5px;">[ &nbsp; ] VERDADERO &nbsp;&nbsp;&nbsp;&nbsp; [ &nbsp; ] FALSO</p>
+                <p style="color: #002749; margin-bottom: 5px;">Justificación:</p>
+                <p style="margin-bottom: 5px;">_______________________________________________________________________________________________________</p>
+                <p>_______________________________________________________________________________________________________</p>
+            </div>
+        `;
+    });
+
+    html += `<h3 style="color: #002749; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 40px; page-break-before: always;">SECCIÓN 2: SELECCIÓN MÚLTIPLE (10 pts)</h3>`;
+    S2.forEach((q, i) => {
+        html += `
+            <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                <p style="margin-bottom: 8px;">${i + 1}. ${q.text}</p>
+        `;
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+        q.options.forEach((opt, oi) => {
+            html += `<p style="margin-bottom: 5px;">[ &nbsp; ] ${letters[oi]}) ${opt}</p>`;
+        });
+        html += `</div>`;
+    });
+
+    html += `<h3 style="color: #002749; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 40px; page-break-before: always;">SECCIÓN 3: ORDENAMIENTO (5 pts)</h3>`;
+    S3.forEach((q, i) => {
+        html += `
+            <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                <p style="color: #002749; margin-bottom: 5px; font-weight: bold;">${i + 1}. ${q.title}</p>
+                <p style="font-size: 13px; color: #002749; margin-bottom: 10px;">Escriba el número de orden (1, 2, 3...) dentro de cada corchete:</p>
+        `;
+        let items = [...q.items];
+        items.forEach(item => {
+            html += `<p style="margin-bottom: 8px;">[ &nbsp; ] ${item.text}</p>`;
+        });
+        html += `</div>`;
+    });
+
+    html += `<h3 style="color: #002749; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 40px; page-break-before: always;">SECCIÓN 4: COMPLETAMIENTO (10 pts)</h3>`;
+    S4.forEach((q, i) => {
+        html += `
+            <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                <p style="color: #002749; font-weight: bold; margin-bottom: 8px;">${i + 1}. ${q.title || q.topic}</p>
+        `;
+        q.questions.forEach((pq, pi) => {
+            let str = "";
+            pq.parts.forEach((p, pidx) => {
+                if(pidx > 0) str += " ________________________ ";
+                str += p;
             });
-        };
+            html += `<p style="margin-bottom: 12px; margin-left: 15px;">${pi + 1}) ${str}</p>`;
+        });
+        html += `</div>`;
+    });
 
-        const c = localStorage.getItem("carrera") || "Ingeniería Industrial";
-        let headerImgName = "ENCABEZADO INDUSTRIAL.jpg";
-        if (c === "Ingeniería en Seguridad Industrial") headerImgName = "ENCABEZADO SEGURIDAD.jpg";
+    html += `<h3 style="color: #002749; border-bottom: 1px solid #ccc; padding-bottom: 5px; margin-top: 40px; page-break-before: always;">SECCIÓN 5: UNIR CON LÍNEAS / CORRESPONDENCIA (10 pts)</h3>`;
+    html += `<p style="font-size: 13px; color: #002749; margin-bottom: 15px;">Escriba la letra de la columna derecha dentro del corchete correspondiente en la columna izquierda.</p>`;
+    
+    S5.forEach((q, i) => {
+        html += `
+            <div style="margin-bottom: 30px; page-break-inside: avoid;">
+                <p style="color: #002749; font-weight: bold; margin-bottom: 10px;">${i + 1}. ${q.title}</p>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                    <thead>
+                        <tr style="background: #002749; color: #fff;">
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ccc; width: 50%;">Conceptos</th>
+                            <th style="padding: 10px; text-align: left; border: 1px solid #ccc; width: 50%;">Definiciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        let letters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O'];
+        
+        q.items.forEach((item, ii) => {
+            html += `
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ccc; color: #002749;">[ &nbsp; ] ${item.left}</td>
+                    <td style="padding: 10px; border: 1px solid #ccc; color: #002749;">${letters[ii]}) ${item.right}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
 
-        const headerImg = await getBase64ImageFromURL(headerImgName).catch(() => null);
-        const footerImg = await getBase64ImageFromURL("PIE DE PAGINA.jpg").catch(() => null);
+    // Firma
+    html += `
+        <div style="margin-top: 60px; text-align: center; page-break-inside: avoid;">
+            <p>____________________________________________________</p>
+            <p style="color: #002749; font-weight: bold; margin-top: 5px;">Firma del Estudiante</p>
+    `;
+    if (typeof CU !== 'undefined' && CU && CU.sigDataUrl) {
+        html += `<img src="${CU.sigDataUrl}" style="max-height: 80px; margin-top: -85px; position: relative;">`;
+    }
+    html += `</div>`;
 
-        const headerH = headerImg ? (210 * headerImg.height / headerImg.width) : 25;
-        const footerH = footerImg ? (210 * footerImg.height / footerImg.width) : 15;
+    html += `
+        <div style="margin-top: 50px;">
+            <img src="${footerUrl}" style="width: 100%; height: auto;" alt="Footer">
+        </div>
+    </div>`;
 
-        function drawDecorations() {
-            if (headerImg) {
-                doc.addImage(headerImg.dataURL, 'JPEG', 0, 0, 210, headerH);
-            } else {
-                doc.setFillColor(0, 39, 73);
-                doc.rect(0, 0, 210, 25, 'F');
-                doc.setTextColor(255, 255, 255);
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(14);
-                doc.text("UNIVERSIDAD ESTATAL PENÍNSULA DE SANTA ELENA", 105, 12, { align: 'center' });
-                doc.setFontSize(10);
-                doc.text("EVALUACIÓN DE GESTIÓN DE PROYECTOS - MODALIDAD FÍSICA", 105, 18, { align: 'center' });
-                doc.setTextColor(0, 0, 0);
-            }
-            if (footerImg) {
-                doc.addImage(footerImg.dataURL, 'JPEG', 0, 297 - footerH, 210, footerH);
-            }
+    printContainer.innerHTML = html;
+    printContainer.style.display = 'block';
+
+    // Render KaTeX
+    if (window.renderMathInElement) {
+        try {
+            window.renderMathInElement(printContainer, {
+                delimiters: [
+                    {left: "\\(", right: "\\)", display: false},
+                    {left: "$$", right: "$$", display: true},
+                    {left: "\\[", right: "\\]", display: true}
+                ],
+                throwOnError: false,
+                output: 'htmlAndMathml'
+            });
+        } catch (e) {
+            console.error('Error rendering math in print:', e);
         }
-        // -----------------------------
-        
-        drawDecorations();
-        let y = headerH + 8;
-        
-        function cleanLaTeX(str) {
-            if (typeof str !== 'string') return str;
-            return str
-                .replace(/\\+\(\s*/g, '')
-                .replace(/\s*\\+\)/g, '')
-                .replace(/\\+sum_\{([^}]+)\}\^\{([^}]+)\}/g, 'SUM($1...$2)')
-                .replace(/\\+sum_\{([^}]+)\}/g, 'SUM($1)')
+    }
+
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            printContainer.style.display = 'none';
+        }, 1000);
+    }, 800);
+}/g, 'SUM($1)')
                 .replace(/\\+sum/g, 'SUM')
                 .replace(/\\+cdot/g, '·')
                 .replace(/\\+times/g, '×')
