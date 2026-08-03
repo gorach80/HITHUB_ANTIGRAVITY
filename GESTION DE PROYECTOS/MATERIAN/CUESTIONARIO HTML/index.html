@@ -1588,13 +1588,62 @@ async function generateBlankPDF() {
     
     // Abrimos ventana de carga
     const w = window.open('', '_blank');
-    w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando evaluación física UPSE...</h2><p>Por favor espera un momento...</p></body></html>');
+    w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...<\\/title><\\/head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando evaluación física UPSE...<\\/h2><p>Por favor espera un momento...<\\/p><\\/body><\\/html>');
     
     try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ format: 'a4', unit: 'mm' });
         
-        let y = 15;
+        // --- IMAGE FETCHING LOGIC ---
+        const getBase64ImageFromURL = (url) => {
+            return new Promise((resolve, reject) => {
+                var img = new Image();
+                img.setAttribute("crossOrigin", "anonymous");
+                img.onload = () => {
+                    var canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve({ dataURL: canvas.toDataURL("image/jpeg"), width: img.width, height: img.height });
+                };
+                img.onerror = error => reject(error);
+                img.src = url;
+            });
+        };
+
+        const c = localStorage.getItem("carrera") || "Ingeniería Industrial";
+        let headerImgName = "ENCABEZADO INDUSTRIAL.jpg";
+        if (c === "Ingeniería en Seguridad Industrial") headerImgName = "ENCABEZADO SEGURIDAD.jpg";
+
+        const headerImg = await getBase64ImageFromURL(headerImgName).catch(() => null);
+        const footerImg = await getBase64ImageFromURL("PIE DE PAGINA.jpg").catch(() => null);
+
+        const headerH = headerImg ? (210 * headerImg.height / headerImg.width) : 25;
+        const footerH = footerImg ? (210 * footerImg.height / footerImg.width) : 15;
+
+        function drawDecorations() {
+            if (headerImg) {
+                doc.addImage(headerImg.dataURL, 'JPEG', 0, 0, 210, headerH);
+            } else {
+                doc.setFillColor(0, 39, 73);
+                doc.rect(0, 0, 210, 25, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                doc.text("UNIVERSIDAD ESTATAL PENÍNSULA DE SANTA ELENA", 105, 12, { align: 'center' });
+                doc.setFontSize(10);
+                doc.text("EVALUACIÓN DE GESTIÓN DE PROYECTOS - MODALIDAD FÍSICA", 105, 18, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+            }
+            if (footerImg) {
+                doc.addImage(footerImg.dataURL, 'JPEG', 0, 297 - footerH, 210, footerH);
+            }
+        }
+        // -----------------------------
+        
+        drawDecorations();
+        let y = headerH + 8;
         
         function cleanLaTeX(str) {
             if (typeof str !== 'string') return str;
@@ -1613,30 +1662,22 @@ async function generateBlankPDF() {
                 .replace(/\\max/g, 'max')
                 .replace(/\\sqrt\{([^}]+)\}/g, '√($1)');
         }
-        
-        // Función auxiliar para dibujar texto y controlar salto de página
+
         function drawText(text, x, currentY, size = 10, isBold = false, align = 'left', maxWidth = 180) {
-            if (currentY > 280) { doc.addPage(); currentY = 15; }
+            text = cleanLaTeX(text);
+            const pageBottom = 297 - footerH - 10;
+            if (currentY > pageBottom) { 
+                doc.addPage(); 
+                drawDecorations();
+                currentY = headerH + 8; 
+            }
             doc.setFont("helvetica", isBold ? "bold" : "normal");
             doc.setFontSize(size);
-            const lines = doc.splitTextToSize(cleanLaTeX(text), maxWidth);
+            const lines = doc.splitTextToSize(text, maxWidth);
             doc.text(lines, x, currentY, { align: align });
             return currentY + (lines.length * (size * 0.4)) + 2;
         }
 
-        // Encabezado
-        doc.setFillColor(0, 39, 73);
-        doc.rect(0, 0, 210, 25, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("UNIVERSIDAD ESTATAL PENÍNSULA DE SANTA ELENA", 105, 12, { align: 'center' });
-        doc.setFontSize(10);
-        doc.text("EVALUACIÓN DE GESTIÓN DE PROYECTOS - MODALIDAD FÍSICA", 105, 18, { align: 'center' });
-        
-        y = 35;
-        doc.setTextColor(0, 0, 0);
-        
         // Bloque de datos del estudiante
         doc.setDrawColor(0, 39, 73);
         doc.setLineWidth(0.5);
@@ -1712,7 +1753,8 @@ async function generateBlankPDF() {
         y += 2;
         y = drawText("Escriba la letra de la columna derecha dentro del corchete correspondiente en la columna izquierda.", 15, y, 9, false);
         S5.forEach((q, i) => {
-            if (y > 230) { doc.addPage(); y = 15; }
+            const pageBottom = 297 - footerH - 10;
+            if (y > pageBottom - 40) { doc.addPage(); drawDecorations(); y = headerH + 8; }
             y = drawText(`${i+1}. ${q.title}`, 15, y, 10, true, 'left', 175);
             
             // Generar letras para opciones barajadas
@@ -1720,7 +1762,7 @@ async function generateBlankPDF() {
             
             let tableBody = [];
             for (let j = 0; j < Math.max(q.leftItems.length, shuffledOptions.length); j++) {
-                const left = q.leftItems[j] ? `[   ] ${q.leftItems[j].text}` : "";
+                const left = q.leftItems[j] ? `[   ] ${cleanLaTeX(q.leftItems[j].text)}` : "";
                 const letter = String.fromCharCode(65 + j);
                 const right = shuffledOptions[j] ? `${letter}) ${cleanLaTeX(shuffledOptions[j].text)}` : "";
                 tableBody.push([left, right]);
@@ -1734,13 +1776,14 @@ async function generateBlankPDF() {
                 styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
                 headStyles: { fillColor: [0, 39, 73], textColor: 255 },
                 columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 90 } },
-                margin: { left: 15 }
+                margin: { left: 15, bottom: footerH + 10 }
             });
             y = doc.lastAutoTable.finalY + 8;
         });
         
         // Firmas al final
-        if (y > 250) { doc.addPage(); y = 15; }
+        const pageBottom = 297 - footerH - 10;
+        if (y > pageBottom - 30) { doc.addPage(); drawDecorations(); y = headerH + 8; }
         y += 20;
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(0.3);
@@ -1756,625 +1799,7 @@ async function generateBlankPDF() {
         
     } catch (e) {
         console.error("Error generando PDF en blanco: ", e);
-        w.document.write('<div style="color:red;text-align:center;margin-top:50px;">Error al generar el PDF.</div>');
-    }
-}
-
-
-function exportPDF() {
-    openSignatureModal();
-}
-
-/* ==================================================================
-   EXPORTAR PDF DE RESULTADOS (FORMATO OFICIAL UPSE CON FIRMA Y QR)
-   ================================================================== */
-async function doExportPDF() {
-    if (!secScores || !secScores.s1 || !secScores.s2 || !secScores.s3 || !secScores.s4 || !secScores.s5) {
-        secScores = {
-            s1: calcSecScore(1),
-            s2: calcSecScore(2),
-            s3: calcSecScore(3),
-            s4: calcSecScore(4),
-            s5: calcSecScore(5)
-        };
-    }
-
-    const w = window.open('', '_blank');
-    if (!w) {
-        toast('El navegador bloqueó la ventana emergente. Habilita los pop-ups para imprimir.', 'error');
-        return;
-    }
-    w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando informe oficial firmado UPSE...</h2><p>Por favor espera un momento mientras se procesa la firma y el código QR...</p></body></html>');
-
-    try {
-        toast('Generando PDF con Firma y Código QR de Verificación...', 'info');
-        
-        const studentName = CU ? CU.name : 'Estudiante Anónimo';
-        const studentCedula = (CU && CU.cedula) ? CU.cedula : 'Sin registrar';
-        const studentEmail = CU ? CU.email : 'Sin registrar';
-        const totalScore = secScores.s1.score + secScores.s2.score + secScores.s3.score + secScores.s4.score + secScores.s5.score;
-        const formattedDate = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const sigTimeStr = (CU && CU.sigTimestamp) ? CU.sigTimestamp.toLocaleString('es-EC') : new Date().toLocaleString('es-EC');
-        const examStartStr = (CU && CU.startTime) ? CU.startTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '09:00:00';
-        const examEndStr = (CU && CU.endTime) ? CU.endTime.toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : new Date().toLocaleTimeString('es-EC', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-        const geoStr = (CU && CU.geoCoords) ? CU.geoCoords : 'La Libertad - Santa Elena (GPS)';
-
-        const qrPayload = JSON.stringify({
-            Institucion: "UPSE - Universidad Estatal Península de Santa Elena",
-            Estudiante: studentName,
-            Cedula: studentCedula,
-            Carrera: CU ? CU.career : 'Ingeniería Industrial',
-            Asignatura: "Gestión de Proyectos",
-            FechaFirma: sigTimeStr,
-            InicioExamen: examStartStr,
-            FinExamen: examEndStr,
-            UbicacionGPS: geoStr,
-            Nota: `${totalScore.toFixed(2)}/40.00`,
-            VerificacionID: "UPSE-VAL-" + Math.random().toString(36).substring(2, 10).toUpperCase()
-        });
-
-        const qrDataUrl = await generateQRCodeDataUrl(qrPayload);
-        const sigImgSrc = (CU && CU.sigDataUrl) ? CU.sigDataUrl : '';
-        const headerImgName = (CU && CU.career === 'Ingeniería en Seguridad Industrial') 
-            ? 'ENCABEZADO%20%20SEGURIDAD%20INDUSTRIAL.jpg' 
-            : 'ENCABEZADO%20INGENIERIA%20INDUSTRIAL.jpg';
-
-        // Generar contenido dinámico de la Tabla 3 de preguntas
-        let table3Rows = '';
-
-            // SECCIÓN 1: Verdadero o Falso
-            table3Rows += `
-                <tr class="keep-together">
-                    <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
-                        <strong>Ítem de Verdadero o Falso.</strong> Lee cada pregunta detenidamente y selecciona la única opción correcta.<br>
-                        <strong>Tema: “Diseño del Producto”</strong> // Relación con el RAA1.1
-                    </td>
-                    <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
-                        5,00 puntos<br>(0.5 puntos c/u)
-                    </td>
-                </tr>
-                <tr class="keep-together">
-                    <td colspan="2" style="padding: 0;">
-                        <table style="width: 100%; margin: 0; border: none;">
-            `;
-            secScores.s1.details.forEach((d, i) => {
-                const userAnsText = (d.a && d.a.sel === null) ? '(Sin responder)' : (d.a && d.a.sel ? 'V' : 'F');
-                const correctAnsText = d.q.answer ? 'V' : 'F';
-                const isCorrect = d.st === 'correct' || d.st === 'partial';
-                const pointsStr = d.qs.toFixed(2) + ' / 0.50';
-                const statusStyle = isCorrect ? 'color: green;' : 'color: red;';
-                const mark = isCorrect ? '✓' : '✗';
-                const justTxt = (d.a && d.a.just) ? d.a.just.trim() : '';
-                
-                table3Rows += `
-                    <tr style="border-bottom: 1px solid #ddd;">
-                        <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">P${i+1}.</td>
-                        <td style="border: none; padding: 4pt; width: 80%; vertical-align: top; text-align: justify;">
-                            ${d.q.text}<br>
-                            <span style="font-size: 8.5pt; ${statusStyle}">
-                                <strong>Tu respuesta:</strong> ${userAnsText} [${mark}]
-                                ${!isCorrect ? ` (Correcta: ${correctAnsText})` : ''}
-                            </span><br>
-                            <span style="font-size: 8.5pt; color: #444;">
-                                <strong>Justificación:</strong> ${escapeHtml(justTxt) || '<em>Sin justificación</em>'}
-                            </span>
-                            ${!isCorrect ? `<br><span style="font-size: 8.5pt; color: #555; font-style: italic;"><strong>Explicación:</strong> ${d.q.expl}</span>` : ''}
-                        </td>
-                        <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top; ${statusStyle}">
-                            ${pointsStr}
-                        </td>
-                    </tr>
-                `;
-            });
-            table3Rows += `
-                        </table>
-                    </td>
-                </tr>
-            `;
-
-        // SECCIÓN 2: Selección única
-        table3Rows += `
-            <tr class="keep-together">
-                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
-                    <strong>Ítem de Selección Simple.</strong> Lee cada pregunta detenidamente y selecciona la única respuesta correcta.<br>
-                    <strong>Tema: “Localización de Plantas”</strong> // Relación con el RAA1.2
-                </td>
-                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
-                    10,00 puntos<br>(0.5 puntos c/u)
-                </td>
-            </tr>
-            <tr class="keep-together">
-                <td colspan="2" style="padding: 0;">
-                    <table style="width: 100%; margin: 0; border: none;">
-        `;
-        secScores.s2.details.forEach((d, i) => {
-            const letters = ['A', 'B', 'C', 'D'];
-            const userAnsText = d.a.sel === null ? '(Sin responder)' : `${letters[d.a.sel]}. ${d.q.opts[d.a.sel]}`;
-            const correctAnsText = `${letters[d.q.c]}. ${d.q.opts[d.q.c]}`;
-            const isCorrect = d.st === 'correct';
-            const pointsStr = d.qs.toFixed(2) + ' / 0.50';
-            const statusStyle = isCorrect ? 'color: green;' : 'color: red;';
-            const mark = isCorrect ? '✓' : '✗';
-
-            table3Rows += `
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">P${i+11}.</td>
-                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top; text-align: justify;">
-                        ${d.q.text}<br>
-                        <span style="font-size: 8.5pt; ${statusStyle}">
-                            <strong>Tu respuesta:</strong> ${userAnsText} [${mark}]
-                            ${!isCorrect ? `<br><strong>Correcta:</strong> ${correctAnsText}` : ''}
-                        </span>
-                        ${!isCorrect ? `<br><span style="font-size: 8.5pt; color: #555; font-style: italic;"><strong>Explicación:</strong> ${d.q.expl}</span>` : ''}
-                    </td>
-                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top; ${statusStyle}">
-                        ${pointsStr}
-                    </td>
-                </tr>
-            `;
-        });
-        table3Rows += `
-                    </table>
-                </td>
-            </tr>
-        `;
-
-        // SECCIÓN 3: Ordenamiento
-        table3Rows += `
-            <tr class="keep-together">
-                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
-                    <strong>Ítem de Ordenamiento.</strong> Lee cada pregunta detenidamente y selecciona la secuencia correcta.<br>
-                    <strong>Tema: “Requerimientos Tecnológicos”</strong> // Relación con el RAA1.2
-                </td>
-                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
-                    5,00 puntos<br>(2.5 puntos c/u)
-                </td>
-            </tr>
-            <tr class="keep-together">
-                <td colspan="2" style="padding: 0;">
-                    <table style="width: 100%; margin: 0; border: none;">
-        `;
-        secScores.s3.details.forEach((d, ii) => {
-            table3Rows += `
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">${ii+1}.</td>
-                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top;">
-                        <strong>${d.item.title}</strong><br>
-                        <div style="margin-left: 10px; font-size: 8.5pt;">
-            `;
-            d.posDetails.forEach((pd, pi) => {
-                const col = pd.isCorrect ? 'color: green;' : 'color: red;';
-                const mark = pd.isCorrect ? '✓' : '✗';
-                table3Rows += `
-                    <div style="${col}; margin-bottom: 1px;">
-                        Pos ${pi+1}: [${mark}] ${pd.isCorrect ? 'Correcto' : 'Colocaste: "' + d.item.sentences[d.a.order[pi]] + '"'}
-                        ${!pd.isCorrect ? ` — (Debería ser Pos ${pd.correctPos+1})` : ''}
-                    </div>
-                `;
-            });
-            table3Rows += `
-                        </div>
-                    </td>
-                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top;">
-                        ${d.score.toFixed(2)} / 2.50
-                    </td>
-                </tr>
-            `;
-        });
-        table3Rows += `
-                    </table>
-                </td>
-            </tr>
-        `;
-
-        // SECCIÓN 4: Completamiento
-        table3Rows += `
-            <tr class="keep-together">
-                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
-                    <strong>Ítem de Completamiento.</strong> Lee cada pregunta detenidamente y complétala con la única opción correcta.<br>
-                    <strong>Tema: “Planificación y Logística”</strong> // Relación con el RAA1.3
-                </td>
-                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
-                    10,00 puntos<br>(0.5 puntos c/u)
-                </td>
-            </tr>
-            <tr class="keep-together">
-                <td colspan="2" style="padding: 0;">
-                    <table style="width: 100%; margin: 0; border: none;">
-        `;
-        secScores.s4.details.forEach((d, ii) => {
-            table3Rows += `
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">${ii+1}.</td>
-                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top;">
-                        <strong>${d.item.title}</strong><br>
-                        <div style="margin-left: 10px; font-size: 8.5pt;">
-            `;
-            d.qDetails.forEach((qd, qi) => {
-                const col = qd.isOk ? 'color: green;' : 'color: red;';
-                const mark = qd.isOk ? '✓' : '✗';
-                table3Rows += `
-                    <div style="${col}; margin-bottom: 3px;">
-                        P${qi+1}: [${mark}] Tu respuesta: "${escapeHtml(qd.userAns) || '(vacío)'}" 
-                        ${!qd.isOk ? ` — Correcta: "${qd.correctAns}"` : ''}<br>
-                        <span style="font-size: 8pt; color: #555; font-style: italic;">(${qd.q.expl})</span>
-                    </div>
-                `;
-            });
-            table3Rows += `
-                        </div>
-                    </td>
-                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top;">
-                        ${d.score.toFixed(2)} / 5.00
-                    </td>
-                </tr>
-            `;
-        });
-        table3Rows += `
-                    </table>
-                </td>
-            </tr>
-        `;
-
-        // SECCIÓN 5: Unir Columnas
-        table3Rows += `
-            <tr class="keep-together">
-                <td style="width: 85%; font-family: 'Times New Roman'; font-size: 9pt;">
-                    <strong>Ítem De Unir Las Columnas.</strong> Lee cada pregunta detenidamente une o empareja la pregunta con la opción correcta.<br>
-                    <strong>Tema: “Indicadores Financieros”</strong> // Relación con el RAA1.4
-                </td>
-                <td style="width: 15%; font-weight: bold; text-align: center; font-family: 'Times New Roman'; font-size: 9pt;">
-                    10,00 puntos<br>(0.5 puntos c/u)
-                </td>
-            </tr>
-            <tr class="keep-together">
-                <td colspan="2" style="padding: 0;">
-                    <table style="width: 100%; margin: 0; border: none;">
-        `;
-        secScores.s5.details.forEach((d, ii) => {
-            table3Rows += `
-                <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="border: none; padding: 4pt; width: 5%; font-weight: bold; vertical-align: top;">${ii+1}.</td>
-                    <td style="border: none; padding: 4pt; width: 80%; vertical-align: top;">
-                        <strong>${d.item.title}</strong><br>
-                        <div style="margin-left: 10px; font-size: 8.5pt;">
-            `;
-            d.matchDetails.forEach((md, pi) => {
-                const col = md.isCorrect ? 'color: green;' : 'color: red;';
-                const mark = md.isCorrect ? '✓' : '✗';
-                table3Rows += `
-                    <div style="${col}; margin-bottom: 1px;">
-                        ${pi+1}. ${md.leftItem.text}: [${mark}] Tu opción: "${md.userSel || '(sin seleccionar)'}"
-                        ${!md.isCorrect ? ` — Correcta: "${md.correctLetter}"` : ''}
-                    </div>
-                `;
-            });
-            table3Rows += `
-                        </div>
-                    </td>
-                    <td style="border: none; padding: 4pt; width: 15%; text-align: right; font-weight: bold; vertical-align: top;">
-                        ${d.score.toFixed(2)} / 5.00
-                    </td>
-                </tr>
-            `;
-        });
-        table3Rows += `
-                    </table>
-                </td>
-            </tr>
-        `;
-
-        // Generar la página HTML completa del examen
-        let docHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <base href="${window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1)}">
-    <title>Evaluación Resultados - ${studentName}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"><\/script>
-    <style>
-        @page {
-            size: A4 portrait;
-            margin: 6mm 10mm 6mm 10mm;
-        }
-        body {
-            font-family: "Times New Roman", Times, serif;
-            font-size: 9.5pt;
-            line-height: 1.15;
-            color: #000;
-            background: #fff;
-            margin: 0;
-            padding: 0;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .page-header-fixed {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 24mm;
-            background: #ffffff;
-            text-align: center;
-            z-index: 1000;
-        }
-        .page-header-img {
-            width: 100%;
-            height: 23mm;
-            display: block;
-            margin: 0 auto;
-            object-fit: contain;
-        }
-        .page-footer-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 18mm;
-            background: #ffffff;
-            text-align: center;
-            z-index: 1000;
-        }
-        .page-footer-img {
-            width: 100%;
-            height: 17mm;
-            display: block;
-            margin: 0 auto;
-            object-fit: contain;
-        }
-        .page-header-space {
-            height: 25mm;
-        }
-        .page-footer-space {
-            height: 19mm;
-        }
-        .section-label {
-            font-size: 9pt;
-            font-weight: bold;
-            margin-top: 6pt;
-            margin-bottom: 2pt;
-        }
-        table.meta-table, table.raa-table, table.activities-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 6pt;
-            font-family: "Times New Roman", Times, serif;
-        }
-        table.meta-table th, table.meta-table td, 
-        table.raa-table th, table.raa-table td, 
-        table.activities-table th, table.activities-table td {
-            border: 1px solid #000;
-            padding: 3pt 5pt;
-            font-size: 8.5pt;
-            vertical-align: middle;
-        }
-        .shading-gray {
-            background-color: #bebebe !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        .shading-black {
-            background-color: #000000 !important;
-            color: #ffffff !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            text-align: center;
-            font-weight: bold;
-        }
-        .text-bold { font-weight: bold; }
-        .text-center { text-align: center; }
-        .text-justify { text-align: justify; }
-        .instructions-block { font-size: 8.5pt; margin-bottom: 8pt; text-align: justify; }
-        .instructions-list { margin: 2pt 0; padding-left: 15pt; }
-        .instructions-list li { margin-bottom: 2pt; }
-        .keep-together { page-break-inside: avoid; }
-        .signature-table { width: 100%; border-collapse: collapse; margin-top: 20pt; page-break-inside: avoid; }
-        .signature-table td { border: none; text-align: center; width: 50%; padding-top: 30pt; }
-        .signature-line { border-top: 1px solid #000; width: 200px; margin: 0 auto 5pt auto; }
-    </style>
-</head>
-<body>
-
-    <!-- ENCABEZADO Y PIE DE PÁGINA FIJOS -->
-    <div class="page-header-fixed">
-        <img src="${headerImgName}" class="page-header-img">
-    </div>
-    <div class="page-footer-fixed">
-        <img src="PIE%20DE%20PAGINA.jpg" class="page-footer-img" alt="Pie de página UPSE">
-    </div>
-
-    <!-- ESTRUCTURA PRINCIPAL IMPRESA CON ESPACIOS RESERVADOS -->
-    <table style="width: 100%; border-collapse: collapse; border: none;">
-        <thead>
-            <tr>
-                <td style="border: none; padding: 0;">
-                    <div class="page-header-space"></div>
-                </td>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="border: none; padding: 0;">
-                    <div class="section-label" style="margin-top: 0;">Datos del Examen:</div>
-                    <table class="meta-table">
-                        <tr>
-                            <td class="text-bold" style="width: 15%;">Fecha:</td>
-                            <td style="width: 35%;">${formattedDate}</td>
-                            <td class="text-bold" style="width: 15%;">Ciclo:</td>
-                            <td style="width: 35%;">I</td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold">Asignatura:</td>
-                            <td>GESTIÓN DE PROYECTOS</td>
-                            <td class="text-bold">Duración:</td>
-                            <td>90 minutos</td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold">Docente:</td>
-                            <td>Ing. Luis A Palate G. Mg</td>
-                            <td class="text-bold">Valoración:</td>
-                            <td>40 puntos (Segundo Parcial)</td>
-                        </tr>
-                        <tr>
-                            <td class="text-bold">Estudiante:</td>
-                            <td>${studentName}</td>
-                            <td class="text-bold">Calificación:</td>
-                            <td class="text-bold" style="font-size: 10pt;">${totalScore.toFixed(2)} / 40.00</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="shading-gray"></td>
-                            <td class="text-bold text-center">Calificación:</td>
-                            <td></td>
-                        </tr>
-                    </table>
-
-                    <div class="section-label">Relación y Medición de Resultados de Aprendizaje:</div>
-                    <table class="raa-table">
-                        <thead>
-                            <tr class="text-bold text-center">
-                                <th style="width: 15%;">Código RAA (Asignatura)</th>
-                                <th style="width: 40%;">Descripción del RAA</th>
-                                <th style="width: 10%;">Código RAC (Carrera)</th>
-                                <th style="width: 35%;">Descripción del RAC</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-bold text-center">RAA1.1</td>
-                                <td class="text-justify">Evaluar la viabilidad técnica y operativa de proyectos mediante herramientas de diseño de producto (QFD, balanceo de líneas, ingeniería de valor) para asegurar la eficiencia del proceso productivo.</td>
-                                <td class="text-bold text-center" rowspan="4">RAC</td>
-                                <td class="text-justify" rowspan="4">Al culminar la asignatura, el estudiante estará en capacidad de formular, evaluar y gestionar proyectos industriales aplicando metodologías técnicas y financieras, asegurando la optimización de recursos y la viabilidad económica en el sector productivo.</td>
-                            </tr>
-                            <tr>
-                                <td class="text-bold text-center">RAA1.2</td>
-                                <td class="text-justify">Analizar decisiones de localización de planta y determinación de requerimientos tecnológicos mediante métodos ponderados, de centro de gravedad y análisis de brechas.</td>
-                            </tr>
-                            <tr>
-                                <td class="text-bold text-center">RAA1.3</td>
-                                <td class="text-justify">Planificar y programar los requerimientos de materiales (MRP), la producción (MPS) y la gestión logística de inventarios (modelos EOQ y stock de seguridad).</td>
-                            </tr>
-                            <tr>
-                                <td class="text-bold text-center">RAA1.4</td>
-                                <td class="text-justify">Evaluar la rentabilidad económica y financiera de proyectos utilizando indicadores de rentabilidad (VAN, TIR, PRI) y considerando el impacto de impuestos y depreciación.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div class="section-label">Instrucciones Generales:</div>
-                    <div class="instructions-block">
-                        <ul class="instructions-list">
-                            <li>Presentación: Utilice bolígrafo de tinta negra o azul, con letra legible y ordenada (no Utilizar esferográfico borrable).</li>
-                            <li>No se permiten correcciones con líquido corrector ni tachaduras excesivas. Conducta:</li>
-                            <li>Está prohibido el uso de teléfonos móviles, dispositivos electrónicos no autorizados o materiales no permitidos.</li>
-                            <li>Queda prohibida la comunicación entre estudiantes. Cualquier acto de deshonestidad académica se sancionará según la normativa vigente.</li>
-                        </ul>
-                        <strong style="margin-top: 4px; display: block;">El cuestionario consta de 40 puntos en total.</strong>
-                    </div>
-
-                    <div class="section-label">Detalle del Examen y Respuestas del Estudiante:</div>
-                    <table class="activities-table">
-                        <thead>
-                            <tr>
-                                <th colspan="2" class="shading-black">Actividades en las que se evalúa el nivel de logro de los aprendizajes (40 puntos)</th>
-                            </tr>
-                            <tr class="text-bold">
-                                <td colspan="2" style="padding: 4pt 6pt;">Relación con el resultado de aprendizaje: RAC con RAA1.1, RAA1.2, RAA1.3, RAA1.4</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${table3Rows}
-                        </tbody>
-                    </table>
-
-                    <table class="signature-table" style="width: 100%; border-collapse: collapse; margin-top: 15pt; page-break-inside: avoid;">
-                        <tr>
-                            <td style="width: 42%; vertical-align: bottom; text-align: center; border: 1px solid #cbd5e1; padding: 8pt; border-radius: 6px;">
-                                <div style="height: 45px;"></div>
-                                <div class="signature-line" style="border-top: 1px solid #000; width: 180px; margin: 0 auto 4pt auto;"></div>
-                                <strong style="font-size: 9pt;">Ing. Luis A Palate G. Mg</strong><br>
-                                <span style="font-size: 8pt; color: #555;">DOCENTE DE LA ASIGNATURA</span>
-                            </td>
-                            <td style="width: 4%; border: none;"></td>
-                            <td style="width: 54%; vertical-align: top; border: 1px solid #002749; padding: 8pt; border-radius: 6px; background: #f8fafc;">
-                                <div style="font-size: 8pt; font-weight: bold; color: #002749; margin-bottom: 5pt; border-bottom: 1px solid #002749; padding-bottom: 3pt; text-transform: uppercase; text-align: center;">
-                                    Sello de Firma Electrónica - UPSE
-                                </div>
-                                <table style="width: 100%; border: none; border-collapse: collapse;">
-                                    <tr>
-                                        <td style="border: none; vertical-align: top; width: 68%; font-size: 7.5pt; line-height: 1.35; color: #1e293b; text-align: left; padding: 0;">
-                                            <div><strong>Estudiante:</strong> ${studentName}</div>
-                                            <div><strong>Cédula:</strong> ${studentCedula}</div>
-                                            <div><strong>Fecha Firma:</strong> ${sigTimeStr}</div>
-                                            <div><strong>Horario Examen:</strong> ${examStartStr} - ${examEndStr}</div>
-                                            <div><strong>GPS:</strong> ${geoStr}</div>
-                                            <div style="margin-top: 3px; color: #7EB61F; font-weight: bold; font-size: 7pt;">VALIDADO Y FIRMADO DIGITALMENTE</div>
-                                        </td>
-                                        <td style="border: none; vertical-align: middle; width: 32%; text-align: center; padding: 0;">
-                                            ${sigImgSrc ? `<img src="${sigImgSrc}" style="width: 75px; height: 35px; object-fit: contain; display: block; margin: 0 auto 4px auto;">` : ''}
-                                            ${qrDataUrl ? `<img src="${qrDataUrl}" style="width: 62px; height: 62px; display: block; margin: 0 auto;">` : ''}
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </tbody>
-        <tfoot>
-            <tr>
-                <td style="border: none; padding: 0;">
-                    <div class="page-footer-space"></div>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <script>
-        function doPrint() {
-            if (typeof renderMathInElement === 'function') {
-                renderMathInElement(document.body, {
-                    delimiters: [
-                        {left: '$$', right: '$$', display: true},
-                        {left: '\\\\(', right: '\\\\)', display: false},
-                        {left: '\\\\[', right: '\\\\]', display: true}
-                    ],
-                    throwOnError: false
-                });
-            }
-            const imgs = Array.from(document.images);
-            Promise.all(imgs.map(img => {
-                if (img.complete && img.naturalHeight !== 0) return Promise.resolve();
-                return new Promise(resolve => {
-                    img.onload = resolve;
-                    img.onerror = resolve;
-                });
-            })).then(() => {
-                setTimeout(() => { window.print(); }, 250);
-            });
-        }
-        if (document.readyState === 'complete') {
-            doPrint();
-        } else {
-            window.onload = doPrint;
-        }
-    <\/script>
-</body>
-</html>`;
-    w.document.open();
-    w.document.write(docHtml);
-    w.document.close();
-
-    } catch (err) {
-        console.error('Error al generar informe:', err);
-        toast('Ocurrió un error al preparar el documento: ' + err.message, 'error');
-        if (w) {
-            w.document.open();
-            w.document.write('<!DOCTYPE html><html><body style="font-family:sans-serif; text-align:center; padding:50px; color:#1e293b;"><h2 style="color:#ef4444;">Error al preparar la impresión</h2><p>' + err.message + '</p><button onclick="window.close()" style="padding:10px 20px; font-weight:bold; cursor:pointer;">Cerrar ventana</button></body></html>');
-            w.document.close();
-        }
+        w.document.write('<div style="color:red;text-align:center;margin-top:50px;">Error al generar el PDF: <br>' + e.message + '<br>' + (e.stack || '').replace(/\n/g, '<br>') + '<\\/div>');
     }
 }
 

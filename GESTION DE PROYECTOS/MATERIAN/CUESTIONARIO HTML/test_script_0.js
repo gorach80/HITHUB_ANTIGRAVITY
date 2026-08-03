@@ -1,393 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación del Segundo Parcial — Sin Registro</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@200;400;500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
-    <!-- KaTeX para renderizado ultra-rápido de fórmulas matemáticas -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-    
 
-    <style>
-        :root{--bg:#070d19;--bg2:#0e182a;--card:#132238;--card-h:#1a2d4a;--bdr:rgba(255,255,255,.12);--bdr2:rgba(126,182,31,.35);--fg:#f1f5f9;--fg2:#94a3b8;--fg3:#64748b;--ac:#7eb61f;--acg:rgba(126,182,31,.15);--acd:#003e71;--wn:#ffe000;--wng:rgba(255,224,0,.15);--dn:#ef4444;--dng:rgba(239,68,68,.12);--ok:#22c55e;--okg:rgba(34,197,94,.12);--fl:#f43f5e;--flg:rgba(244,63,94,.12);--r:14px;--rs:8px;--sh:0 4px 24px rgba(0,0,0,.4);--sh2:0 12px 48px rgba(0,0,0,.6)}
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden}
-        .bg-layer{position:fixed;inset:0;z-index:0;pointer-events:none}
-        .bg-blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.3;animation:bf 20s ease-in-out infinite}
-        .bg-blob:nth-child(1){width:500px;height:500px;background:radial-gradient(circle,#003e71,transparent 70%);top:-10%;left:-10%;animation-duration:22s}
-        .bg-blob:nth-child(2){width:400px;height:400px;background:radial-gradient(circle,#002749,transparent 70%);bottom:-15%;right:-5%;animation-duration:18s;animation-delay:-5s}
-        .bg-blob:nth-child(3){width:300px;height:300px;background:radial-gradient(circle,#7eb61f,transparent 70%);top:40%;left:50%;animation-duration:25s;animation-delay:-10s}
-        @keyframes bf{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(40px,-30px) scale(1.08)}50%{transform:translate(-20px,40px) scale(.95)}75%{transform:translate(30px,20px) scale(1.05)}}
-        .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(126,182,31,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(126,182,31,.04) 1px,transparent 1px);background-size:60px 60px}
-        .particles{position:fixed;inset:0;z-index:0;pointer-events:none}
-        .particle{position:absolute;width:3px;height:3px;background:var(--ac);border-radius:50%;opacity:0;animation:pr linear infinite}
-        @keyframes pr{0%{opacity:0;transform:translateY(100vh) scale(0)}10%{opacity:.5}90%{opacity:.2}100%{opacity:0;transform:translateY(-10vh) scale(1)}}
-        .app{position:relative;z-index:1;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
-        .screen{display:none;width:100%;max-width:880px;animation:si .5s cubic-bezier(.16,1,.3,1) forwards}
-        .screen.active{display:block}
-        @keyframes si{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-
-        /* LOGIN */
-        .lcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:48px 40px;box-shadow:var(--sh2);text-align:center}
-        .llogo{width:72px;height:72px;background:linear-gradient(135deg,var(--ac),#059669);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:32px;color:#fff;box-shadow:0 8px 32px rgba(16,185,129,.3)}
-        .ltitle{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;margin-bottom:6px}
-        .lsub{color:var(--fg2);font-size:14px;margin-bottom:32px;line-height:1.6}
-        .msbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px 24px;background:#2f2f2f;color:#fff;border:1px solid #3c3c3c;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-        .msbtn:hover{background:#3a3a3a;box-shadow:0 4px 16px rgba(0,0,0,.25);transform:translateY(-1px)}
-        .ldiv{display:flex;align-items:center;gap:16px;margin:24px 0;color:var(--fg3);font-size:12px;text-transform:uppercase;letter-spacing:1px}
-        .ldiv::before,.ldiv::after{content:'';flex:1;height:1px;background:var(--bdr)}
-        .fgrp{margin-bottom:16px;text-align:left}
-        .fgrp label{display:block;font-size:13px;font-weight:500;color:var(--fg2);margin-bottom:6px}
-        .fgrp input{width:100%;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
-        .fgrp input:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acg)}
-        .fgrp input::placeholder{color:var(--fg3)}
-        .lsubm{width:100%;padding:14px;background:linear-gradient(135deg,var(--ac),#059669);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:8px}
-        .lsubm:hover{box-shadow:0 6px 24px rgba(16,185,129,.35);transform:translateY(-1px)}
-        .lerr{color:var(--dn);font-size:13px;margin-top:12px;display:none}
-
-        /* INSTRUCCIONES */
-        .icard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:40px;box-shadow:var(--sh2)}
-        .ihdr{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--bdr)}
-        .iico{width:52px;height:52px;background:var(--acg);border:1px solid var(--bdr2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ac);flex-shrink:0}
-        .ititle{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700}
-        .isub{font-size:13px;color:var(--fg2);margin-top:2px}
-        .ubadge{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:24px}
-        .uav{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#059669);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0}
-        .uinfo{flex:1}.uname{font-weight:600;font-size:14px}.uemail{font-size:12px;color:var(--fg2)}
-        .sprev{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-        .sbox{padding:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs)}
-        .sbox .sn{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--ac);margin-bottom:4px}
-        .sbox .st{font-weight:600;font-size:13px;margin-bottom:2px}
-        .sbox .sd{font-size:11px;color:var(--fg2)}
-        .ilist{list-style:none;margin-bottom:28px}
-        .ilist li{display:flex;align-items:flex-start;gap:12px;padding:10px 0;font-size:13px;line-height:1.5;color:var(--fg2);border-bottom:1px solid rgba(30,51,41,.5)}
-        .ilist li:last-child{border-bottom:none}
-        .ilist li .ii{width:28px;height:28px;background:var(--acg);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ac);flex-shrink:0;margin-top:1px}
-        .strtbtn{width:100%;padding:16px;background:linear-gradient(135deg,var(--ac),#059669);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.3px}
-        .strtbtn:hover{box-shadow:0 8px 32px rgba(16,185,129,.4);transform:translateY(-2px)}
-
-        /* TRANSICIÓN */
-        .tcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:48px 40px;box-shadow:var(--sh2);text-align:center}
-        .tico{width:80px;height:80px;background:var(--acg);border:1px solid var(--bdr2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:32px;color:var(--ac)}
-        .ttitle{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px}
-        .tsub{color:var(--fg2);font-size:14px;margin-bottom:28px;line-height:1.6}
-        .ssum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
-        .sst{padding:14px 10px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs)}
-        .sst .sv{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700}
-        .sst .sl{font-size:11px;color:var(--fg2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-        .sst.sok .sv{color:var(--ok)}.sst.sbad .sv{color:var(--fl)}.sst.semp .sv{color:var(--fg3)}
-
-        /* EVAL HEADER */
-        .ehdr{position:sticky;top:0;z-index:10;background:rgba(6,10,8,.94);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);padding:16px 0;margin-bottom:24px}
-        .etop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-        .eslbl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--ac)}
-        .etimer{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--fg2);font-variant-numeric:tabular-nums}
-        .etimer i{color:var(--wn);font-size:13px}
-        .pbt{width:100%;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden}
-        .pbf{height:100%;background:linear-gradient(90deg,var(--ac),#34d399);border-radius:3px;transition:width .5s cubic-bezier(.16,1,.3,1);width:0%}
-
-        /* MAPA */
-        .qmap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
-        .qmd{width:34px;height:34px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--fg3);cursor:pointer;transition:all .2s}
-        .qmd:hover{border-color:var(--bdr2);color:var(--fg2)}
-        .qmd.cur{border-color:var(--ac);color:var(--ac);background:var(--acg)}
-        .qmd.don{background:var(--acd);border-color:var(--ac);color:var(--ac)}
-        .qmd.par{border-color:var(--wn);color:var(--wn);background:var(--wng)}
-
-        /* QUESTION CARD */
-        .qcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:32px;margin-bottom:20px;box-shadow:var(--sh)}
-        .qnum{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:var(--acg);border:1px solid var(--bdr2);border-radius:8px;font-size:13px;font-weight:700;color:var(--ac);margin-bottom:14px}
-        .qtxt{font-size:16px;font-weight:500;line-height:1.7;margin-bottom:20px}
-
-        /* V/F */
-        .vfops{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-        .vfop{display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 20px;background:var(--bg2);border:2px solid var(--bdr);border-radius:var(--rs);cursor:pointer;transition:all .2s;font-size:15px;font-weight:600;color:var(--fg2)}
-        .vfop:hover{border-color:var(--bdr2);background:var(--card-h);color:var(--fg)}
-        .vfop.st{border-color:var(--ok);background:var(--okg);color:var(--ok)}
-        .vfsf{border-color:var(--fl)!important;background:var(--flg)!important;color:var(--fl)!important}
-        .vfop i{font-size:18px}
-        .jarea{display:none;animation:fs .3s ease forwards}.jarea.vis{display:block}
-        @keyframes fs{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-        .jlbl{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--wn);margin-bottom:8px}
-        .jlbl i{font-size:14px}
-        .jtxt{width:100%;min-height:100px;padding:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s}
-        .jtxt:focus{border-color:var(--wn);box-shadow:0 0 0 3px var(--wng)}
-        .jtxt::placeholder{color:var(--fg3)}
-        .qst{display:flex;align-items:center;gap:6px;margin-top:12px;font-size:12px;font-weight:500;opacity:0;transition:opacity .3s}
-        .qst.vis{opacity:1}.qst.cok{color:var(--ok)}.qst.cinc{color:var(--wn)}
-
-        /* MC */
-        .mcopts{display:flex;flex-direction:column;gap:10px}
-        .mcop{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;background:var(--bg2);border:2px solid var(--bdr);border-radius:var(--rs);cursor:pointer;transition:all .2s;font-size:14px;line-height:1.6;color:var(--fg2)}
-        .mcop:hover{border-color:var(--bdr2);background:var(--card-h);color:var(--fg)}
-        .mcop.sel{border-color:var(--ac);background:var(--acg);color:var(--fg)}
-        .mclt{width:30px;height:30px;background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all .2s}
-        .mcop.sel .mclt{background:var(--ac);color:#fff;border-color:var(--ac)}
-        .mctx{flex:1;padding-top:3px}
-
-        /* ORDERING */
-        .ord-item-label{font-size:13px;font-weight:600;color:var(--wn);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-        .ord-pool{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-        .ord-sentence{padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);cursor:grab;transition:all .2s;font-size:14px;line-height:1.5;color:var(--fg2);display:flex;align-items:center;gap:10px;user-select:none}
-        .ord-sentence:active{cursor:grabbing}
-        .ord-sentence:hover{border-color:var(--bdr2);background:var(--card-h)}
-        .ord-sentence.dragging{opacity:.4;border-style:dashed}
-        .ord-sentence.drag-over{border-color:var(--ac);background:var(--acg)}
-        .ord-sentence.placed{background:var(--acd);border-color:var(--ac);color:var(--fg);cursor:grab}
-        .ord-sentence.correct-pos{border-color:var(--ok)!important;background:var(--okg)!important}
-        .ord-sentence.incorrect-pos{border-color:var(--fl)!important;background:var(--flg)!important}
-        .ord-nums{width:24px;height:24px;background:rgba(255,255,255,.06);border:1px solid var(--bdr);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-        .ord-arrows{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
-        .ord-arrows button{width:22px;height:18px;border:1px solid var(--bdr);background:var(--bg2);color:var(--fg3);border-radius:4px;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0}
-        .ord-arrows button:hover{border-color:var(--ac);color:var(--ac);background:var(--acg)}
-        .ord-check{width:100%;padding:12px;background:linear-gradient(135deg,var(--wn),#d97706);color:#fff;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;margin-top:12px}
-        .ord-check:hover{box-shadow:0 4px 16px rgba(245,158,11,.3);transform:translateY(-1px)}
-        .ord-result{margin-top:12px;padding:10px 14px;border-radius:var(--rs);font-size:13px;display:none;font-weight:500;align-items:center;gap:8px}
-        .ord-result.vis{display:flex}
-        .ord-result.ok{background:var(--okg);color:var(--ok);border:1px solid rgba(34,197,94,.2)}
-        .ord-result.bad{background:var(--flg);color:var(--fl);border:1px solid rgba(244,63,94,.2)}
-
-        /* FILL-IN */
-        .fill-sentence{font-size:15px;line-height:2;color:var(--fg2);margin-bottom:8px}
-        .fill-input{display:inline-block;width:180px;padding:6px 12px;background:var(--bg2);border:2px solid var(--bdr);border-radius:var(--rs);color:var(--fg);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:all .2s;vertical-align:middle;margin:0 4px}
-        .fill-input:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acg)}
-        .fill-input.ok{border-color:var(--ok);background:var(--okg)}
-        .fill-input.bad{border-color:var(--fl);background:var(--flg)}
-        .fill-hint{font-size:12px;color:var(--fg3);margin-top:6px;font-style:italic}
-
-        /* MATCHING COLUMN STYLES */
-        .match-grp { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .match-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center; padding: 10px 14px; background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--rs); }
-        .match-left { font-size: 13px; font-weight: 500; color: var(--fg); line-height: 1.4; }
-        .match-select { width: 100%; padding: 8px 12px; background: var(--bg); border: 2px solid var(--bdr); border-radius: var(--rs); color: var(--fg2); outline: none; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; }
-        .match-select:focus { border-color: var(--ac); color: var(--fg); box-shadow: 0 0 0 3px var(--acg); }
-        .match-select.ok { border-color: var(--ok); background: var(--okg); color: var(--ok); }
-        .match-select.bad { border-color: var(--fl); background: var(--flg); color: var(--fl); }
-        .match-select option { background: var(--bg2); color: var(--fg); }
-        .match-col-right { margin-top: 20px; padding: 18px; background: rgba(255,255,255,0.02); border: 1px dashed var(--bdr); border-radius: var(--rs); }
-        .match-col-right-title { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--wn); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; }
-        .match-option-desc { font-size: 13px; color: var(--fg2); line-height: 1.5; margin-bottom: 8px; }
-        .match-option-desc:last-child { margin-bottom: 0; }
-        .match-option-desc strong { color: var(--ac); margin-right: 4px; }
-
-        /* NAV */
-        .navs{display:flex;gap:12px;margin-top:8px;margin-bottom:40px}
-        .nbtn{flex:1;padding:14px 20px;border:1px solid var(--bdr);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px}
-        .nbtn.prev{background:var(--card);color:var(--fg2)}
-        .nbtn.prev:hover{background:var(--card-h);color:var(--fg);border-color:var(--bdr2)}
-        .nbtn.nxt{background:linear-gradient(135deg,var(--ac),#059669);color:#fff;border-color:transparent}
-        .nbtn.nxt:hover{box-shadow:0 6px 24px rgba(16,185,129,.35);transform:translateY(-1px)}
-        .nbtn.fin{background:linear-gradient(135deg,var(--wn),#d97706);color:#fff;border-color:transparent}
-        .nbtn.fin:hover{box-shadow:0 6px 24px rgba(245,158,11,.35);transform:translateY(-1px)}
-        .nbtn.cont{background:linear-gradient(135deg,var(--ac),#059669);color:#fff;border-color:transparent}
-        .nbtn.cont:hover{box-shadow:0 6px 24px rgba(16,185,129,.35);transform:translateY(-1px)}
-        .nbtn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
-
-        /* RESULTS */
-        .rcard{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:40px;box-shadow:var(--sh2);text-align:center}
-        .sring{width:180px;height:180px;margin:0 auto 24px;position:relative}
-        .sring svg{width:100%;height:100%;transform:rotate(-90deg)}
-        .sring .rbg{fill:none;stroke:var(--bg2);stroke-width:10}
-        .sring .rfill{fill:none;stroke:var(--ac);stroke-width:10;stroke-linecap:round;stroke-dasharray:440;stroke-dashoffset:440;transition:stroke-dashoffset 1.5s cubic-bezier(.16,1,.3,1) .3s}
-        .sring .rfill.low{stroke:var(--dn)}.sring .rfill.mid{stroke:var(--wn)}
-        .sval{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-        .snum{font-family:'Space Grotesk',sans-serif;font-size:48px;font-weight:900;line-height:1}
-        .slbl{font-size:13px;color:var(--fg2);margin-top:4px}
-        .rtitle{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px}
-        .rsub{color:var(--fg2);font-size:14px;margin-bottom:28px;line-height:1.6}
-        .strow{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px}
-        .stbx{padding:16px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs)}
-        .stbx .stv{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700}
-        .stbx .stl{font-size:11px;color:var(--fg2);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-        .stbx.sok .stv{color:var(--ok)}.stbx.sbad .stv{color:var(--fl)}.stbx.semp .stv{color:var(--fg3)}.stbx.ssc .stv{color:var(--ac)}
-        .sdiv{font-size:13px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:1px;margin:20px 0 12px;padding-top:16px;border-top:1px solid var(--bdr)}
-        .revsec{margin-top:28px;text-align:left}
-        .revtit{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bdr)}
-        .ritem{padding:16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:10px;border-left:4px solid var(--bdr)}
-        .ritem.rok{border-left-color:var(--ok)}.ritem.rbad{border-left-color:var(--fl)}.ritem.remp{border-left-color:var(--fg3)}
-        .rihead{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
-        .rinum{font-size:12px;font-weight:700;color:var(--fg3)}
-        .ribadge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px}
-        .ribadge.bok{background:var(--okg);color:var(--ok)}
-        .ribadge.bbad{background:var(--flg);color:var(--fl)}
-        .ribadge.bemp{background:rgba(90,112,104,.2);color:var(--fg3)}
-        .ribadge.bpar{background:var(--wng);color:var(--wn)}
-        .ritxt{font-size:14px;line-height:1.6;color:var(--fg2);margin-bottom:8px}
-        .rians{font-size:13px;color:var(--fg2)}
-        .rians strong{color:var(--fg)}
-        .rians .cok{color:var(--ok);font-weight:600}.rians .ubad{color:var(--fl);font-weight:600}
-        .riexpl{margin-top:8px;padding:10px 12px;background:var(--card);border-radius:6px;font-size:13px;color:var(--fg2);line-height:1.5;border-left:2px solid var(--ac);padding-left:12px}
-        .riexpl strong{color:var(--ac);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-        .rijust{margin-top:8px;padding:10px 12px;background:var(--card);border-radius:6px;font-size:13px;color:var(--fg2);line-height:1.5}
-        .rijust strong{color:var(--wn);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-        .ract{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
-        .rbtn{padding:14px 20px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;border:none}
-        .rbtn.eml{background:linear-gradient(135deg,var(--ac),#059669);color:#fff}
-        .rbtn.eml:hover{box-shadow:0 6px 24px rgba(16,185,129,.35);transform:translateY(-1px)}
-        .rbtn.pdf{background:linear-gradient(135deg,var(--dn),#b91c1c);color:#fff}
-        .rbtn.pdf:hover{box-shadow:0 6px 24px rgba(239,68,68,.35);transform:translateY(-1px)}
-        .rbtn.prt{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}
-        .rbtn.prt:hover:not(:disabled){box-shadow:0 6px 24px rgba(59,130,246,.35);transform:translateY(-1px)}
-        .rbtn.prt:disabled,.rbtn.prt.disabled{opacity:0.45!important;cursor:not-allowed!important;filter:grayscale(0.7)!important;box-shadow:none!important;transform:none!important}
-        .rbtn.ret{background:var(--bg2);color:var(--fg2);border:1px solid var(--bdr);grid-column: span 2}
-        .rbtn.ret:hover{background:var(--card-h);color:var(--fg);border-color:var(--bdr2)}
-
-        /* TOAST */
-        .tc{position:fixed;top:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:10px}
-        .toast{padding:14px 20px;background:var(--card);border:1px solid var(--bdr);border-radius:var(--rs);box-shadow:var(--sh2);display:flex;align-items:center;gap:10px;font-size:14px;color:var(--fg);animation:ti .4s cubic-bezier(.16,1,.3,1) forwards;max-width:360px}
-        .toast.to{animation:too .3s ease forwards}
-        .toast i{font-size:18px;flex-shrink:0}
-        .toast.success i{color:var(--ok)}.toast.warning i{color:var(--wn)}.toast.error i{color:var(--dn)}
-        @keyframes ti{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
-        @keyframes too{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(40px)}}
-
-        /* MODAL */
-        .movl{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
-        .movl.active{display:flex}
-        .mbox{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:32px;max-width:420px;width:100%;box-shadow:var(--sh2);animation:si .3s ease forwards}
-        .mico{width:56px;height:56px;background:var(--wng);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px;color:var(--wn)}
-        .mtit{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:8px}
-        .mtxt{font-size:14px;color:var(--fg2);text-align:center;line-height:1.6;margin-bottom:24px}
-        .macts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        .mbtn{padding:12px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none}
-        .mbtn.canc{background:var(--bg2);color:var(--fg2);border:1px solid var(--bdr)}
-        .mbtn.canc:hover{background:var(--card-h);color:var(--fg)}
-        .mbtn.conf{background:linear-gradient(135deg,var(--wn),#d97706);color:#fff}
-        .mbtn.conf:hover{box-shadow:0 4px 16px rgba(245,158,11,.3)}
-
-        @media(max-width:600px){
-            .lcard,.icard,.rcard,.tcard{padding:28px 20px}
-            .qcard{padding:24px 18px}
-            .vfops{grid-template-columns:1fr}
-            .strow{grid-template-columns:1fr 1fr;gap:8px}
-            .sprev,.ssum{grid-template-columns:1fr}
-            .ract{grid-template-columns:1fr}
-            .snum{font-size:40px}
-            .sring{width:150px;height:150px}
-            .fill-input{width:130px;font-size:13px}
-            .match-row { grid-template-columns: 1fr; gap: 8px; }
-        }
-        @media(prefers-reduced-motion:reduce){.bg-blob,.particle{animation:none!important}.screen{animation:none!important}*{transition-duration:.01ms!important}}
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-</head>
-<body>
-<div class="bg-layer"><div class="bg-blob"></div><div class="bg-blob"></div><div class="bg-blob"></div></div>
-<div class="bg-grid"></div>
-<div class="particles" id="particles"></div>
-<div class="tc" id="toastC"></div>
-<div class="movl" id="modal"><div class="mbox"><div class="mico"><i class="fas fa-exclamation-triangle"></i></div><div class="mtit">Entregar evaluación</div><div class="mtxt" id="modalTxt"></div><div class="macts"><button class="mbtn canc" onclick="closeModal()">Revisar</button><button class="mbtn conf" id="modalConf">Entregar</button></div></div></div>
-
-<!-- MODAL CONFIGURACIÓN BACKUP (ADMINISTRADOR) -->
-<div class="movl" id="configModal">
-  <div class="mbox" style="max-width: 460px; padding: 28px;">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; color:var(--ac);">
-      <i class="fas fa-cog" style="font-size:24px;"></i>
-      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; margin:0;">Configuración de Respaldo (Admin)</h2>
-    </div>
-    <p style="font-size:13px; color:var(--fg2); margin-bottom:16px; line-height:1.5;">Ingresa la URL de la aplicación web de Google Apps Script para guardar de forma automatizada las notas de los alumnos:</p>
-    <div class="fgrp" style="margin-bottom:20px;">
-      <label for="cfgBackupUrl">URL del Apps Script Web App</label>
-      <input type="text" id="cfgBackupUrl" placeholder="https://script.google.com/macros/s/.../exec" style="font-size:13px;">
-    </div>
-    <div class="macts" style="display:flex; flex-direction:column; gap:12px;">
-      <div style="display:flex; gap:10px; width:100%;">
-        <button class="mbtn canc" onclick="closeConfigModal()" style="flex:1; margin:0;">Cancelar</button>
-        <button class="mbtn conf" onclick="saveConfig()" style="flex:1; margin:0; background:linear-gradient(135deg,var(--ac),#059669); color:#fff; box-shadow:0 4px 12px var(--acg);">Guardar URL</button>
-      </div>
-            <button class="mbtn conf" onclick="generateBlankPDF()" style="width:100%; margin:0; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; box-shadow:0 4px 12px rgba(245,158,11,0.25);">
-        <i class="fas fa-file-pdf"></i> Generar Evaluación PDF en Blanco
-      </button>
-<button class="mbtn conf" onclick="loginAsDocente()" style="width:100%; margin:0; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.25);">
-        <i class="fas fa-user-shield"></i> Ingresar al Examen como Docente (Sin Registro)
-      </button>
-      <a href="dashboard.html" onclick="sessionStorage.setItem('docente_auth','true')" class="mbtn conf" style="width:100%; margin:0; background:linear-gradient(135deg,#0ea5e9,#0284c7); color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 12px rgba(14,165,233,0.25);">
-        <i class="fas fa-chart-line"></i> Abrir Dashboard Analítico Docente
-      </a>
-    </div>
-  </div>
-</div>
-
-<!-- ACC CHOOSER MODAL SIMULATOR -->
-<div class="movl" id="microsoftModal">
-  <div class="mbox" style="max-width: 440px; padding: 32px; background: #ffffff; border: 1px solid #d2d2d2; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
-    <div style="text-align:left; margin-bottom:24px;">
-      <svg viewBox="0 0 23 23" style="width:36px; height:36px; margin-bottom:16px;">
-        <rect x="0" y="0" width="11" height="11" fill="#f25022"/>
-        <rect x="12" y="0" width="11" height="11" fill="#7fba00"/>
-        <rect x="0" y="12" width="11" height="11" fill="#00a4ef"/>
-        <rect x="12" y="12" width="11" height="11" fill="#ffb900"/>
-      </svg>
-      <h2 style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size:20px; font-weight:600; color:#333333; margin-bottom:4px;">Elige una cuenta</h2>
-      <p style="color:#666666; font-size:13px;">para iniciar sesión en <span style="color:#0078d4; font-weight:600;">upse.edu.ec</span></p>
-    </div>
-    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:20px;" id="microsoftAccountsList"></div>
-    <button class="mbtn canc" style="width:100%; border-color:#ccc; color:#333; background:#fff;" onclick="closeMsModal()">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL BLOQUEADOR PANTALLA COMPLETA (SEGURIDAD) -->
-<div class="movl" id="fullscreenBlocker" style="background: rgba(6,10,8,0.98); z-index: 99999; backdrop-filter: blur(10px);">
-  <div class="mbox" style="max-width: 420px; padding: 32px; text-align: center; border: 1px solid var(--dn); box-shadow: 0 12px 48px rgba(239,68,68,0.15);">
-    <div style="color: var(--dn); font-size: 54px; margin-bottom: 20px;">
-      <i class="fas fa-exclamation-triangle"></i>
-    </div>
-    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px;">Pantalla Completa Obligatoria</h2>
-    <p style="font-size: 14px; color: var(--fg2); margin-bottom: 24px; line-height: 1.6;">Para garantizar la honestidad académica de la evaluación, es obligatorio permanecer en modo pantalla completa. El examen ha sido pausado.</p>
-    <button class="mbtn conf" onclick="reEnterFullscreen()" style="width: 100%; background: linear-gradient(135deg, var(--dn), #b91c1c); color: #fff; border: none; box-shadow: 0 4px 16px rgba(239,68,68,0.3); padding: 12px; font-weight: 600; border-radius: 8px; cursor: pointer;">
-      <i class="fas fa-expand"></i> Volver a Pantalla Completa
-    </button>
-  </div>
-</div>
-
-<div class="app">
-<!-- LOGIN --><div class="screen active" id="sLogin"><div class="login-gear" onclick="handleGearClick(event)" style="position: absolute; top: 20px; right: 20px; font-size: 18px; color: #ffffff; opacity: 0.3; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.8" onmouseout="this.style.opacity=0.3" title="Acceso docente"><i class="fas fa-cog"></i></div><div class="lcard"><div class="llogo" style="background:none; box-shadow:none; width:96px; height:96px; margin:0 auto 16px;"><img src="upse_logo.png" alt="Escudo UPSE" style="width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3));"></div><h1 class="ltitle">Evaluación del Segundo Parcial (Modo Sin Registro)</h1><p class="lsub">Gestión de Proyectos — UPSE · Ingeniería Industrial (7mo Semestre)</p><div style="margin: -6px 0 16px 0; font-size: 11px; font-weight: 700; color: #f59e0b; display: inline-flex; align-items: center; gap: 6px; background: rgba(245, 158, 11, 0.1); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.3);"><i class="fas fa-calendar-alt"></i> Fecha y Hora Límite: 03/08/2026 — 10:00 AM</div><div class="fgrp" style="margin-bottom:15px; text-align:left;"><label for="mCarrera" style="font-weight:600; font-size:12px; color:var(--fg2); display:block; margin-bottom:6px;">Carrera / Especialidad</label><select id="mCarrera" style="width:100%; padding:10px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.05); color:var(--fg); font-family:inherit; font-size:13px; outline:none; transition:border-color 0.2s;" onchange="updateCareerSub(this.value)"><option value="Ingeniería Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Ingeniería Industrial</option><option value="Ingeniería en Seguridad Industrial" style="background:#1e1e1e; color:#fff;">Carrera de Seguridad Industrial</option></select></div><button class="msbtn" onclick="msLogin()"><svg viewBox="0 0 23 23" style="width:18px; height:18px; margin-right:10px;"><rect x="0" y="0" width="11" height="11" fill="#f25022"/><rect x="12" y="0" width="11" height="11" fill="#7fba00"/><rect x="0" y="12" width="11" height="11" fill="#00a4ef"/><rect x="12" y="12" width="11" height="11" fill="#ffb900"/></svg>Iniciar sesión con Microsoft</button><div class="ldiv">o ingresa manualmente</div><div class="fgrp"><label for="mN">Nombre completo</label><input type="text" id="mN" placeholder="Ej: María García López"></div><div class="fgrp"><label for="mC">Cédula de Identidad</label><input type="text" id="mC" placeholder="Ej: 0912345678" maxlength="10"></div><div class="fgrp"><label for="mE">Correo institucional</label><input type="email" id="mE" placeholder="Ej: maria.lopez@upse.edu.ec"></div><div class="honesty-box" style="margin:18px 0 14px 0; padding:14px 16px; background:linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03)); border:1px solid rgba(239,68,68,0.25); border-radius:8px; text-align:left;"><div style="font-weight:700; font-size:13px; color:#ef4444; display:flex; align-items:center; gap:8px; margin-bottom:8px;"><i class="fas fa-user-shield"></i> Protocolo de Honestidad Académica</div><ul style="font-size:11px; color:var(--fg2); margin:0 0 10px 0; padding-left:18px; line-height:1.5;"><li>Es <strong>obligatorio</strong> permanecer en <strong>pantalla completa</strong> durante toda la evaluación.</li><li>Está <strong>prohibido</strong> cambiar de pestaña, minimizar el navegador o abrir otras aplicaciones.</li><li>Cada infracción será registrada como una <strong>advertencia de seguridad</strong>.</li><li>Al acumular <strong>3 advertencias</strong>, el examen se entregará de forma <strong>automática e irrevocable</strong>.</li><li>Plazo máximo de desarrollo: <strong>Hasta las 10:00 AM del 03/08/2026</strong>.</li></ul><button type="button" onclick="playHonestyAudio()" style="background:linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.06)); border:1px solid rgba(239,68,68,0.3); color:var(--fg); cursor:pointer; display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700; padding:7px 14px; border-radius:6px; outline:none; transition:all 0.2s;"><i class="fas fa-volume-up" style="color:#ef4444;"></i> Escuchar Protocolo</button></div><button class="lsubm" onclick="mLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar evaluación</button><div class="lerr" id="lErr"></div></div></div>
-<!-- INSTR --><div class="screen" id="sInstr"><div class="icard"><div class="ihdr"><div class="iico"><i class="fas fa-clipboard-list"></i></div><div><div class="ititle">Instrucciones de la Evaluación (Segundo Parcial)</div><div class="isub">5 secciones — 40 puntos totales</div></div></div><div class="ubadge"><div class="uav" id="uAv">M</div><div class="uinfo"><div class="uname" id="uNm">María García</div><div class="uemail" id="uEm">maria.lopez@upse.edu.ec</div></div></div><div class="sprev"><div class="sbox"><div class="sn">Sección 1</div><div class="st">V/F + Justificación</div><div class="sd">10 preguntas — Diseño del Producto (5 pts)</div></div><div class="sbox"><div class="sn">Sección 2</div><div class="st">Selección única</div><div class="sd">20 preguntas — Localización (10 pts)</div></div><div class="sbox"><div class="sn">Sección 3</div><div class="st">Ordenamiento</div><div class="sd">2 items de 10 oraciones — Requerimientos (5 pts)</div></div><div class="sbox"><div class="sn">Sección 4</div><div class="st">Completamiento</div><div class="sd">2 items de 10 preguntas — Planificación y Logística (10 pts)</div></div><div class="sbox" style="grid-column: span 2"><div class="sn">Sección 5</div><div class="st">Unir las Columnas</div><div class="sd">2 items de 10 correspondencias — Indicadores Financieros (10 pts)</div></div></div><ul class="ilist"><li><span class="ii" style="background:rgba(245,158,11,0.15); color:#f59e0b;"><i class="fas fa-calendar-times"></i></span><span>Fecha y hora límite: <strong style="color:#f59e0b">Lunes 03 de Agosto de 2026 — 10:00 AM</strong>.</span></li><li><span class="ii"><i class="fas fa-clock"></i></span><span>Tiempo total: <strong style="color:var(--fg)">90 minutos</strong> distribuidos en las 5 secciones.</span></li><li><span class="ii"><i class="fas fa-pen-fancy"></i></span><span>S1: 0.5 pt c/u (0.25 respuesta + 0.25 justificación). S2, S4: 0.5 pt c/u. S3: 0.25 pt por posición. S5: 0.5 pt por correspondencia.</span></li><li><span class="ii"><i class="fas fa-exchange-alt"></i></span><span>S5: Selecciona la letra de la columna derecha que corresponda al concepto de la columna izquierda.</span></li><li><span class="ii"><i class="fas fa-envelope"></i></span><span>Al finalizar, se guardarán los resultados y podrás enviarlos a tu correo institucional.</span></li></ul><button class="strtbtn" onclick="startExam()"><i class="fas fa-play"></i> Comenzar evaluación</button></div></div>
-<!-- TRANS --><div class="screen" id="sTrans"><div class="tcard"><div class="tico"><i class="fas fa-check-double"></i></div><div class="ttitle" id="transTitle">Sección completada</div><div class="tsub" id="transSub"></div><div class="ssum" id="transSum"></div><button class="strtbtn" id="transBtn" onclick="nextSection()"><i class="fas fa-arrow-right"></i> Continuar</button></div></div>
-<!-- EXAM --><div class="screen" id="sExam"><div class="ehdr"><div class="etop"><span class="eslbl" id="eLbl">Sección 1</span><span class="etimer"><i class="fas fa-hourglass-half"></i> <span id="eTim">25:00</span></span></div><div class="pbt"><div class="pbf" id="eProg"></div></div></div><div class="qmap" id="qMap"></div><div id="qCont"></div><div class="navs"><button class="nbtn prev" id="bPrev" onclick="navQ(-1)" disabled><i class="fas fa-arrow-left"></i> Anterior</button><button class="nbtn nxt" id="bNext" onclick="navQ(1)">Siguiente <i class="fas fa-arrow-right"></i></button></div></div>
-<!-- RESULTS --><div class="screen" id="sRes"><div class="rcard"><div class="sring"><svg viewBox="0 0 160 160"><circle class="rbg" cx="80" cy="80" r="70"/><circle class="rfill" id="rRing" cx="80" cy="80" r="70"/></svg><div class="sval"><div class="snum" id="rNum">0</div><div class="slbl" id="rLbl">de 40 puntos</div></div></div><h2 class="rtitle" id="rTit">Resultado</h2><p class="rsub" id="rSub"></p><div id="rStats"></div><div class="revsec"><div class="revtit">Revisión detallada</div><div id="rRev"></div></div><div class="ract"><button class="rbtn pdf" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> Guardar como PDF</button><button class="rbtn prt disabled" id="btnPrintPDF" onclick="printPDF()" disabled style="opacity:0.45; cursor:not-allowed; filter:grayscale(0.7);" title="Primero debes presionar 'Guardar como PDF' y firmar la evaluación."><i class="fas fa-print"></i> Imprimir Evaluación</button><button class="rbtn eml" onclick="sendEmail()"><i class="fas fa-envelope"></i> Enviar por correo</button><button class="rbtn ret" id="btnRetry" onclick="retry()"><i class="fas fa-redo"></i> Reintentar</button></div></div></div>
-
-<!-- MODAL DE FIRMA ELECTRÓNICA -->
-<div id="modalSignature" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(7,13,25,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px;">
-    <div style="background:#132238; border:1px solid rgba(255,255,255,0.15); border-radius:14px; width:100%; max-width:520px; padding:24px; color:#fff; box-shadow:0 24px 48px rgba(0,0,0,0.6);">
-        <h3 style="font-family:'Space Grotesk',sans-serif; margin:0 0 8px 0; color:#FFE000; font-size:18px; display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-signature"></i> Firma Electrónica del Estudiante
-        </h3>
-        <p style="font-size:12px; color:#94a3b8; margin:0 0 16px 0; line-height:1.4;">
-            Por favor realiza tu firma manuscrita dentro del cuadro a continuación. Esta firma se incrustará en el informe PDF oficial.
-        </p>
-
-        <div style="background:#ffffff; border-radius:8px; padding:4px; margin-bottom:12px; border:2px dashed #94a3b8;">
-            <canvas id="sigCanvas" width="480" height="150" style="width:100%; height:150px; touch-action:none; cursor:crosshair; background:#ffffff; border-radius:4px; display:block;"></canvas>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-            <button type="button" onclick="clearSignature()" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                <i class="fas fa-eraser"></i> Limpiar Trazo
-            </button>
-            <span style="font-size:11px; color:#7EB61F; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
-                
-            </span>
-        </div>
-
-        <div style="display:flex; gap:12px;">
-            <button type="button" onclick="closeSignatureModal()" style="flex:1; background:rgba(255,255,255,0.1); border:none; color:#fff; padding:12px; border-radius:8px; font-weight:600; cursor:pointer;">Cancelar</button>
-            <button type="button" onclick="confirmSignatureAndExport()" style="flex:2; background:linear-gradient(135deg, #7EB61F, #5a8514); border:none; color:#fff; padding:12px; border-radius:8px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 16px rgba(126,182,31,0.3);">
-                <i class="fas fa-file-pdf"></i> Confirmar y Generar PDF
-            </button>
-        </div>
-    </div>
-</div>
-
-</div>
-
-<script>
 /* ==================================================================
    DATOS COMPLETOS DE LA EVALUACIÓN
    ================================================================== */
@@ -566,6 +177,7 @@ let CU=null, curSec=1, curQ=0, answers=[], timerInt=null, timeRem=0, s5Shuffled=
 let secScores={s1:null,s2:null,s3:null,s4:null,s5:null};
 let cheatWarnings=0;
 const MAX_WARNINGS=3;
+const EXAM_START_TIME=new Date('2026-08-02T15:00:00-05:00');
 const EXAM_DEADLINE=new Date('2026-08-03T10:00:00-05:00');
 let examActive=false;
 let infractionDebounce=false;
@@ -1500,6 +1112,35 @@ function closeSignatureModal() {
     document.getElementById('modalSignature').style.display = 'none';
 }
 
+function generateQRCodeDataUrl(text) {
+    return new Promise((resolve) => {
+        try {
+            const container = document.getElementById('qrHiddenContainer');
+            if (container && typeof QRCode !== 'undefined') {
+                container.innerHTML = '';
+                new QRCode(container, {
+                    text: text,
+                    width: 300,
+                    height: 300,
+                    correctLevel: QRCode.CorrectLevel.L
+                });
+                setTimeout(() => {
+                    const img = container.querySelector('img');
+                    const cvs = container.querySelector('canvas');
+                    if (img && img.src && img.src.length > 50) resolve(img.src);
+                    else if (cvs) resolve(cvs.toDataURL());
+                    else resolve(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`);
+                }, 150);
+            } else {
+                resolve(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`);
+            }
+        } catch (err) {
+            console.error('Error al generar QR:', err);
+            resolve(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`);
+        }
+    });
+}
+
 let pdfGenerated = false;
 
 function enablePrintButton() {
@@ -1823,6 +1464,3 @@ function sendBackupData(results) {
         toast('Error al respaldar en la nube. Se mantiene guardado en local.', 'error');
     });
 }
-</script>
-</body>
-</html>
