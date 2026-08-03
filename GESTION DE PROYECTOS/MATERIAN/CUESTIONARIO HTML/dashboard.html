@@ -790,14 +790,30 @@ let allData = [];
 
         function loadDashboardData() {
             if (sessionStorage.getItem('docente_auth') !== 'true') return;
-            
+
             // Cargar estrictamente datos reales guardados en localStorage
             const rawV6 = localStorage.getItem('evalH_v6');
             const rawV5 = localStorage.getItem('evalH_v5');
             let localResults = JSON.parse(rawV6 || rawV5 || '[]');
 
-            processAllStudents(localResults);
-            updateDashboardUI();
+            // Fetch remote results from Netlify function
+            return fetch('/api/getResults')
+                .then(r => r.ok ? r.json() : [])
+                .then(remoteResults => {
+                    // Merge remote and local, deduplicate by email+date
+                    const combined = [...localResults];
+                    remoteResults.forEach(r => {
+                        const exists = combined.some(l => l.user && l.user.email === r.user?.email && l.date === r.date);
+                        if (!exists) combined.push(r);
+                    });
+                    processAllStudents(combined);
+                    updateDashboardUI();
+                })
+                .catch(() => {
+                    // If remote fetch fails, fallback to local only
+                    processAllStudents(localResults);
+                    updateDashboardUI();
+                });
         }
 
         function processAllStudents(results) {

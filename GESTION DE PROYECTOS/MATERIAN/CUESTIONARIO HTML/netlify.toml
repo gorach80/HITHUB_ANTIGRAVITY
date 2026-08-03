@@ -1,0 +1,9 @@
+[[redirects]]
+  from = "/api/submitResult"
+  to = "/.netlify/functions/submitResult"
+  status = 200
+
+[[redirects]]
+  from = "/api/getResults"
+  to = "/.netlify/functions/getResults"
+  status = 200

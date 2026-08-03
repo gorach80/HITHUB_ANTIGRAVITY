@@ -300,7 +300,10 @@
         <button class="mbtn canc" onclick="closeConfigModal()" style="flex:1; margin:0;">Cancelar</button>
         <button class="mbtn conf" onclick="saveConfig()" style="flex:1; margin:0; background:linear-gradient(135deg,var(--ac),#059669); color:#fff; box-shadow:0 4px 12px var(--acg);">Guardar URL</button>
       </div>
-      <button class="mbtn conf" onclick="loginAsDocente()" style="width:100%; margin:0; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.25);">
+            <button class="mbtn conf" onclick="generateBlankPDF()" style="width:100%; margin:0; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; box-shadow:0 4px 12px rgba(245,158,11,0.25);">
+        <i class="fas fa-file-pdf"></i> Generar Evaluación PDF en Blanco
+      </button>
+<button class="mbtn conf" onclick="loginAsDocente()" style="width:100%; margin:0; background:linear-gradient(135deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 4px 12px rgba(59,130,246,0.25);">
         <i class="fas fa-user-shield"></i> Ingresar al Examen como Docente (Sin Registro)
       </button>
       <a href="dashboard.html" onclick="sessionStorage.setItem('docente_auth','true')" class="mbtn conf" style="width:100%; margin:0; background:linear-gradient(135deg,#0ea5e9,#0284c7); color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 12px rgba(14,165,233,0.25);">
@@ -1506,23 +1509,23 @@ function generateQRCodeDataUrl(text) {
                 container.innerHTML = '';
                 new QRCode(container, {
                     text: text,
-                    width: 120,
-                    height: 120,
-                    correctLevel: QRCode.CorrectLevel.M
+                    width: 300,
+                    height: 300,
+                    correctLevel: QRCode.CorrectLevel.L
                 });
                 setTimeout(() => {
                     const img = container.querySelector('img');
                     const cvs = container.querySelector('canvas');
                     if (img && img.src && img.src.length > 50) resolve(img.src);
                     else if (cvs) resolve(cvs.toDataURL());
-                    else resolve(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}`);
+                    else resolve(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`);
                 }, 150);
             } else {
-                resolve(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}`);
+                resolve(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`);
             }
         } catch (err) {
             console.error('Error al generar QR:', err);
-            resolve(`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(text)}`);
+            resolve(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`);
         }
     });
 }
@@ -1577,6 +1580,162 @@ function confirmSignatureAndExport() {
         }
     }, 1500);
 }
+
+async function generateBlankPDF() {
+    toast('Generando PDF en blanco...', 'info');
+    
+    // Abrimos ventana de carga
+    const w = window.open('', '_blank');
+    w.document.write('<!DOCTYPE html><html><head><title>Cargando Documento UPSE...</title></head><body style="font-family:sans-serif; text-align:center; padding-top:80px; color:#002749;"><h2>Generando evaluación física UPSE...</h2><p>Por favor espera un momento...</p></body></html>');
+    
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ format: 'a4', unit: 'mm' });
+        
+        let y = 15;
+        
+        // Función auxiliar para dibujar texto y controlar salto de página
+        function drawText(text, x, currentY, size = 10, isBold = false, align = 'left', maxWidth = 180) {
+            if (currentY > 280) { doc.addPage(); currentY = 15; }
+            doc.setFont("helvetica", isBold ? "bold" : "normal");
+            doc.setFontSize(size);
+            const lines = doc.splitTextToSize(text, maxWidth);
+            doc.text(lines, x, currentY, { align: align });
+            return currentY + (lines.length * (size * 0.4)) + 2;
+        }
+
+        // Encabezado
+        doc.setFillColor(0, 39, 73);
+        doc.rect(0, 0, 210, 25, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("UNIVERSIDAD ESTATAL PENÍNSULA DE SANTA ELENA", 105, 12, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text("EVALUACIÓN DE GESTIÓN DE PROYECTOS - MODALIDAD FÍSICA", 105, 18, { align: 'center' });
+        
+        y = 35;
+        doc.setTextColor(0, 0, 0);
+        
+        // Bloque de datos del estudiante
+        doc.setDrawColor(0, 39, 73);
+        doc.setLineWidth(0.5);
+        doc.rect(15, y, 180, 25);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("DATOS DEL ESTUDIANTE", 20, y + 6);
+        doc.setFont("helvetica", "normal");
+        doc.text("Nombre Completo: _________________________________________________________", 20, y + 14);
+        doc.text("Cédula: ________________________   Fecha: ________________________", 20, y + 21);
+        y += 35;
+
+        // SECCIÓN 1
+        y = drawText("SECCIÓN 1: VERDADERO Y FALSO (5 pts)", 15, y, 12, true);
+        y += 2;
+        S1.forEach((q, i) => {
+            y = drawText(`${i+1}. ${q.text}`, 15, y, 10, false, 'left', 175);
+            y = drawText("[   ] VERDADERO        [   ] FALSO", 20, y, 10, true);
+            y = drawText("Justificación: __________________________________________________________________________________", 20, y, 10);
+            y = drawText("________________________________________________________________________________________________", 20, y, 10);
+            y += 4;
+        });
+
+        // SECCIÓN 2
+        y += 5;
+        y = drawText("SECCIÓN 2: SELECCIÓN MÚLTIPLE (10 pts)", 15, y, 12, true);
+        y += 2;
+        S2.forEach((q, i) => {
+            y = drawText(`${i+1}. ${q.text}`, 15, y, 10, false, 'left', 175);
+            q.opts.forEach((opt, oi) => {
+                const letter = String.fromCharCode(65 + oi);
+                y = drawText(`[   ] ${letter}) ${opt}`, 20, y, 10, false, 'left', 170);
+            });
+            y += 4;
+        });
+
+        // SECCIÓN 3
+        y += 5;
+        y = drawText("SECCIÓN 3: ORDENAMIENTO (5 pts)", 15, y, 12, true);
+        y += 2;
+        S3.forEach((q, i) => {
+            y = drawText(`${i+1}. ${q.title}`, 15, y, 10, false, 'left', 175);
+            y = drawText("Escriba el número de orden (1, 2, 3...) dentro de cada corchete:", 20, y, 9, false);
+            q.sentences.forEach((sent, si) => {
+                y = drawText(`[   ] ${sent}`, 20, y, 10, false, 'left', 170);
+            });
+            y += 4;
+        });
+
+        // SECCIÓN 4
+        y += 5;
+        y = drawText("SECCIÓN 4: COMPLETAMIENTO (10 pts)", 15, y, 12, true);
+        y += 2;
+        S4.forEach((q, i) => {
+            let paragraph = `${i+1}. `;
+            q.parts.forEach((p, pi) => {
+                paragraph += p;
+                if (pi < q.parts.length - 1) {
+                    paragraph += " ________________________ ";
+                }
+            });
+            y = drawText(paragraph, 15, y, 10, false, 'left', 175);
+            y += 4;
+        });
+
+        // SECCIÓN 5
+        y += 5;
+        y = drawText("SECCIÓN 5: UNIR CON LÍNEAS / CORRESPONDENCIA (10 pts)", 15, y, 12, true);
+        y += 2;
+        y = drawText("Escriba la letra de la columna derecha dentro del corchete correspondiente en la columna izquierda.", 15, y, 9, false);
+        S5.forEach((q, i) => {
+            if (y > 230) { doc.addPage(); y = 15; }
+            y = drawText(`${i+1}. ${q.title}`, 15, y, 10, true, 'left', 175);
+            
+            // Generar letras para opciones barajadas
+            const shuffledOptions = [...q.rightItems].sort(() => Math.random() - 0.5);
+            
+            let tableBody = [];
+            for (let j = 0; j < Math.max(q.leftItems.length, shuffledOptions.length); j++) {
+                const left = q.leftItems[j] ? `[   ] ${q.leftItems[j]}` : "";
+                const letter = String.fromCharCode(65 + j);
+                const right = shuffledOptions[j] ? `${letter}) ${shuffledOptions[j]}` : "";
+                tableBody.push([left, right]);
+            }
+            
+            doc.autoTable({
+                startY: y,
+                head: [['Conceptos', 'Definiciones']],
+                body: tableBody,
+                theme: 'grid',
+                styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
+                headStyles: { fillColor: [0, 39, 73], textColor: 255 },
+                columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 90 } },
+                margin: { left: 15 }
+            });
+            y = doc.lastAutoTable.finalY + 8;
+        });
+        
+        // Firmas al final
+        if (y > 250) { doc.addPage(); y = 15; }
+        y += 20;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.line(65, y, 145, y);
+        y += 5;
+        doc.setFont("helvetica", "bold");
+        doc.text("Firma del Estudiante", 105, y, { align: 'center' });
+        
+        // Descargar PDF
+        const pdfBlob = doc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        w.location.href = pdfUrl;
+        
+    } catch (e) {
+        console.error("Error generando PDF en blanco: ", e);
+        w.document.write('<div style="color:red;text-align:center;margin-top:50px;">Error al generar el PDF.</div>');
+    }
+}
+
 
 function exportPDF() {
     openSignatureModal();

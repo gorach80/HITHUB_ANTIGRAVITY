@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector de Código QR - PC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="brand">
+                <i class="fas fa-qrcode brand-icon"></i>
+                <div class="brand-text">
+                    <h1>Lector de Código QR</h1>
+                    <p>Captura por Cámara o Sube una Imagen</p>
+                </div>
+            </div>
+            <div class="mode-toggles">
+                <button id="btnCameraMode" class="btn btn-active"><i class="fas fa-camera"></i> Cámara</button>
+                <button id="btnImageMode" class="btn"><i class="fas fa-image"></i> Imagen</button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Camera View -->
+            <div id="cameraSection" class="section active">
+                <div class="video-container">
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" hidden></canvas>
+                    <div id="scanOverlay" class="scan-overlay">
+                        <div class="scan-line"></div>
+                        <div class="scan-text">Buscando código QR...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Upload View -->
+            <div id="imageSection" class="section">
+                <div class="upload-container">
+                    <input type="file" id="fileInput" accept="image/*" class="file-input">
+                    <label for="fileInput" class="upload-label">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <span>Haz clic o arrastra una imagen aquí</span>
+                    </label>
+                    <canvas id="imageCanvas" style="display:none; max-width: 100%; border-radius: 8px; margin-top: 15px; border: 1px solid var(--bdr);"></canvas>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <h2><i class="fas fa-poll-h"></i> Resultado de Lectura</h2>
+                <div class="result-box">
+                    <textarea id="resultText" readonly placeholder="Esperando a decodificar un QR..."></textarea>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" id="btnCopy"><i class="fas fa-copy"></i> Copiar</button>
+                    <button class="btn btn-success" id="btnExportCSV"><i class="fas fa-file-csv"></i> Exportar CSV</button>
+                </div>
+                
+                <div class="history-section">
+                    <h3><i class="fas fa-history"></i> Historial (Sesión actual)</h3>
+                    <ul id="historyList" class="history-list">
+                        <!-- History items go here -->
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Cargar librería jsQR local -->
+    <script src="jsQR.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
